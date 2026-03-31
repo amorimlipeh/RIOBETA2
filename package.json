@@ -1,17 +1,1 @@
-{
-  "name": "riobeta2-base-completa-final",
-  "version": "1.0.0",
-  "private": true,
-  "main": "server.js",
-  "scripts": {
-    "start": "node server.js",
-    "ensure:data": "node scripts/ensure-data-files.js",
-    "init": "node scripts/init-project.js",
-    "backup:now": "node scripts/backup-now.js",
-    "normalize:uploads": "node scripts/normalize-uploads.js"
-  },
-  "dependencies": {
-    "express": "^4.21.2",
-    "multer": "^1.4.5-lts.2"
-  }
-}
+{"name":"riobeta2","version":"1.0.0"}
