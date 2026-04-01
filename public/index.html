@@ -1,216 +1,82 @@
+
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>RIOBETA2</title>
-  <style>
-    *{box-sizing:border-box}
-    body{margin:0;font-family:Arial,sans-serif;background:#0b1f3a;color:#fff}
-    .app{display:flex;min-height:100vh}
-    .sidebar{width:230px;background:#1d2f7a;padding:14px;flex-shrink:0}
-    .brand{display:flex;align-items:center;gap:12px;margin-bottom:18px}
-    .logo{width:48px;height:48px;border-radius:14px;background:#fff;color:#1d2f7a;display:flex;align-items:center;justify-content:center;font-size:28px}
-    .brand-title{font-size:14px;font-weight:700;line-height:1.2}
-    .brand-sub{font-size:13px;opacity:.95;margin-top:4px}
-    .menu{display:flex;flex-direction:column;gap:12px}
-    .menu button{width:100%;padding:14px;border:none;border-radius:14px;text-align:left;background:#304eb4;color:#fff;font-size:16px;cursor:pointer}
-    .menu button.active{background:#4c6ae2}
-    .main{flex:1;padding:22px}
-    .hero,.module-box,.card,.panel{background:#142d5c;border-radius:16px}
-    .hero{padding:18px 20px;margin-bottom:18px}
-    .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px;margin-bottom:18px}
-    .card{padding:18px}
-    .label{font-size:15px;opacity:.92;margin-bottom:12px}
-    .value{font-size:38px;font-weight:700;line-height:1}
-    .panel{padding:18px}
-    .logs .log{padding:14px 0;border-bottom:1px solid rgba(255,255,255,.08)}
-    .logs .log:last-child{border-bottom:0}
-    .hidden{display:none!important}
-    .module-box{padding:20px;min-height:280px}
-    .module-box h2{margin-top:0}
-    input{width:100%;padding:12px;border:none;border-radius:12px;margin:8px 0}
-    .action{background:#4c6ae2;color:#fff;padding:12px 16px;border:none;border-radius:12px;cursor:pointer}
-    .list{margin-top:14px}
-    .item{padding:10px 0;border-bottom:1px solid rgba(255,255,255,.08)}
-    @media (max-width:900px){.app{display:block}.sidebar{width:100%}.main{padding:18px}}
-  </style>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+body{font-family:Arial;background:#0b1f3a;color:#fff;margin:0}
+.menu{padding:10px;background:#1f3b73}
+button{width:100%;margin:5px 0;padding:15px;border:none;border-radius:10px;background:#3b5bbf;color:#fff}
+.card{background:#1a2f5c;margin:10px;padding:15px;border-radius:10px}
+</style>
 </head>
 <body>
-  <div class="app">
-    <aside class="sidebar">
-      <div class="brand">
-        <div class="logo">✨</div>
-        <div>
-          <div class="brand-title">SISTEMA DE ESTOQUE ✨</div>
-          <div class="brand-sub">RIO DAS ESTRELAS 🌟</div>
-        </div>
-      </div>
-      <nav class="menu">
-        <button data-module="dashboard" class="active">Dashboard</button>
-        <button data-module="produtos">Produtos</button>
-        <button data-module="estoque">Estoque</button>
-        <button data-module="enderecos">Endereços</button>
-        <button data-module="pedidos">Pedidos</button>
-        <button data-module="recebimento">Recebimento</button>
-        <button data-module="inventario">Inventário</button>
-        <button data-module="notificacoes">Notificações</button>
-        <button data-module="configuracoes">Configurações</button>
-      </nav>
-    </aside>
 
-    <main class="main">
-      <section id="dashboardView">
-        <div class="hero">
-          <h1 style="margin:0;">🚀 Dashboard RIOBETA2</h1>
-          <div style="margin-top:8px;color:#d7ffe0;font-weight:600;">✅ Dashboard carregado com sucesso</div>
-        </div>
-        <div class="cards">
-          <div class="card"><div class="label">Produtos</div><div class="value" id="produtos">0</div></div>
-          <div class="card"><div class="label">Estoque total</div><div class="value" id="estoqueTotal">0</div></div>
-          <div class="card"><div class="label">Pedidos abertos</div><div class="value" id="pedidosAbertos">0</div></div>
-          <div class="card"><div class="label">Recebimentos</div><div class="value" id="recebimentos">0</div></div>
-          <div class="card"><div class="label">Ocupação</div><div class="value" id="ocupacao">0%</div></div>
-        </div>
-        <div class="panel logs">
-          <h2 style="margin-top:0;">Últimos logs</h2>
-          <div id="logs"></div>
-        </div>
-      </section>
+<div class="menu">
+<button onclick="show('dashboard')">Dashboard</button>
+<button onclick="show('produtos')">Produtos</button>
+<button onclick="show('estoque')">Estoque</button>
+<button onclick="show('pedidos')">Pedidos</button>
+</div>
 
-      <section id="moduleView" class="hidden">
-        <div class="module-box" id="moduleBox"></div>
-      </section>
-    </main>
-  </div>
+<div id="content"></div>
 
-  <script>
-    async function getJson(url, fallback){
-      try {
-        const r = await fetch(url);
-        return await r.json();
-      } catch(e) {
-        return fallback;
-      }
-    }
+<script>
+async function api(u){return fetch(u).then(r=>r.json())}
 
-    async function carregarDashboard(){
-      const data = await getJson('/api/dashboard', {produtos:0,estoqueTotal:0,pedidosAbertos:0,recebimentos:0,ocupacao:'0%',logs:[]});
-      document.getElementById('produtos').textContent = data.produtos ?? 0;
-      document.getElementById('estoqueTotal').textContent = data.estoqueTotal ?? 0;
-      document.getElementById('pedidosAbertos').textContent = data.pedidosAbertos ?? 0;
-      document.getElementById('recebimentos').textContent = data.recebimentos ?? 0;
-      document.getElementById('ocupacao').textContent = data.ocupacao ?? '0%';
-      const logs = Array.isArray(data.logs) ? data.logs : [];
-      document.getElementById('logs').innerHTML = logs.length
-        ? logs.map(log => `<div class="log"><strong>${log.modulo || 'sistema'}</strong><br><span>${log.acao || log.msg || ''}</span></div>`).join('')
-        : '<div>Nenhum log encontrado.</div>';
-    }
+async function show(m){
+ if(m==='dashboard'){
+  const d=await api('/api/dashboard');
+  content.innerHTML=`<div class=card>
+  Produtos:${d.produtos}<br>
+  Estoque:${d.estoqueTotal}<br>
+  Pedidos:${d.pedidosAbertos}</div>`;
+ }
+ if(m==='produtos'){
+  const l=await api('/api/produtos');
+  content.innerHTML=`<div class=card>
+  <input id=n placeholder=nome>
+  <button onclick=addProd()>Salvar</button>
+  ${l.map(i=>`<div>${i.nome||''} <button onclick=delProd(${i.id})>X</button></div>`).join('')}
+  </div>`;
+ }
+ if(m==='estoque'){
+  content.innerHTML=`<div class=card>
+  <input id=p placeholder=produto>
+  <input id=q placeholder=qtd>
+  <button onclick=addEst()>Salvar</button></div>`;
+ }
+ if(m==='pedidos'){
+  const l=await api('/api/pedidos');
+  content.innerHTML=`<div class=card>
+  <input id=ped placeholder=pedido>
+  <button onclick=addPed()>Salvar</button>
+  ${l.map(i=>`<div>${i.pedido} - ${i.status}
+  <button onclick=fin(${i.id})>Finalizar</button></div>`).join('')}
+  </div>`;
+ }
+}
 
-    async function renderProdutos(){
-      const itens = await getJson('/api/produtos', []);
-      return `
-        <h2>Produtos</h2>
-        <p>Módulo funcional. Cadastro e listagem básicos já ativos.</p>
-        <input id="produtoCodigo" placeholder="Código do produto">
-        <input id="produtoNome" placeholder="Nome do produto">
-        <button class="action" onclick="salvarProduto()">Salvar produto</button>
-        <div class="list">${itens.map(i => `<div class="item"><strong>${i.codigo || '-'}</strong> - ${i.nome || '-'}</div>`).join('') || 'Nenhum produto.'}</div>
-      `;
-    }
+function addProd(){
+ fetch('/api/produtos',{method:'POST',headers:{'Content-Type':'application/json'},
+ body:JSON.stringify({nome:n.value})}).then(()=>show('produtos'))
+}
+function delProd(id){
+ fetch('/api/produtos/'+id,{method:'DELETE'}).then(()=>show('produtos'))
+}
+function addEst(){
+ fetch('/api/estoque',{method:'POST',headers:{'Content-Type':'application/json'},
+ body:JSON.stringify({produto:p.value,qtd:q.value})})
+}
+function addPed(){
+ fetch('/api/pedidos',{method:'POST',headers:{'Content-Type':'application/json'},
+ body:JSON.stringify({pedido:ped.value})}).then(()=>show('pedidos'))
+}
+function fin(id){
+ fetch('/api/pedidos/'+id,{method:'POST'}).then(()=>show('pedidos'))
+}
 
-    async function renderEstoque(){
-      const itens = await getJson('/api/estoque', []);
-      return `
-        <h2>Estoque</h2>
-        <p>Módulo funcional. Movimento básico já ativo.</p>
-        <input id="estoqueProduto" placeholder="Produto">
-        <input id="estoqueQtd" placeholder="Quantidade">
-        <button class="action" onclick="salvarEstoque()">Salvar movimento</button>
-        <div class="list">${itens.map(i => `<div class="item"><strong>${i.produto || '-'}</strong> - ${i.quantidade || 0}</div>`).join('') || 'Nenhum movimento.'}</div>
-      `;
-    }
-
-    async function renderPedidos(){
-      const itens = await getJson('/api/pedidos', []);
-      return `
-        <h2>Pedidos</h2>
-        <p>Módulo funcional. Criação simples já ativa.</p>
-        <input id="pedidoNome" placeholder="Descrição do pedido">
-        <button class="action" onclick="salvarPedido()">Salvar pedido</button>
-        <div class="list">${itens.map(i => `<div class="item"><strong>${i.pedido || '-'}</strong> - ${i.status || 'aberto'}</div>`).join('') || 'Nenhum pedido.'}</div>
-      `;
-    }
-
-    function renderBase(title, text){
-      return `<h2>${title}</h2><p>${text}</p>`;
-    }
-
-    async function abrirModulo(modulo){
-      document.querySelectorAll('.menu button').forEach(btn => btn.classList.remove('active'));
-      document.querySelector(`[data-module="${modulo}"]`).classList.add('active');
-
-      const dashboardView = document.getElementById('dashboardView');
-      const moduleView = document.getElementById('moduleView');
-      const moduleBox = document.getElementById('moduleBox');
-
-      if(modulo === 'dashboard'){
-        dashboardView.classList.remove('hidden');
-        moduleView.classList.add('hidden');
-        await carregarDashboard();
-        return;
-      }
-
-      dashboardView.classList.add('hidden');
-      moduleView.classList.remove('hidden');
-
-      if(modulo === 'produtos') moduleBox.innerHTML = await renderProdutos();
-      else if(modulo === 'estoque') moduleBox.innerHTML = await renderEstoque();
-      else if(modulo === 'pedidos') moduleBox.innerHTML = await renderPedidos();
-      else if(modulo === 'enderecos') moduleBox.innerHTML = renderBase('Endereços', 'Módulo fixado e pronto para próxima etapa WMS.');
-      else if(modulo === 'recebimento') moduleBox.innerHTML = renderBase('Recebimento', 'Módulo fixado e pronto para conferência futura.');
-      else if(modulo === 'inventario') moduleBox.innerHTML = renderBase('Inventário', 'Módulo fixado e pronto para contagem futura.');
-      else if(modulo === 'notificacoes') moduleBox.innerHTML = renderBase('Notificações', 'Módulo fixado e pronto para alertas futuros.');
-      else if(modulo === 'configuracoes') moduleBox.innerHTML = renderBase('Configurações', 'Módulo fixado e pronto para ajustes futuros.');
-    }
-
-    async function salvarProduto(){
-      const codigo = document.getElementById('produtoCodigo').value;
-      const nome = document.getElementById('produtoNome').value;
-      await fetch('/api/produtos', {
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({ codigo, nome })
-      });
-      abrirModulo('produtos');
-    }
-
-    async function salvarEstoque(){
-      const produto = document.getElementById('estoqueProduto').value;
-      const quantidade = document.getElementById('estoqueQtd').value;
-      await fetch('/api/estoque', {
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({ produto, quantidade })
-      });
-      abrirModulo('estoque');
-    }
-
-    async function salvarPedido(){
-      const pedido = document.getElementById('pedidoNome').value;
-      await fetch('/api/pedidos', {
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({ pedido, status:'aberto' })
-      });
-      abrirModulo('pedidos');
-    }
-
-    document.querySelectorAll('.menu button').forEach(btn => {
-      btn.addEventListener('click', () => abrirModulo(btn.dataset.module));
-    });
-
-    carregarDashboard();
-  </script>
+show('dashboard')
+</script>
 </body>
 </html>
