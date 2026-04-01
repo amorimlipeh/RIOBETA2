@@ -1,6 +1,7 @@
-node_modules/
-logs/
-temp/
-auto/
+node_modules
 .env
+logs
+temp
+auto
 *.log
+database.db

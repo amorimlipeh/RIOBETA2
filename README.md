@@ -1,3 +1,7 @@
-# RIOBETA2 V2 CORRIGIDO
+# RIOBETA2 V20 AUTH COMPLETO
 
-Correção do crash no Railway + módulos mantidos.
+Versão com:
+- cadastro de usuário
+- login funcional
+- persistência em data/usuarios.json
+- compatível com Railway
