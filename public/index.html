@@ -4,68 +4,48 @@
 <head>
 <meta name=viewport content="width=device-width, initial-scale=1">
 <style>
-body{font-family:Arial;background:#0b1f3a;color:#fff;margin:0}
+body{background:#0b1f3a;color:#fff;font-family:Arial}
 .box{padding:20px}
-input{width:100%;padding:10px;margin:5px 0;border-radius:8px;border:none}
-button{padding:10px;border:none;border-radius:8px;background:#3b5bbf;color:#fff;width:100%}
-.card{background:#1a2f5c;padding:15px;border-radius:10px;margin-top:10px}
+input,button{width:100%;padding:10px;margin:5px 0;border:none;border-radius:8px}
+button{background:#3b5bbf;color:#fff}
 </style>
 </head>
 <body>
 
-<div class=box id=login>
+<div class=box>
 <h2>Login</h2>
-<input id=l placeholder="Login">
-<input id=s placeholder="Senha">
-<button onclick="login()">Entrar</button>
-</div>
-
-<div class=box id=app style="display:none">
-<h2>Painel Desenvolvedor</h2>
-
-<h3>Criar empresa</h3>
-<input id=emp placeholder="Nome empresa">
-<button onclick="addEmpresa()">Salvar</button>
-<div id=empresas></div>
+<input id=l placeholder=login>
+<input id=s placeholder=senha>
+<button onclick=login()>Entrar</button>
 
 <h3>Criar usuário</h3>
-<input id=user placeholder="Login">
-<input id=senha placeholder="Senha">
-<input id=empresa placeholder="Empresa">
-<button onclick="addUser()">Salvar</button>
+<input id=nl placeholder=login>
+<input id=ns placeholder=senha>
+<button onclick=create()>Criar</button>
 
+<button onclick=test()>Testar rota protegida</button>
 </div>
 
 <script>
+let token=''
+
 function login(){
  fetch('/api/login',{method:'POST',headers:{'Content-Type':'application/json'},
  body:JSON.stringify({login:l.value,senha:s.value})})
- .then(r=>r.json())
- .then(d=>{
-  if(d.ok){
-    login.style.display='none'
-    app.style.display='block'
-    load()
-  }else{
-    alert('Erro login')
-  }
+ .then(r=>r.json()).then(d=>{
+  if(d.ok){ token=d.token; alert('Logado') }
+  else alert('Erro')
  })
 }
 
-function load(){
- fetch('/api/empresas').then(r=>r.json()).then(d=>{
-  empresas.innerHTML=d.map(x=>'<div class=card>'+x.nome+'</div>').join('')
- })
+function create(){
+ fetch('/api/user',{method:'POST',headers:{'Content-Type':'application/json'},
+ body:JSON.stringify({login:nl.value,senha:ns.value})})
 }
 
-function addEmpresa(){
- fetch('/api/empresas',{method:'POST',headers:{'Content-Type':'application/json'},
- body:JSON.stringify({nome:emp.value})}).then(load)
-}
-
-function addUser(){
- fetch('/api/usuarios',{method:'POST',headers:{'Content-Type':'application/json'},
- body:JSON.stringify({login:user.value,senha:senha.value,empresa:empresa.value})})
+function test(){
+ fetch('/api/protected',{headers:{authorization:token}})
+ .then(r=>r.json()).then(d=>alert(JSON.stringify(d)))
 }
 </script>
 

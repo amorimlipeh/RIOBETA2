@@ -1,39 +1,53 @@
 
-const express=require('express');
-const fs=require('fs');
-const path=require('path');
-const app=express();
-app.use(express.json());
-app.use(express.static('public'));
+const express = require('express')
+const sqlite3 = require('sqlite3').verbose()
+const jwt = require('jsonwebtoken')
+const path = require('path')
 
-const file=n=>path.join(__dirname,'data',n)
-const read=n=>{try{return JSON.parse(fs.readFileSync(file(n)))}catch{return[]}}
-const save=(n,d)=>fs.writeFileSync(file(n),JSON.stringify(d,null,2))
+const app = express()
+app.use(express.json())
+app.use(express.static('public'))
+
+const db = new sqlite3.Database('./database.db')
+
+// init db
+db.serialize(()=>{
+ db.run("CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY, login TEXT, senha TEXT)")
+})
+
+// middleware auth
+function auth(req,res,next){
+ const token = req.headers.authorization
+ if(!token) return res.status(401).json({ok:false})
+ try{
+  jwt.verify(token,'segredo')
+  next()
+ }catch{
+  res.status(401).json({ok:false})
+ }
+}
 
 // login
 app.post('/api/login',(req,res)=>{
- const users=read('usuarios.json')
- const u=users.find(x=>x.login===req.body.login && x.senha===req.body.senha)
- if(!u) return res.json({ok:false})
- res.json({ok:true,empresa:u.empresa})
+ const {login,senha} = req.body
+ db.get("SELECT * FROM users WHERE login=? AND senha=?",[login,senha],(err,row)=>{
+  if(!row) return res.json({ok:false})
+  const token = jwt.sign({id:row.id},'segredo')
+  res.json({ok:true,token})
+ })
 })
 
-// empresas
-app.get('/api/empresas',(req,res)=>res.json(read('empresas.json')))
-app.post('/api/empresas',(req,res)=>{
- let e=read('empresas.json')
- e.push({id:Date.now(),nome:req.body.nome,ativa:true})
- save('empresas.json',e)
+// create user
+app.post('/api/user',(req,res)=>{
+ const {login,senha} = req.body
+ db.run("INSERT INTO users (login,senha) VALUES (?,?)",[login,senha])
  res.json({ok:true})
 })
 
-// usuarios
-app.post('/api/usuarios',(req,res)=>{
- let u=read('usuarios.json')
- u.push(req.body)
- save('usuarios.json',u)
- res.json({ok:true})
+// protected route
+app.get('/api/protected',auth,(req,res)=>{
+ res.json({ok:true,msg:"Acesso liberado"})
 })
 
 app.get('*',(req,res)=>res.sendFile(path.join(__dirname,'public/index.html')))
-app.listen(process.env.PORT||3000,'0.0.0.0')
+app.listen(3000,'0.0.0.0')
