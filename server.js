@@ -1,54 +1,35 @@
-const express = require('express');
-const path = require('path');
-const fs = require('fs');
 
+const express = require('express');
+const fs = require('fs');
 const app = express();
 app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static('public'));
 
-function readJson(file, fallback) {
-  try {
-    const full = path.join(__dirname, 'data', file);
-    if (!fs.existsSync(full)) {
-      fs.writeFileSync(full, JSON.stringify(fallback, null, 2));
-      return fallback;
-    }
-    const raw = fs.readFileSync(full, 'utf-8').trim();
-    return raw ? JSON.parse(raw) : fallback;
-  } catch (err) {
-    return fallback;
-  }
-}
+const read = (f)=>JSON.parse(fs.readFileSync(f));
+const write = (f,d)=>fs.writeFileSync(f,JSON.stringify(d,null,2));
 
-app.get('/api/health', (req, res) => {
-  res.json({ ok: true, sistema: 'RIOBETA2 ONLINE' });
+app.get('/api/produtos',(req,res)=>res.json(read('data/produtos.json')));
+app.post('/api/produtos',(req,res)=>{
+  let d=read('data/produtos.json');
+  d.push(req.body);
+  write('data/produtos.json',d);
+  res.json({ok:true});
 });
 
-app.get('/api/dashboard', (req, res) => {
-  const produtos = readJson('produtos.json', []);
-  const estoque = readJson('estoque.json', []);
-  const pedidos = readJson('pedidos.json', []);
-  const logs = readJson('logs.json', []);
-
-  const estoqueTotal = estoque.reduce((sum, item) => sum + Number(item.quantidade || 0), 0);
-  const pedidosAbertos = pedidos.filter(item => (item.status || '').toLowerCase() !== 'finalizado').length;
-
-  res.json({
-    ok: true,
-    produtos: produtos.length,
-    estoqueTotal,
-    pedidosAbertos,
-    recebimentos: 0,
-    ocupacao: '0%',
-    logs: logs.slice(0, 5)
-  });
+app.get('/api/estoque',(req,res)=>res.json(read('data/estoque.json')));
+app.post('/api/estoque',(req,res)=>{
+  let d=read('data/estoque.json');
+  d.push(req.body);
+  write('data/estoque.json',d);
+  res.json({ok:true});
 });
 
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+app.get('/api/pedidos',(req,res)=>res.json(read('data/pedidos.json')));
+app.post('/api/pedidos',(req,res)=>{
+  let d=read('data/pedidos.json');
+  d.push(req.body);
+  write('data/pedidos.json',d);
+  res.json({ok:true});
 });
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`🚀 Servidor rodando na porta ${PORT}`);
-});
+app.listen(3000,()=>console.log('RIOBETA2 ONLINE'));

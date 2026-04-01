@@ -1,277 +1,65 @@
+
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>RIOBETA2</title>
-  <style>
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #0b1f3a;
-      color: #fff;
-    }
-    .app {
-      display: flex;
-      min-height: 100vh;
-    }
-    .sidebar {
-      width: 230px;
-      background: #1d2f7a;
-      padding: 14px;
-      flex-shrink: 0;
-    }
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 18px;
-    }
-    .logo {
-      width: 48px;
-      height: 48px;
-      border-radius: 14px;
-      background: #fff;
-      color: #1d2f7a;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 28px;
-      font-weight: bold;
-    }
-    .brand-title {
-      font-size: 14px;
-      font-weight: 700;
-      line-height: 1.2;
-    }
-    .brand-sub {
-      font-size: 13px;
-      opacity: .95;
-      margin-top: 4px;
-    }
-    .menu {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-    .menu button {
-      width: 100%;
-      padding: 14px 14px;
-      border: none;
-      border-radius: 14px;
-      text-align: left;
-      background: #304eb4;
-      color: #fff;
-      font-size: 16px;
-      cursor: pointer;
-    }
-    .menu button.active {
-      background: #4c6ae2;
-      box-shadow: inset 0 0 0 2px rgba(255,255,255,.12);
-    }
-    .main {
-      flex: 1;
-      padding: 26px;
-    }
-    .hero {
-      background: #243f86;
-      border-radius: 16px;
-      padding: 18px 20px;
-      margin-bottom: 18px;
-    }
-    .status-ok {
-      margin-top: 8px;
-      font-size: 15px;
-      color: #d7ffe0;
-      font-weight: 600;
-    }
-    .cards {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
-      gap: 14px;
-      margin-bottom: 18px;
-    }
-    .card, .panel {
-      background: #142d5c;
-      border-radius: 16px;
-      padding: 18px;
-    }
-    .label {
-      font-size: 15px;
-      opacity: .92;
-      margin-bottom: 12px;
-    }
-    .value {
-      font-size: 38px;
-      font-weight: 700;
-      line-height: 1;
-    }
-    .logs .log {
-      padding: 14px 0;
-      border-bottom: 1px solid rgba(255,255,255,.08);
-    }
-    .logs .log:last-child {
-      border-bottom: 0;
-    }
-    .muted {
-      opacity: .82;
-    }
-    .hidden {
-      display: none !important;
-    }
-    .module-box {
-      background: #142d5c;
-      border-radius: 16px;
-      padding: 20px;
-      min-height: 280px;
-    }
-    .module-box h2 {
-      margin-top: 0;
-    }
-    .module-note {
-      opacity: .88;
-      line-height: 1.5;
-    }
-    @media (max-width: 900px) {
-      .app { display: block; }
-      .sidebar { width: 100%; }
-      .main { padding: 18px; }
-    }
-  </style>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+body{font-family:Arial;background:#0b1f3a;color:#fff;margin:0}
+.menu{padding:10px;background:#1f3b73}
+button{width:100%;margin:5px 0;padding:15px;border:none;border-radius:10px;background:#3b5bbf;color:#fff}
+.card{background:#1a2f5c;margin:10px;padding:15px;border-radius:10px}
+</style>
 </head>
 <body>
-  <div class="app">
-    <aside class="sidebar">
-      <div class="brand">
-        <div class="logo">✨</div>
-        <div>
-          <div class="brand-title">SISTEMA DE ESTOQUE ✨</div>
-          <div class="brand-sub">RIO DAS ESTRELAS 🌟</div>
-        </div>
-      </div>
 
-      <nav class="menu" id="menu">
-        <button data-module="dashboard" class="active">Dashboard</button>
-        <button data-module="produtos">Produtos</button>
-        <button data-module="estoque">Estoque</button>
-        <button data-module="enderecos">Endereços</button>
-        <button data-module="pedidos">Pedidos</button>
-        <button data-module="recebimento">Recebimento</button>
-        <button data-module="inventario">Inventário</button>
-        <button data-module="notificacoes">Notificações</button>
-        <button data-module="configuracoes">Configurações</button>
-      </nav>
-    </aside>
+<div class="menu">
+<button onclick="show('dashboard')">Dashboard</button>
+<button onclick="show('produtos')">Produtos</button>
+<button onclick="show('estoque')">Estoque</button>
+<button onclick="show('pedidos')">Pedidos</button>
+</div>
 
-    <main class="main">
-      <section id="dashboardView">
-        <div class="hero">
-          <h1 style="margin:0;">🚀 Dashboard RIOBETA2</h1>
-          <div class="status-ok">✅ Dashboard carregado com sucesso</div>
-        </div>
+<div id="content"></div>
 
-        <div class="cards">
-          <div class="card">
-            <div class="label">Produtos</div>
-            <div class="value" id="produtos">0</div>
-          </div>
-          <div class="card">
-            <div class="label">Estoque total</div>
-            <div class="value" id="estoqueTotal">0</div>
-          </div>
-          <div class="card">
-            <div class="label">Pedidos abertos</div>
-            <div class="value" id="pedidosAbertos">0</div>
-          </div>
-          <div class="card">
-            <div class="label">Recebimentos</div>
-            <div class="value" id="recebimentos">0</div>
-          </div>
-          <div class="card">
-            <div class="label">Ocupação</div>
-            <div class="value" id="ocupacao">0%</div>
-          </div>
-        </div>
+<script>
+function show(m){
+  if(m==='dashboard'){
+    document.getElementById('content').innerHTML=`<div class="card">🚀 Dashboard ativo</div>`;
+  }
+  if(m==='produtos'){
+    document.getElementById('content').innerHTML=`
+    <div class="card">
+      <input id="p" placeholder="Produto">
+      <button onclick="addProd()">Salvar</button>
+    </div>`;
+  }
+  if(m==='estoque'){
+    document.getElementById('content').innerHTML=`
+    <div class="card">
+      <input id="e" placeholder="Quantidade">
+      <button onclick="addEst()">Salvar</button>
+    </div>`;
+  }
+  if(m==='pedidos'){
+    document.getElementById('content').innerHTML=`
+    <div class="card">
+      <input id="pd" placeholder="Pedido">
+      <button onclick="addPed()">Salvar</button>
+    </div>`;
+  }
+}
 
-        <div class="panel logs">
-          <h2 style="margin-top:0;">Últimos logs</h2>
-          <div id="logs"></div>
-        </div>
-      </section>
+function addProd(){
+ fetch('/api/produtos',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({nome:document.getElementById('p').value})});
+}
+function addEst(){
+ fetch('/api/estoque',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({qtd:document.getElementById('e').value})});
+}
+function addPed(){
+ fetch('/api/pedidos',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pedido:document.getElementById('pd').value})});
+}
+show('dashboard');
+</script>
 
-      <section id="moduleView" class="hidden">
-        <div class="module-box">
-          <h2 id="moduleTitle">Módulo</h2>
-          <p class="module-note" id="moduleText"></p>
-        </div>
-      </section>
-    </main>
-  </div>
-
-  <script>
-    const moduleDescriptions = {
-      produtos: 'Módulo de Produtos já fixado na tela e pronto para receber cadastro, busca com %, imagem e fator sem remover o Dashboard.',
-      estoque: 'Módulo de Estoque já fixado na tela e pronto para receber movimentações sem remover Dashboard e Produtos.',
-      enderecos: 'Módulo de Endereços já fixado na tela e pronto para receber WMS e organização por rua, posição, andar e pallet.',
-      pedidos: 'Módulo de Pedidos já fixado na tela e pronto para continuar a evolução sem quebrar os anteriores.',
-      recebimento: 'Módulo de Recebimento já fixado na tela e pronto para conferência e importações futuras.',
-      inventario: 'Módulo de Inventário já fixado na tela e pronto para contagem e divergências.',
-      notificacoes: 'Módulo de Notificações já fixado na tela e pronto para alertas e fluxos internos.',
-      configuracoes: 'Módulo de Configurações já fixado na tela e pronto para preferências, permissões e ajustes do sistema.'
-    };
-
-    async function carregarDashboard() {
-      try {
-        const response = await fetch('/api/dashboard');
-        const data = await response.json();
-
-        document.getElementById('produtos').textContent = data.produtos ?? 0;
-        document.getElementById('estoqueTotal').textContent = data.estoqueTotal ?? 0;
-        document.getElementById('pedidosAbertos').textContent = data.pedidosAbertos ?? 0;
-        document.getElementById('recebimentos').textContent = data.recebimentos ?? 0;
-        document.getElementById('ocupacao').textContent = data.ocupacao ?? '0%';
-
-        const logs = Array.isArray(data.logs) ? data.logs : [];
-        document.getElementById('logs').innerHTML = logs.length
-          ? logs.map(log => `
-              <div class="log">
-                <strong>${log.modulo || log.msg || 'sistema'}</strong><br>
-                <span class="muted">${log.acao || log.msg || JSON.stringify(log)}</span>
-              </div>
-            `).join('')
-          : '<div class="muted">Nenhum log encontrado.</div>';
-      } catch (error) {
-        document.getElementById('logs').innerHTML = '<div class="muted">Erro ao carregar dashboard.</div>';
-      }
-    }
-
-    function abrirModulo(modulo) {
-      const dashboardView = document.getElementById('dashboardView');
-      const moduleView = document.getElementById('moduleView');
-      const moduleTitle = document.getElementById('moduleTitle');
-      const moduleText = document.getElementById('moduleText');
-
-      document.querySelectorAll('.menu button').forEach(btn => btn.classList.remove('active'));
-      document.querySelector(`[data-module="${modulo}"]`).classList.add('active');
-
-      if (modulo === 'dashboard') {
-        dashboardView.classList.remove('hidden');
-        moduleView.classList.add('hidden');
-        return;
-      }
-
-      dashboardView.classList.add('hidden');
-      moduleView.classList.remove('hidden');
-      moduleTitle.textContent = modulo.charAt(0).toUpperCase() + modulo.slice(1);
-      moduleText.textContent = moduleDescriptions[modulo] || 'Módulo fixado e pronto para receber a próxima etapa.';
-    }
-
-    document.querySelectorAll('.menu button').forEach(btn => {
-      btn.addEventListener('click', () => abrirModulo(btn.dataset.module));
-    });
-
-    carregarDashboard();
-  </script>
 </body>
 </html>
