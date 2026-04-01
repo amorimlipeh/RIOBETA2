@@ -1,24 +1,118 @@
-
 <!DOCTYPE html>
-<html>
-<body style="background:#082247;color:#fff;font-family:Arial">
-<h2>Login</h2>
-<input id=l placeholder=login><br><br>
-<input id=s placeholder=senha><br><br>
-<button onclick=login()>Entrar</button>
-<button onclick=reg()>Criar conta</button>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RIOBETA2 V20 FINAL</title>
+  <style>
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Arial,sans-serif;background:#082247;color:#fff;min-height:100vh}
+    .wrap{max-width:560px;margin:0 auto;padding:24px}
+    .card{background:#0e2c5d;border-radius:18px;padding:22px;box-shadow:0 8px 24px rgba(0,0,0,.18);margin-top:18px}
+    h1,h2,p{margin:0 0 12px}
+    input{width:100%;padding:16px;border:none;border-radius:14px;margin:8px 0;font-size:18px}
+    button{width:100%;padding:16px;border:none;border-radius:14px;margin-top:10px;background:#4a68de;color:#fff;font-size:18px;cursor:pointer}
+    .secondary{background:#224992}
+    .hidden{display:none}
+    .msg{margin-top:12px;padding:12px;border-radius:12px;background:#13366f;min-height:20px}
+    .ok{background:#165b38}
+    .err{background:#6e1d2b}
+    .userbox{background:#12305f;border-radius:16px;padding:18px;margin-top:16px}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card" id="loginCard">
+      <h1>Login</h1>
+      <input id="loginInput" placeholder="Login" />
+      <input id="senhaInput" placeholder="Senha" />
+      <button onclick="fazerLogin()">Entrar</button>
+      <button class="secondary" onclick="mostrarCadastro()">Criar conta</button>
+      <div class="msg" id="loginMsg"></div>
+    </div>
 
-<script>
-async function login(){
- let r=await fetch('/api/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({login:l.value,senha:s.value})});
- let d=await r.json();
- alert(d.ok?'OK':'Erro login');
-}
-async function reg(){
- let r=await fetch('/api/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({login:l.value,senha:s.value})});
- let d=await r.json();
- alert(d.ok?'Criado':'Erro');
-}
-</script>
+    <div class="card hidden" id="cadastroCard">
+      <h2>Criar conta</h2>
+      <input id="cadLogin" placeholder="Novo login" />
+      <input id="cadSenha" placeholder="Nova senha" />
+      <button onclick="criarConta()">Salvar cadastro</button>
+      <button class="secondary" onclick="mostrarLogin()">Voltar</button>
+      <div class="msg" id="cadMsg"></div>
+    </div>
+
+    <div class="card hidden" id="painelCard">
+      <h2>RIOBETA2 ONLINE</h2>
+      <p>Login realizado com sucesso.</p>
+      <div class="userbox" id="userBox"></div>
+      <button onclick="logout()">Sair</button>
+    </div>
+  </div>
+
+  <script>
+    function msg(id, text, kind='') {
+      const el = document.getElementById(id);
+      el.textContent = text || '';
+      el.className = 'msg' + (kind ? ' ' + kind : '');
+    }
+
+    function mostrarCadastro() {
+      document.getElementById('loginCard').classList.add('hidden');
+      document.getElementById('cadastroCard').classList.remove('hidden');
+      msg('cadMsg', '');
+    }
+    function mostrarLogin() {
+      document.getElementById('cadastroCard').classList.add('hidden');
+      document.getElementById('painelCard').classList.add('hidden');
+      document.getElementById('loginCard').classList.remove('hidden');
+      msg('loginMsg', '');
+    }
+
+    async function criarConta() {
+      const login = document.getElementById('cadLogin').value.trim();
+      const senha = document.getElementById('cadSenha').value.trim();
+      const r = await fetch('/api/register', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ login, senha })
+      });
+      const d = await r.json();
+      if (!d.ok) return msg('cadMsg', d.msg || 'Erro ao cadastrar', 'err');
+
+      msg('cadMsg', 'Conta criada. Entrando...', 'ok');
+      document.getElementById('loginInput').value = login;
+      document.getElementById('senhaInput').value = senha;
+      setTimeout(() => {
+        mostrarLogin();
+        fazerLogin();
+      }, 500);
+    }
+
+    async function fazerLogin() {
+      const login = document.getElementById('loginInput').value.trim();
+      const senha = document.getElementById('senhaInput').value.trim();
+      const r = await fetch('/api/login', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ login, senha })
+      });
+      const d = await r.json();
+      if (!d.ok) return msg('loginMsg', d.msg || 'Erro login', 'err');
+
+      document.getElementById('loginCard').classList.add('hidden');
+      document.getElementById('cadastroCard').classList.add('hidden');
+      document.getElementById('painelCard').classList.remove('hidden');
+      document.getElementById('userBox').innerHTML = `
+        <strong>Usuário:</strong> ${d.usuario.login}<br>
+        <strong>Cargo:</strong> ${d.usuario.cargo}<br>
+        <strong>Status:</strong> Online
+      `;
+    }
+
+    function logout() {
+      document.getElementById('painelCard').classList.add('hidden');
+      document.getElementById('loginCard').classList.remove('hidden');
+      msg('loginMsg', '');
+    }
+  </script>
 </body>
 </html>

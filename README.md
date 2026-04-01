@@ -1,7 +1,6 @@
-# RIOBETA2 V20 AUTH COMPLETO
+# RIOBETA2 V20 FINAL ANTI TRAVAMENTO
 
-Versão com:
-- cadastro de usuário
-- login funcional
-- persistência em data/usuarios.json
-- compatível com Railway
+- login
+- criar conta
+- persistência em JSON
+- Dockerfile para evitar travamento no build do Railway
