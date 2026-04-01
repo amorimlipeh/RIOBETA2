@@ -14,41 +14,67 @@ button{padding:12px;border:none;border-radius:8px;background:#3b5bbf;color:#fff;
 <body>
 
 <div class=box>
-<h2>Picking</h2>
+<h2>Pedido</h2>
 
-<input id=prod placeholder="Digite produto">
-<button onclick="buscar()">Buscar</button>
+<input id=prod placeholder="Produto">
+<input id=qtd placeholder="Quantidade">
+<button onclick="addItem()">Adicionar item</button>
+<button onclick="criar()">Criar pedido</button>
+
+<div id=lista></div>
+
+<hr>
+
+<h2>Picking</h2>
+<input id=pedidoId placeholder="ID Pedido">
+<button onclick="carregar()">Carregar picking</button>
 
 <div id=result></div>
 
 </div>
 
 <script>
-async function buscar(){
- const nome=prod.value
- const r=await fetch('/api/picking/'+nome).then(r=>r.json())
+let itens=[]
 
+function renderLista(){
+ lista.innerHTML=itens.map(i=>`<div>${i.nome} (${i.qtd})</div>`).join('')
+}
+
+function addItem(){
+ itens.push({nome:prod.value,qtd:qtd.value})
+ renderLista()
+}
+
+function criar(){
+ fetch('/api/pedido',{method:'POST',headers:{'Content-Type':'application/json'},
+ body:JSON.stringify({itens})}).then(()=>{
+  alert('Pedido criado')
+  itens=[]
+  renderLista()
+ })
+}
+
+async function carregar(){
+ const r=await fetch('/api/picking/'+pedidoId.value).then(r=>r.json())
  if(!r.ok){
-   result.innerHTML='<div class=card>Produto não encontrado</div>'
+   result.innerHTML='Pedido não encontrado'
    return
  }
 
- result.innerHTML=`<div class=card>
- Produto: ${r.nome}<br>
- Endereço: ${r.endereco}<br>
- Quantidade: ${r.qtd}<br><br>
-
- <input id=qtd placeholder="Qtd retirar">
- <button onclick="retirar('${r.nome}','${r.endereco}')">Confirmar retirada</button>
- </div>`
+ result.innerHTML=r.lista.map(i=>`
+ <div class=card>
+ ${i.nome} (${i.qtd})<br>
+ Endereço: ${i.endereco}<br>
+ <input placeholder="Qtd retirar" id="q_${i.nome}">
+ <button onclick="retirar('${i.nome}','${i.endereco}')">OK</button>
+ </div>
+ `).join('')
 }
 
 function retirar(nome,endereco){
- fetch('/api/retirar',{
-   method:'POST',
-   headers:{'Content-Type':'application/json'},
-   body:JSON.stringify({nome,endereco,qtd:qtd.value})
- }).then(()=>buscar())
+ let qtd=document.getElementById('q_'+nome).value
+ fetch('/api/retirar',{method:'POST',headers:{'Content-Type':'application/json'},
+ body:JSON.stringify({nome,endereco,qtd})}).then(()=>carregar())
 }
 </script>
 

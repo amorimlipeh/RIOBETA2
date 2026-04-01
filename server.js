@@ -12,25 +12,45 @@ const save=(n,d)=>fs.writeFileSync(f(n),JSON.stringify(d,null,2))
 
 app.get('/api/estoque',(req,res)=>res.json(read('estoque.json')))
 
-// buscar produto para picking
-app.get('/api/picking/:nome',(req,res)=>{
- const e=read('estoque.json')
- const item=e.find(i=>i.nome.toLowerCase()===req.params.nome.toLowerCase())
- if(!item) return res.json({ok:false})
- res.json({ok:true,...item})
+// criar pedido
+app.post('/api/pedido',(req,res)=>{
+ let pedidos=read('pedidos.json')
+ pedidos.push({id:Date.now(),itens:req.body.itens,status:'aberto'})
+ save('pedidos.json',pedidos)
+ res.json({ok:true})
 })
 
-// retirar produto
+// listar pedidos
+app.get('/api/pedidos',(req,res)=>res.json(read('pedidos.json')))
+
+// gerar picking organizado
+app.get('/api/picking/:id',(req,res)=>{
+ const pedidos=read('pedidos.json')
+ const estoque=read('estoque.json')
+
+ const ped=pedidos.find(p=>p.id==req.params.id)
+ if(!ped) return res.json({ok:false})
+
+ let lista=ped.itens.map(i=>{
+   let est=estoque.find(e=>e.nome===i.nome)
+   return {...i,endereco:est?est.endereco:'N/A'}
+ })
+
+ // ordenar por endereco
+ lista.sort((a,b)=>(a.endereco||'').localeCompare(b.endereco||''))
+
+ res.json({ok:true,lista})
+})
+
+// retirada
 app.post('/api/retirar',(req,res)=>{
- let e=read('estoque.json')
- let item=e.find(i=>i.endereco===req.body.endereco && i.nome===req.body.nome)
-
+ let estoque=read('estoque.json')
+ let item=estoque.find(i=>i.nome===req.body.nome && i.endereco===req.body.endereco)
  if(item){
-   item.qtd -= Number(req.body.qtd)
-   if(item.qtd<=0) e=e.filter(i=>i!==item)
-   save('estoque.json',e)
+   item.qtd-=Number(req.body.qtd)
+   if(item.qtd<=0) estoque=estoque.filter(i=>i!==item)
+   save('estoque.json',estoque)
  }
-
  res.json({ok:true})
 })
 
