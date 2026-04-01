@@ -6,58 +6,41 @@
 <style>
 body{font-family:Arial;background:#0b1f3a;color:#fff;margin:0}
 .top{padding:10px;background:#1f3b73}
-select{padding:8px;margin-right:10px}
 .grid{display:grid;grid-template-columns:repeat(10,1fr);gap:6px;padding:10px}
 .cell{padding:10px;border-radius:6px;text-align:center;font-size:12px;cursor:pointer}
 .vazio{background:#ecf0f1;color:#000}
 .ocupado{background:#2ecc71}
-.bloq{background:#e74c3c}
+.fixo{background:#e67e22}
 </style>
 </head>
 <body>
 
 <div class=top>
-<select id=rua onchange="load()">
-<option value="01">Rua 01</option>
-<option value="02">Rua 02</option>
-</select>
-
-<select id=andar onchange="load()">
-<option value="1">Andar 1</option>
-<option value="2">Andar 2</option>
-<option value="3">Andar 3</option>
-<option value="4">Andar 4</option>
-<option value="5">Andar 5</option>
-<option value="6">Andar 6</option>
-<option value="7">Andar 7</option>
-</select>
+<button onclick="sugerir()">Sugerir endereço</button>
 </div>
 
 <div id=grid class=grid></div>
 
 <script>
 async function load(){
- const rua=ruaSel.value
- const andar=andarSel.value
-
  const estoque=await fetch('/api/estoque').then(r=>r.json())
  const fixos=await fetch('/api/fixos').then(r=>r.json())
 
  let mapa={}
  estoque.forEach(i=>mapa[i.endereco]=i)
- fixos.forEach(i=>mapa[i.endereco]={fixo:true})
+ fixos.forEach(i=>mapa[i.endereco]={fixo:true,produto:i.produto})
 
  let html=''
  for(let i=1;i<=30;i++){
    let pos=String(i).padStart(3,'0')
-   let addr=rua+'-'+pos+'-'+andar+'-1'
+   let addr='01-'+pos+'-1-1'
 
    if(mapa[addr]?.fixo){
-     html+=`<div class="cell bloq">${pos}</div>`
+     html+=`<div class="cell fixo" onclick="info('${addr}')">${pos}</div>`
    } else if(mapa[addr]){
      html+=`<div class="cell ocupado" onclick="info('${addr}')">${pos}</div>`
    } else {
-     html+=`<div class="cell vazio" onclick="fixar('${addr}')">${pos}</div>`
+     html+=`<div class="cell vazio" onclick="mov('${addr}')">${pos}</div>`
    }
  }
  grid.innerHTML=html
@@ -66,19 +49,23 @@ async function load(){
 function info(addr){
  fetch('/api/estoque').then(r=>r.json()).then(data=>{
   let i=data.find(x=>x.endereco===addr)
-  if(i) alert(i.nome+'\nQtd:'+i.qtd+'\n'+addr)
+  alert(addr+'\n'+(i?i.nome+' qtd:'+i.qtd:'vazio'))
  })
 }
 
-function fixar(addr){
- if(confirm('Fixar endereço?')){
-   fetch('/api/fixar',{method:'POST',headers:{'Content-Type':'application/json'},
-   body:JSON.stringify({endereco:addr})}).then(load)
- }
+function mov(addr){
+ let nome=prompt('Produto')
+ let qtd=prompt('Qtd')
+ fetch('/api/estoque',{method:'POST',headers:{'Content-Type':'application/json'},
+ body:JSON.stringify({nome,qtd,endereco:addr})}).then(load)
 }
 
-const ruaSel=document.getElementById('rua')
-const andarSel=document.getElementById('andar')
+function sugerir(){
+ fetch('/api/sugerir').then(r=>r.json()).then(d=>{
+  alert('Sugestão: '+d.endereco)
+ })
+}
+
 load()
 </script>
 
