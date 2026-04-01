@@ -1,36 +1,30 @@
 
 const express=require('express');
-const fs=require('fs');
-const path=require('path');
 const app=express();
 app.use(express.json());
 app.use(express.static('public'));
 
-let operadores=[]
+let operadores=[
+ {nome:'João',tempo:120,itens:30},
+ {nome:'Maria',tempo:90,itens:40},
+ {nome:'Carlos',tempo:200,itens:20}
+];
 
-app.post('/api/iniciar',(req,res)=>{
-  operadores.push({
-    id:Date.now(),
-    nome:req.body.nome||'Operador',
-    status:'andamento',
-    endereco:req.body.endereco||'-',
-    tempo:0
-  })
-  res.json({ok:true})
+app.get('/api/ia',(req,res)=>{
+ let ranking=[...operadores].sort((a,b)=>b.itens-a.itens)
+ let gargalo=operadores.find(o=>o.tempo>150)
+
+ let sugestao='Operação balanceada'
+ if(gargalo){
+   sugestao='Reduzir carga do operador '+gargalo.nome
+ }
+
+ res.json({
+   ranking,
+   gargalo:gargalo||null,
+   sugestao,
+   media: Math.round(operadores.reduce((s,o)=>s+o.tempo,0)/operadores.length)
+ })
 })
 
-app.get('/api/painel',(req,res)=>{
-  res.json(operadores)
-})
-
-app.post('/api/finalizar',(req,res)=>{
-  operadores=operadores.map(o=>o.id==req.body.id?{...o,status:'finalizado'}:o)
-  res.json({ok:true})
-})
-
-setInterval(()=>{
-  operadores=operadores.map(o=>({...o,tempo:o.tempo+1}))
-},1000)
-
-app.get('*',(req,res)=>res.sendFile(path.join(__dirname,'public/index.html')))
 app.listen(process.env.PORT||3000,'0.0.0.0')

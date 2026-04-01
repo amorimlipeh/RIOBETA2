@@ -8,49 +8,45 @@ body{font-family:Arial;background:#0b1f3a;color:#fff;margin:0}
 .box{padding:20px}
 .card{background:#1a2f5c;padding:15px;border-radius:10px;margin:10px 0}
 .green{color:#2ecc71}
-.blue{color:#3498db}
-.yellow{color:#f1c40f}
-button{padding:10px;border:none;border-radius:8px;background:#3b5bbf;color:#fff}
+.red{color:#e74c3c}
 </style>
 </head>
 <body>
 
 <div class=box>
-<h2>Painel Operacional</h2>
+<h2>IA Operacional</h2>
 
-<input id=nome placeholder="Nome operador">
-<input id=end placeholder="Endereço">
-<button onclick="start()">Iniciar Operação</button>
-
-<div id=painel></div>
+<div id=app></div>
 
 </div>
 
 <script>
 async function load(){
- const data=await fetch('/api/painel').then(r=>r.json())
- painel.innerHTML=data.map(o=>`
+ const d=await fetch('/api/ia').then(r=>r.json())
+
+ app.innerHTML=`
  <div class=card>
- 👷 ${o.nome}<br>
- 📍 ${o.endereco}<br>
- ⏱️ ${o.tempo}s<br>
- <span class="${o.status=='andamento'?'green':'blue'}">${o.status}</span><br>
- <button onclick="finalizar(${o.id})">Finalizar</button>
+ <h3>Ranking</h3>
+ ${d.ranking.map((o,i)=>`${i+1}º ${o.nome} (${o.itens} itens)`).join('<br>')}
  </div>
- `).join('')
+
+ <div class=card>
+ <h3>Média tempo</h3>
+ ${d.media}s
+ </div>
+
+ <div class=card>
+ <h3>Gargalo</h3>
+ ${d.gargalo?'<span class=red>'+d.gargalo.nome+'</span>':'Nenhum'}
+ </div>
+
+ <div class=card>
+ <h3>Sugestão</h3>
+ <span class=green>${d.sugestao}</span>
+ </div>
+ `
 }
 
-function start(){
- fetch('/api/iniciar',{method:'POST',headers:{'Content-Type':'application/json'},
- body:JSON.stringify({nome:nome.value,endereco:end.value})}).then(load)
-}
-
-function finalizar(id){
- fetch('/api/finalizar',{method:'POST',headers:{'Content-Type':'application/json'},
- body:JSON.stringify({id})}).then(load)
-}
-
-setInterval(load,1000)
 load()
 </script>
 
