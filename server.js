@@ -17,7 +17,6 @@ app.post('/api/fixar',(req,res)=>{
  save('fixos.json',e)
  res.json({ok:true})
 })
-
 app.get('/api/fixos',(req,res)=>res.json(read('fixos.json')))
 
 app.get('*',(req,res)=>res.sendFile(path.join(__dirname,'public/index.html')))

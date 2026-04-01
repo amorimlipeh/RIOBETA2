@@ -6,9 +6,9 @@
 <style>
 body{font-family:Arial;background:#0b1f3a;color:#fff;margin:0}
 .top{padding:10px;background:#1f3b73}
-select{padding:10px;border-radius:8px}
+select{padding:8px;margin-right:10px}
 .grid{display:grid;grid-template-columns:repeat(10,1fr);gap:6px;padding:10px}
-.cell{padding:12px;border-radius:6px;text-align:center;font-size:12px;cursor:pointer}
+.cell{padding:10px;border-radius:6px;text-align:center;font-size:12px;cursor:pointer}
 .vazio{background:#ecf0f1;color:#000}
 .ocupado{background:#2ecc71}
 .bloq{background:#e74c3c}
@@ -20,7 +20,16 @@ select{padding:10px;border-radius:8px}
 <select id=rua onchange="load()">
 <option value="01">Rua 01</option>
 <option value="02">Rua 02</option>
-<option value="03">Rua 03</option>
+</select>
+
+<select id=andar onchange="load()">
+<option value="1">Andar 1</option>
+<option value="2">Andar 2</option>
+<option value="3">Andar 3</option>
+<option value="4">Andar 4</option>
+<option value="5">Andar 5</option>
+<option value="6">Andar 6</option>
+<option value="7">Andar 7</option>
 </select>
 </div>
 
@@ -28,7 +37,9 @@ select{padding:10px;border-radius:8px}
 
 <script>
 async function load(){
- const rua=ruaSelect.value
+ const rua=ruaSel.value
+ const andar=andarSel.value
+
  const estoque=await fetch('/api/estoque').then(r=>r.json())
  const fixos=await fetch('/api/fixos').then(r=>r.json())
 
@@ -39,7 +50,7 @@ async function load(){
  let html=''
  for(let i=1;i<=30;i++){
    let pos=String(i).padStart(3,'0')
-   let addr=rua+'-'+pos+'-1-1'
+   let addr=rua+'-'+pos+'-'+andar+'-1'
 
    if(mapa[addr]?.fixo){
      html+=`<div class="cell bloq">${pos}</div>`
@@ -66,7 +77,8 @@ function fixar(addr){
  }
 }
 
-const ruaSelect=document.getElementById('rua')
+const ruaSel=document.getElementById('rua')
+const andarSel=document.getElementById('andar')
 load()
 </script>
 
