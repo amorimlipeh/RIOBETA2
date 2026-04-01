@@ -1,1 +1,14 @@
-[]
+[
+  {
+    "modulo": "auth",
+    "acao": "Login do usuário admin."
+  },
+  {
+    "modulo": "dashboard",
+    "acao": "Dashboard inicializado."
+  },
+  {
+    "modulo": "sistema",
+    "acao": "Base carregada com sucesso."
+  }
+]

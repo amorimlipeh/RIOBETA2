@@ -1,1 +1,12 @@
-[]
+[
+  {
+    "id": 1,
+    "produto": "Produto A",
+    "quantidade": 120
+  },
+  {
+    "id": 2,
+    "produto": "Produto B",
+    "quantidade": 80
+  }
+]
