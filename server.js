@@ -1,30 +1,41 @@
 
 const express=require('express');
+const fs=require('fs');
+const path=require('path');
 const app=express();
 app.use(express.json());
 app.use(express.static('public'));
 
-let operadores=[
- {nome:'João',tempo:120,itens:30},
- {nome:'Maria',tempo:90,itens:40},
- {nome:'Carlos',tempo:200,itens:20}
-];
+const f=n=>path.join(__dirname,'data',n);
+const read=n=>{try{return JSON.parse(fs.readFileSync(f(n)))}catch{return[]}}
+const save=(n,d)=>fs.writeFileSync(f(n),JSON.stringify(d,null,2))
 
-app.get('/api/ia',(req,res)=>{
- let ranking=[...operadores].sort((a,b)=>b.itens-a.itens)
- let gargalo=operadores.find(o=>o.tempo>150)
-
- let sugestao='Operação balanceada'
- if(gargalo){
-   sugestao='Reduzir carga do operador '+gargalo.nome
- }
-
- res.json({
-   ranking,
-   gargalo:gargalo||null,
-   sugestao,
-   media: Math.round(operadores.reduce((s,o)=>s+o.tempo,0)/operadores.length)
- })
+// empresas
+app.get('/api/empresas',(req,res)=>res.json(read('empresas.json')))
+app.post('/api/empresas',(req,res)=>{
+ let e=read('empresas.json')
+ e.push({id:Date.now(),nome:req.body.nome})
+ save('empresas.json',e)
+ res.json({ok:true})
 })
 
+// financeiro
+app.get('/api/financeiro',(req,res)=>res.json(read('financeiro.json')))
+app.post('/api/financeiro',(req,res)=>{
+ let fz=read('financeiro.json')
+ fz.push({tipo:req.body.tipo,valor:req.body.valor,data:new Date()})
+ save('financeiro.json',fz)
+ res.json({ok:true})
+})
+
+// usuarios
+app.get('/api/usuarios',(req,res)=>res.json(read('usuarios.json')))
+app.post('/api/usuarios',(req,res)=>{
+ let u=read('usuarios.json')
+ u.push({nome:req.body.nome,cargo:req.body.cargo})
+ save('usuarios.json',u)
+ res.json({ok:true})
+})
+
+app.get('*',(req,res)=>res.sendFile(path.join(__dirname,'public/index.html')))
 app.listen(process.env.PORT||3000,'0.0.0.0')

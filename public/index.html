@@ -7,44 +7,62 @@
 body{font-family:Arial;background:#0b1f3a;color:#fff;margin:0}
 .box{padding:20px}
 .card{background:#1a2f5c;padding:15px;border-radius:10px;margin:10px 0}
-.green{color:#2ecc71}
-.red{color:#e74c3c}
+input{width:100%;padding:10px;margin:5px 0;border:none;border-radius:8px}
+button{padding:10px;border:none;border-radius:8px;background:#3b5bbf;color:#fff;width:100%}
 </style>
 </head>
 <body>
 
 <div class=box>
-<h2>IA Operacional</h2>
+<h2>ERP Completo</h2>
 
-<div id=app></div>
+<h3>Empresa</h3>
+<input id=emp placeholder="Nome empresa">
+<button onclick="addEmpresa()">Salvar</button>
+<div id=empresas></div>
+
+<h3>Financeiro</h3>
+<input id=valor placeholder="Valor">
+<select id=tipo>
+<option value="entrada">Entrada</option>
+<option value="saida">Saída</option>
+</select>
+<button onclick="addFin()">Salvar</button>
+<div id=fin></div>
+
+<h3>Usuários</h3>
+<input id=user placeholder="Nome">
+<input id=cargo placeholder="Cargo">
+<button onclick="addUser()">Salvar</button>
+<div id=users></div>
 
 </div>
 
 <script>
 async function load(){
- const d=await fetch('/api/ia').then(r=>r.json())
+ let e=await fetch('/api/empresas').then(r=>r.json())
+ empresas.innerHTML=e.map(x=>'<div class=card>'+x.nome+'</div>').join('')
 
- app.innerHTML=`
- <div class=card>
- <h3>Ranking</h3>
- ${d.ranking.map((o,i)=>`${i+1}º ${o.nome} (${o.itens} itens)`).join('<br>')}
- </div>
+ let f=await fetch('/api/financeiro').then(r=>r.json())
+ fin.innerHTML=f.map(x=>'<div class=card>'+x.tipo+' '+x.valor+'</div>').join('')
 
- <div class=card>
- <h3>Média tempo</h3>
- ${d.media}s
- </div>
+ let u=await fetch('/api/usuarios').then(r=>r.json())
+ users.innerHTML=u.map(x=>'<div class=card>'+x.nome+' - '+x.cargo+'</div>').join('')
+}
 
- <div class=card>
- <h3>Gargalo</h3>
- ${d.gargalo?'<span class=red>'+d.gargalo.nome+'</span>':'Nenhum'}
- </div>
+function addEmpresa(){
+ fetch('/api/empresas',{method:'POST',headers:{'Content-Type':'application/json'},
+ body:JSON.stringify({nome:emp.value})}).then(load)
+}
 
- <div class=card>
- <h3>Sugestão</h3>
- <span class=green>${d.sugestao}</span>
- </div>
- `
+function addFin(){
+ fetch('/api/financeiro',{method:'POST',headers:{'Content-Type':'application/json'},
+ body:JSON.stringify({tipo:tipo.value,valor:valor.value})}).then(load)
+}
+
+function addUser(){
+ fetch('/api/usuarios',{method:'POST',headers:{'Content-Type':'application/json'},
+ body:JSON.stringify({nome:user.value,cargo:cargo.value})}).then(load)
 }
 
 load()
