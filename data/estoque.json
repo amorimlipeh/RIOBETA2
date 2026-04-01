@@ -1,1 +1,12 @@
-[]
+[
+  {
+    "nome": "Produto A",
+    "qtd": 100,
+    "endereco": "05-001-3-1"
+  },
+  {
+    "nome": "Produto B",
+    "qtd": 50,
+    "endereco": "05-002-3-1"
+  }
+]

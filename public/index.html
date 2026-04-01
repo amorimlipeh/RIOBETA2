@@ -6,69 +6,54 @@
 <style>
 body{font-family:Arial;background:#0b1f3a;color:#fff;margin:0}
 .menu{padding:10px;background:#1f3b73}
-button{width:100%;margin:5px 0;padding:15px;border:none;border-radius:10px;background:#3b5bbf;color:#fff}
-.card{background:#1a2f5c;margin:10px;padding:15px;border-radius:10px}
-input{width:100%;padding:10px;margin:5px 0;border-radius:8px;border:none}
+button{width:100%;margin:5px 0;padding:12px;border:none;border-radius:10px;background:#3b5bbf;color:#fff}
+.grid{display:grid;grid-template-columns:repeat(10,1fr);gap:5px;padding:10px}
+.cell{padding:10px;border-radius:6px;text-align:center;font-size:12px;cursor:pointer}
+.vazio{background:#fff;color:#000}
+.ocupado{background:#2ecc71}
 </style>
 </head>
 <body>
 
 <div class=menu>
-<button onclick="show('dashboard')">Dashboard</button>
-<button onclick="show('produtos')">Produtos</button>
-<button onclick="show('estoque')">Estoque (WMS)</button>
+<button onclick="carregar()">Mapa WMS</button>
 </div>
 
-<div id=content></div>
+<div id=grid class=grid></div>
 
 <script>
-async function api(u,o){return fetch(u,o).then(r=>r.json())}
+async function carregar(){
+ const estoque=await fetch('/api/estoque').then(r=>r.json())
+ let mapa={}
 
-async function show(m){
- if(m==='dashboard'){
-  const d=await api('/api/dashboard')
-  content.innerHTML=`<div class=card>
-  Produtos:${d.produtos}<br>
-  Estoque:${d.estoque}<br>
-  Pedidos:${d.pedidos}</div>`
+ estoque.forEach(i=>{
+   mapa[i.endereco]=i
+ })
+
+ let html=''
+ for(let i=1;i<=20;i++){
+   let pos=String(i).padStart(3,'0')
+   let addr='05-'+pos+'-3-1'
+   if(mapa[addr]){
+     html+=`<div class="cell ocupado" onclick="detalhe('${addr}')">${pos}</div>`
+   }else{
+     html+=`<div class="cell vazio">${pos}</div>`
+   }
  }
-
- if(m==='produtos'){
-  const l=await api('/api/produtos')
-  content.innerHTML=`<div class=card>
-  <input id=n placeholder=nome>
-  <button onclick=add()>Salvar</button>
-  ${l.map(i=>`<div>${i.nome}</div>`).join('')}
-  </div>`
- }
-
- if(m==='estoque'){
-  const l=await api('/api/estoque')
-  content.innerHTML=`<div class=card>
-  <input id=p placeholder=produto>
-  <input id=q placeholder=quantidade>
-  <input id=e placeholder="endereco (05-001-3-1)">
-  <button onclick=mov()>Movimentar</button>
-
-  <h3>Estoque por endereço</h3>
-  ${l.map(i=>`<div>${i.nome} - ${i.qtd} (${i.endereco})</div>`).join('')}
-  </div>`
- }
+ grid.innerHTML=html
 }
 
-function add(){
- api('/api/produtos',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({nome:n.value})}).then(()=>show('produtos'))
+function detalhe(addr){
+ fetch('/api/estoque').then(r=>r.json()).then(data=>{
+   let item=data.find(i=>i.endereco===addr)
+   if(item){
+     alert(item.nome+'\nQtd:'+item.qtd+'\n'+addr)
+   }
+ })
 }
 
-function mov(){
- api('/api/estoque',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
-  nome:p.value,
-  qtd:q.value,
-  endereco:e.value
- })}).then(()=>show('estoque'))
-}
-
-show('dashboard')
+carregar()
 </script>
+
 </body>
 </html>
