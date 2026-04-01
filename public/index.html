@@ -8,73 +8,91 @@ body{font-family:Arial;background:#0b1f3a;color:#fff;margin:0}
 .box{padding:20px}
 input{width:100%;padding:10px;margin:5px 0;border-radius:8px;border:none}
 button{padding:12px;border:none;border-radius:8px;background:#3b5bbf;color:#fff;width:100%}
-.card{background:#1a2f5c;padding:15px;border-radius:10px;margin-top:10px}
+.card{background:#1a2f5c;padding:20px;border-radius:12px;margin-top:10px;text-align:center}
+.big{font-size:20px;margin:8px 0}
+.controls{display:flex;gap:10px;margin-top:10px}
+.controls button{flex:1}
 </style>
 </head>
 <body>
 
 <div class=box>
-<h2>Pedido</h2>
+<h2>Picking com Voz + Scanner</h2>
 
-<input id=prod placeholder="Produto">
-<input id=qtd placeholder="Quantidade">
-<button onclick="addItem()">Adicionar item</button>
-<button onclick="criar()">Criar pedido</button>
+<input id=pedidoId placeholder="ID Pedido (ex: 1)">
+<button onclick="iniciar()">Iniciar</button>
 
-<div id=lista></div>
-
-<hr>
-
-<h2>Picking</h2>
-<input id=pedidoId placeholder="ID Pedido">
-<button onclick="carregar()">Carregar picking</button>
-
-<div id=result></div>
-
+<div id=app></div>
 </div>
 
 <script>
-let itens=[]
+let lista=[]
+let index=0
 
-function renderLista(){
- lista.innerHTML=itens.map(i=>`<div>${i.nome} (${i.qtd})</div>`).join('')
+function falar(texto){
+  try{
+    const u=new SpeechSynthesisUtterance(texto)
+    u.lang='pt-BR'
+    speechSynthesis.speak(u)
+  }catch(e){}
 }
 
-function addItem(){
- itens.push({nome:prod.value,qtd:qtd.value})
- renderLista()
-}
-
-function criar(){
- fetch('/api/pedido',{method:'POST',headers:{'Content-Type':'application/json'},
- body:JSON.stringify({itens})}).then(()=>{
-  alert('Pedido criado')
-  itens=[]
-  renderLista()
- })
-}
-
-async function carregar(){
+async function iniciar(){
  const r=await fetch('/api/picking/'+pedidoId.value).then(r=>r.json())
- if(!r.ok){
-   result.innerHTML='Pedido não encontrado'
+ if(!r.ok){ app.innerHTML='Pedido não encontrado'; return }
+ lista=r.lista
+ index=0
+ mostrar()
+}
+
+function mostrar(){
+ if(index>=lista.length){
+   app.innerHTML='<div class=card>Pedido finalizado</div>'
+   falar('Pedido finalizado')
    return
  }
-
- result.innerHTML=r.lista.map(i=>`
+ const item=lista[index]
+ const instr=`Vá para ${item.endereco}. Produto ${item.nome}. Quantidade ${item.qtd}.`
+ app.innerHTML=`
  <div class=card>
- ${i.nome} (${i.qtd})<br>
- Endereço: ${i.endereco}<br>
- <input placeholder="Qtd retirar" id="q_${i.nome}">
- <button onclick="retirar('${i.nome}','${i.endereco}')">OK</button>
+ <div class=big>📍 ${item.endereco}</div>
+ <div class=big>📦 ${item.nome}</div>
+ <div class=big>🔢 ${item.qtd}</div>
+
+ <input id=scan placeholder="Escanear código / digitar nome do produto">
+ <input id=qtd placeholder="Qtd retirada">
+
+ <div class=controls>
+  <button onclick="validar('${item.nome}','${item.endereco}')">Confirmar</button>
+  <button onclick="repetir()">🔊 Repetir</button>
  </div>
- `).join('')
+
+ <div class=big>${index+1}/${lista.length}</div>
+ </div>
+ `
+ falar(instr)
 }
 
-function retirar(nome,endereco){
- let qtd=document.getElementById('q_'+nome).value
- fetch('/api/retirar',{method:'POST',headers:{'Content-Type':'application/json'},
- body:JSON.stringify({nome,endereco,qtd})}).then(()=>carregar())
+function repetir(){
+ const item=lista[index]
+ falar(`Vá para ${item.endereco}. Produto ${item.nome}. Quantidade ${item.qtd}.`)
+}
+
+function validar(nome,endereco){
+ const lido=(scan.value||'').toLowerCase().trim()
+ if(lido && lido!==nome.toLowerCase()){
+   alert('Produto incorreto!')
+   falar('Produto incorreto')
+   return
+ }
+ fetch('/api/retirar',{
+   method:'POST',
+   headers:{'Content-Type':'application/json'},
+   body:JSON.stringify({nome,endereco,qtd:qtd.value||0})
+ }).then(()=>{
+   index++
+   mostrar()
+ })
 }
 </script>
 

@@ -10,24 +10,9 @@ const f=n=>path.join(__dirname,'data',n);
 const read=n=>{try{return JSON.parse(fs.readFileSync(f(n)))}catch{return[]}}
 const save=(n,d)=>fs.writeFileSync(f(n),JSON.stringify(d,null,2))
 
-app.get('/api/estoque',(req,res)=>res.json(read('estoque.json')))
-
-// criar pedido
-app.post('/api/pedido',(req,res)=>{
- let pedidos=read('pedidos.json')
- pedidos.push({id:Date.now(),itens:req.body.itens,status:'aberto'})
- save('pedidos.json',pedidos)
- res.json({ok:true})
-})
-
-// listar pedidos
-app.get('/api/pedidos',(req,res)=>res.json(read('pedidos.json')))
-
-// gerar picking organizado
 app.get('/api/picking/:id',(req,res)=>{
  const pedidos=read('pedidos.json')
  const estoque=read('estoque.json')
-
  const ped=pedidos.find(p=>p.id==req.params.id)
  if(!ped) return res.json({ok:false})
 
@@ -35,14 +20,11 @@ app.get('/api/picking/:id',(req,res)=>{
    let est=estoque.find(e=>e.nome===i.nome)
    return {...i,endereco:est?est.endereco:'N/A'}
  })
-
- // ordenar por endereco
  lista.sort((a,b)=>(a.endereco||'').localeCompare(b.endereco||''))
 
  res.json({ok:true,lista})
 })
 
-// retirada
 app.post('/api/retirar',(req,res)=>{
  let estoque=read('estoque.json')
  let item=estoque.find(i=>i.nome===req.body.nome && i.endereco===req.body.endereco)

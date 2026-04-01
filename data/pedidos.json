@@ -1,1 +1,16 @@
-[]
+[
+  {
+    "id": 1,
+    "itens": [
+      {
+        "nome": "Produto A",
+        "qtd": 5
+      },
+      {
+        "nome": "Produto B",
+        "qtd": 3
+      }
+    ],
+    "status": "aberto"
+  }
+]
