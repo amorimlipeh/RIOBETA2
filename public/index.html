@@ -2,7 +2,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name=viewport content="width=device-width, initial-scale=1">
 <style>
 body{font-family:Arial;background:#0b1f3a;color:#fff;margin:0}
 .menu{padding:10px;background:#1f3b73}
@@ -13,12 +13,13 @@ input{width:100%;padding:10px;margin:5px 0;border-radius:8px;border:none}
 </head>
 <body>
 
-<div class="menu">
+<div class=menu>
 <button onclick="show('dashboard')">Dashboard</button>
 <button onclick="show('produtos')">Produtos</button>
+<button onclick="show('estoque')">Estoque</button>
 </div>
 
-<div id="content"></div>
+<div id=content></div>
 
 <script>
 async function api(u,o){return fetch(u,o).then(r=>r.json())}
@@ -37,32 +38,33 @@ async function show(m){
   content.innerHTML=`<div class=card>
   <input id=n placeholder=nome>
   <button onclick=add()>Salvar</button>
-  ${l.map(i=>`<div>
-   <input value="${i.nome||''}" onchange="edit(${i.id},this.value)">
-   <button onclick="del(${i.id})">X</button>
-  </div>`).join('')}
+  ${l.map(i=>`<div>${i.nome}</div>`).join('')}
+  </div>`
+ }
+
+ if(m==='estoque'){
+  const l=await api('/api/estoque')
+  const h=await api('/api/historico')
+  content.innerHTML=`<div class=card>
+  <input id=p placeholder=produto>
+  <input id=q placeholder=quantidade>
+  <button onclick=mov()>Movimentar</button>
+
+  <h3>Estoque</h3>
+  ${l.map(i=>`<div>${i.nome}: ${i.qtd}</div>`).join('')}
+
+  <h3>Histórico</h3>
+  ${h.map(i=>`<div>${i.nome} ${i.qtd}</div>`).join('')}
   </div>`
  }
 }
 
 function add(){
- api('/api/produtos',{
-  method:'POST',
-  headers:{'Content-Type':'application/json'},
-  body:JSON.stringify({nome:n.value})
- }).then(()=>show('produtos'))
+ api('/api/produtos',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({nome:n.value})}).then(()=>show('produtos'))
 }
 
-function edit(id,v){
- api('/api/produtos/'+id,{
-  method:'PUT',
-  headers:{'Content-Type':'application/json'},
-  body:JSON.stringify({nome:v})
- })
-}
-
-function del(id){
- api('/api/produtos/'+id,{method:'DELETE'}).then(()=>show('produtos'))
+function mov(){
+ api('/api/estoque',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({nome:p.value,qtd:q.value})}).then(()=>show('estoque'))
 }
 
 show('dashboard')
