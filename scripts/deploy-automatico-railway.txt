@@ -1,0 +1,7 @@
+cd ~/RIOBETA2
+
+git add .
+git commit -m "update: riobeta2 v21 final corrigido"
+git push origin main
+
+Se o Railway estiver conectado ao GitHub, o deploy dispara automaticamente.
