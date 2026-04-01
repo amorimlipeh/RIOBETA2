@@ -1,11 +1,8 @@
+
 {
-  "name": "riobeta2-v20-auth-completo",
-  "version": "20.0.0",
+  "name": "riobeta2",
+  "version": "1.0.0",
   "main": "server.js",
-  "scripts": {
-    "start": "node server.js"
-  },
-  "dependencies": {
-    "express": "^4.18.2"
-  }
+  "scripts": { "start": "node server.js" },
+  "dependencies": { "express": "^4.18.2" }
 }
