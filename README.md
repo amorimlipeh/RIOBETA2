@@ -1,9 +1,3 @@
-# RIOBETA2 UPDATE MÓDULOS FIXOS V1
+# RIOBETA2 V2 CORRIGIDO
 
-Base validada:
-- dashboard funcionando
-- módulos fixos na lateral
-- área de conteúdo alternando por clique
-
-Login padrão:
-- admin / 123
+Correção do crash no Railway + módulos mantidos.

@@ -1,1 +1,12 @@
-[]
+[
+  {
+    "id": 1,
+    "codigo": "P001",
+    "nome": "Produto A"
+  },
+  {
+    "id": 2,
+    "codigo": "P002",
+    "nome": "Produto B"
+  }
+]
