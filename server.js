@@ -34,9 +34,9 @@ app.post('/api/estoque',(req,res)=>{
  let e=read('estoque.json')
  let h=read('historico.json')
 
- let item=e.find(i=>i.nome===req.body.nome)
+ let item=e.find(i=>i.nome===req.body.nome && i.endereco===req.body.endereco)
  if(item){ item.qtd+=Number(req.body.qtd) }
- else{ e.push({nome:req.body.nome,qtd:Number(req.body.qtd)}) }
+ else{ e.push({nome:req.body.nome,qtd:Number(req.body.qtd),endereco:req.body.endereco}) }
 
  h.push({data:new Date(),...req.body})
  save('estoque.json',e)

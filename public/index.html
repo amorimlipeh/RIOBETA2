@@ -16,7 +16,7 @@ input{width:100%;padding:10px;margin:5px 0;border-radius:8px;border:none}
 <div class=menu>
 <button onclick="show('dashboard')">Dashboard</button>
 <button onclick="show('produtos')">Produtos</button>
-<button onclick="show('estoque')">Estoque</button>
+<button onclick="show('estoque')">Estoque (WMS)</button>
 </div>
 
 <div id=content></div>
@@ -44,17 +44,14 @@ async function show(m){
 
  if(m==='estoque'){
   const l=await api('/api/estoque')
-  const h=await api('/api/historico')
   content.innerHTML=`<div class=card>
   <input id=p placeholder=produto>
   <input id=q placeholder=quantidade>
+  <input id=e placeholder="endereco (05-001-3-1)">
   <button onclick=mov()>Movimentar</button>
 
-  <h3>Estoque</h3>
-  ${l.map(i=>`<div>${i.nome}: ${i.qtd}</div>`).join('')}
-
-  <h3>Histórico</h3>
-  ${h.map(i=>`<div>${i.nome} ${i.qtd}</div>`).join('')}
+  <h3>Estoque por endereço</h3>
+  ${l.map(i=>`<div>${i.nome} - ${i.qtd} (${i.endereco})</div>`).join('')}
   </div>`
  }
 }
@@ -64,7 +61,11 @@ function add(){
 }
 
 function mov(){
- api('/api/estoque',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({nome:p.value,qtd:q.value})}).then(()=>show('estoque'))
+ api('/api/estoque',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+  nome:p.value,
+  qtd:q.value,
+  endereco:e.value
+ })}).then(()=>show('estoque'))
 }
 
 show('dashboard')
