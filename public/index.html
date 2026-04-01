@@ -8,6 +8,7 @@ body{font-family:Arial;background:#0b1f3a;color:#fff;margin:0}
 .menu{padding:10px;background:#1f3b73}
 button{width:100%;margin:5px 0;padding:15px;border:none;border-radius:10px;background:#3b5bbf;color:#fff}
 .card{background:#1a2f5c;margin:10px;padding:15px;border-radius:10px}
+input{width:100%;padding:10px;margin:5px 0;border-radius:8px;border:none}
 </style>
 </head>
 <body>
@@ -15,65 +16,53 @@ button{width:100%;margin:5px 0;padding:15px;border:none;border-radius:10px;backg
 <div class="menu">
 <button onclick="show('dashboard')">Dashboard</button>
 <button onclick="show('produtos')">Produtos</button>
-<button onclick="show('estoque')">Estoque</button>
-<button onclick="show('pedidos')">Pedidos</button>
 </div>
 
 <div id="content"></div>
 
 <script>
-async function api(u){return fetch(u).then(r=>r.json())}
+async function api(u,o){return fetch(u,o).then(r=>r.json())}
 
 async function show(m){
  if(m==='dashboard'){
-  const d=await api('/api/dashboard');
+  const d=await api('/api/dashboard')
   content.innerHTML=`<div class=card>
   Produtos:${d.produtos}<br>
-  Estoque:${d.estoqueTotal}<br>
-  Pedidos:${d.pedidosAbertos}</div>`;
+  Estoque:${d.estoque}<br>
+  Pedidos:${d.pedidos}</div>`
  }
+
  if(m==='produtos'){
-  const l=await api('/api/produtos');
+  const l=await api('/api/produtos')
   content.innerHTML=`<div class=card>
   <input id=n placeholder=nome>
-  <button onclick=addProd()>Salvar</button>
-  ${l.map(i=>`<div>${i.nome||''} <button onclick=delProd(${i.id})>X</button></div>`).join('')}
-  </div>`;
- }
- if(m==='estoque'){
-  content.innerHTML=`<div class=card>
-  <input id=p placeholder=produto>
-  <input id=q placeholder=qtd>
-  <button onclick=addEst()>Salvar</button></div>`;
- }
- if(m==='pedidos'){
-  const l=await api('/api/pedidos');
-  content.innerHTML=`<div class=card>
-  <input id=ped placeholder=pedido>
-  <button onclick=addPed()>Salvar</button>
-  ${l.map(i=>`<div>${i.pedido} - ${i.status}
-  <button onclick=fin(${i.id})>Finalizar</button></div>`).join('')}
-  </div>`;
+  <button onclick=add()>Salvar</button>
+  ${l.map(i=>`<div>
+   <input value="${i.nome||''}" onchange="edit(${i.id},this.value)">
+   <button onclick="del(${i.id})">X</button>
+  </div>`).join('')}
+  </div>`
  }
 }
 
-function addProd(){
- fetch('/api/produtos',{method:'POST',headers:{'Content-Type':'application/json'},
- body:JSON.stringify({nome:n.value})}).then(()=>show('produtos'))
+function add(){
+ api('/api/produtos',{
+  method:'POST',
+  headers:{'Content-Type':'application/json'},
+  body:JSON.stringify({nome:n.value})
+ }).then(()=>show('produtos'))
 }
-function delProd(id){
- fetch('/api/produtos/'+id,{method:'DELETE'}).then(()=>show('produtos'))
+
+function edit(id,v){
+ api('/api/produtos/'+id,{
+  method:'PUT',
+  headers:{'Content-Type':'application/json'},
+  body:JSON.stringify({nome:v})
+ })
 }
-function addEst(){
- fetch('/api/estoque',{method:'POST',headers:{'Content-Type':'application/json'},
- body:JSON.stringify({produto:p.value,qtd:q.value})})
-}
-function addPed(){
- fetch('/api/pedidos',{method:'POST',headers:{'Content-Type':'application/json'},
- body:JSON.stringify({pedido:ped.value})}).then(()=>show('pedidos'))
-}
-function fin(id){
- fetch('/api/pedidos/'+id,{method:'POST'}).then(()=>show('pedidos'))
+
+function del(id){
+ api('/api/produtos/'+id,{method:'DELETE'}).then(()=>show('produtos'))
 }
 
 show('dashboard')
