@@ -10,12 +10,11 @@ app.use(express.static('public'))
 
 const db = new sqlite3.Database('./database.db')
 
-// init db
 db.serialize(()=>{
  db.run("CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY, login TEXT, senha TEXT)")
 })
 
-// middleware auth
+// auth middleware
 function auth(req,res,next){
  const token = req.headers.authorization
  if(!token) return res.status(401).json({ok:false})
@@ -44,10 +43,10 @@ app.post('/api/user',(req,res)=>{
  res.json({ok:true})
 })
 
-// protected route
+// protected
 app.get('/api/protected',auth,(req,res)=>{
  res.json({ok:true,msg:"Acesso liberado"})
 })
 
 app.get('*',(req,res)=>res.sendFile(path.join(__dirname,'public/index.html')))
-app.listen(3000,'0.0.0.0')
+app.listen(process.env.PORT||3000,'0.0.0.0')
