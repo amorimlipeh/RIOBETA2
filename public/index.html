@@ -5,54 +5,69 @@
 <meta name=viewport content="width=device-width, initial-scale=1">
 <style>
 body{font-family:Arial;background:#0b1f3a;color:#fff;margin:0}
-.menu{padding:10px;background:#1f3b73}
-button{width:100%;margin:5px 0;padding:12px;border:none;border-radius:10px;background:#3b5bbf;color:#fff}
-.grid{display:grid;grid-template-columns:repeat(10,1fr);gap:5px;padding:10px}
-.cell{padding:10px;border-radius:6px;text-align:center;font-size:12px;cursor:pointer}
-.vazio{background:#fff;color:#000}
+.top{padding:10px;background:#1f3b73}
+select{padding:10px;border-radius:8px}
+.grid{display:grid;grid-template-columns:repeat(10,1fr);gap:6px;padding:10px}
+.cell{padding:12px;border-radius:6px;text-align:center;font-size:12px;cursor:pointer}
+.vazio{background:#ecf0f1;color:#000}
 .ocupado{background:#2ecc71}
+.bloq{background:#e74c3c}
 </style>
 </head>
 <body>
 
-<div class=menu>
-<button onclick="carregar()">Mapa WMS</button>
+<div class=top>
+<select id=rua onchange="load()">
+<option value="01">Rua 01</option>
+<option value="02">Rua 02</option>
+<option value="03">Rua 03</option>
+</select>
 </div>
 
 <div id=grid class=grid></div>
 
 <script>
-async function carregar(){
+async function load(){
+ const rua=ruaSelect.value
  const estoque=await fetch('/api/estoque').then(r=>r.json())
- let mapa={}
+ const fixos=await fetch('/api/fixos').then(r=>r.json())
 
- estoque.forEach(i=>{
-   mapa[i.endereco]=i
- })
+ let mapa={}
+ estoque.forEach(i=>mapa[i.endereco]=i)
+ fixos.forEach(i=>mapa[i.endereco]={fixo:true})
 
  let html=''
- for(let i=1;i<=20;i++){
+ for(let i=1;i<=30;i++){
    let pos=String(i).padStart(3,'0')
-   let addr='05-'+pos+'-3-1'
-   if(mapa[addr]){
-     html+=`<div class="cell ocupado" onclick="detalhe('${addr}')">${pos}</div>`
-   }else{
-     html+=`<div class="cell vazio">${pos}</div>`
+   let addr=rua+'-'+pos+'-1-1'
+
+   if(mapa[addr]?.fixo){
+     html+=`<div class="cell bloq">${pos}</div>`
+   } else if(mapa[addr]){
+     html+=`<div class="cell ocupado" onclick="info('${addr}')">${pos}</div>`
+   } else {
+     html+=`<div class="cell vazio" onclick="fixar('${addr}')">${pos}</div>`
    }
  }
  grid.innerHTML=html
 }
 
-function detalhe(addr){
+function info(addr){
  fetch('/api/estoque').then(r=>r.json()).then(data=>{
-   let item=data.find(i=>i.endereco===addr)
-   if(item){
-     alert(item.nome+'\nQtd:'+item.qtd+'\n'+addr)
-   }
+  let i=data.find(x=>x.endereco===addr)
+  if(i) alert(i.nome+'\nQtd:'+i.qtd+'\n'+addr)
  })
 }
 
-carregar()
+function fixar(addr){
+ if(confirm('Fixar endereço?')){
+   fetch('/api/fixar',{method:'POST',headers:{'Content-Type':'application/json'},
+   body:JSON.stringify({endereco:addr})}).then(load)
+ }
+}
+
+const ruaSelect=document.getElementById('rua')
+load()
 </script>
 
 </body>
