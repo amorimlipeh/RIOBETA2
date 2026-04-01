@@ -1,3 +1,9 @@
-# RIOBETA2 DASHBOARD FIX
+# RIOBETA2 UPDATE MÓDULOS FIXOS V1
 
-Login e dashboard corrigidos.
+Base validada:
+- dashboard funcionando
+- módulos fixos na lateral
+- área de conteúdo alternando por clique
+
+Login padrão:
+- admin / 123

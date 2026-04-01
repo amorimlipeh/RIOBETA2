@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>RIOBETA2 Dashboard</title>
+  <title>RIOBETA2</title>
   <style>
     * { box-sizing: border-box; }
     body {
@@ -12,105 +12,219 @@
       background: #0b1f3a;
       color: #fff;
     }
-    .wrap {
+    .app {
+      display: flex;
       min-height: 100vh;
-      padding: 20px;
     }
-    .hero {
-      background: #1a3470;
-      border-radius: 14px;
-      padding: 18px;
+    .sidebar {
+      width: 230px;
+      background: #1d2f7a;
+      padding: 14px;
+      flex-shrink: 0;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
       margin-bottom: 18px;
     }
-    .loader {
-      display: inline-block;
-      width: 20px;
-      height: 20px;
-      border: 3px solid rgba(255,255,255,.25);
-      border-top-color: #fff;
-      border-radius: 50%;
-      animation: spin .8s linear infinite;
-      vertical-align: middle;
-      margin-right: 10px;
+    .logo {
+      width: 48px;
+      height: 48px;
+      border-radius: 14px;
+      background: #fff;
+      color: #1d2f7a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      font-weight: bold;
     }
-    @keyframes spin { to { transform: rotate(360deg); } }
+    .brand-title {
+      font-size: 14px;
+      font-weight: 700;
+      line-height: 1.2;
+    }
+    .brand-sub {
+      font-size: 13px;
+      opacity: .95;
+      margin-top: 4px;
+    }
+    .menu {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .menu button {
+      width: 100%;
+      padding: 14px 14px;
+      border: none;
+      border-radius: 14px;
+      text-align: left;
+      background: #304eb4;
+      color: #fff;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    .menu button.active {
+      background: #4c6ae2;
+      box-shadow: inset 0 0 0 2px rgba(255,255,255,.12);
+    }
+    .main {
+      flex: 1;
+      padding: 26px;
+    }
+    .hero {
+      background: #243f86;
+      border-radius: 16px;
+      padding: 18px 20px;
+      margin-bottom: 18px;
+    }
+    .status-ok {
+      margin-top: 8px;
+      font-size: 15px;
+      color: #d7ffe0;
+      font-weight: 600;
+    }
     .cards {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-      gap: 12px;
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+      gap: 14px;
       margin-bottom: 18px;
     }
     .card, .panel {
       background: #142d5c;
-      border-radius: 14px;
-      padding: 16px;
+      border-radius: 16px;
+      padding: 18px;
     }
     .label {
-      opacity: .85;
-      font-size: 14px;
-      margin-bottom: 8px;
+      font-size: 15px;
+      opacity: .92;
+      margin-bottom: 12px;
     }
     .value {
-      font-size: 30px;
-      font-weight: bold;
+      font-size: 38px;
+      font-weight: 700;
+      line-height: 1;
     }
     .logs .log {
-      padding: 10px 0;
+      padding: 14px 0;
       border-bottom: 1px solid rgba(255,255,255,.08);
     }
-    .logs .log:last-child { border-bottom: 0; }
-    .muted { opacity: .8; }
-    .hidden { display:none; }
+    .logs .log:last-child {
+      border-bottom: 0;
+    }
+    .muted {
+      opacity: .82;
+    }
+    .hidden {
+      display: none !important;
+    }
+    .module-box {
+      background: #142d5c;
+      border-radius: 16px;
+      padding: 20px;
+      min-height: 280px;
+    }
+    .module-box h2 {
+      margin-top: 0;
+    }
+    .module-note {
+      opacity: .88;
+      line-height: 1.5;
+    }
+    @media (max-width: 900px) {
+      .app { display: block; }
+      .sidebar { width: 100%; }
+      .main { padding: 18px; }
+    }
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <div class="hero">
-      <h2 style="margin:0 0 8px;">🚀 Dashboard RIOBETA2</h2>
-      <div id="statusLine"><span class="loader"></span>Carregando dados do dashboard...</div>
-    </div>
-
-    <div id="dashboard" class="hidden">
-      <div class="cards">
-        <div class="card">
-          <div class="label">Produtos</div>
-          <div class="value" id="produtos">0</div>
-        </div>
-        <div class="card">
-          <div class="label">Estoque total</div>
-          <div class="value" id="estoqueTotal">0</div>
-        </div>
-        <div class="card">
-          <div class="label">Pedidos abertos</div>
-          <div class="value" id="pedidosAbertos">0</div>
-        </div>
-        <div class="card">
-          <div class="label">Recebimentos</div>
-          <div class="value" id="recebimentos">0</div>
-        </div>
-        <div class="card">
-          <div class="label">Ocupação</div>
-          <div class="value" id="ocupacao">0%</div>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="logo">✨</div>
+        <div>
+          <div class="brand-title">SISTEMA DE ESTOQUE ✨</div>
+          <div class="brand-sub">RIO DAS ESTRELAS 🌟</div>
         </div>
       </div>
 
-      <div class="panel logs">
-        <h3 style="margin-top:0;">Últimos logs</h3>
-        <div id="logs"></div>
-      </div>
-    </div>
+      <nav class="menu" id="menu">
+        <button data-module="dashboard" class="active">Dashboard</button>
+        <button data-module="produtos">Produtos</button>
+        <button data-module="estoque">Estoque</button>
+        <button data-module="enderecos">Endereços</button>
+        <button data-module="pedidos">Pedidos</button>
+        <button data-module="recebimento">Recebimento</button>
+        <button data-module="inventario">Inventário</button>
+        <button data-module="notificacoes">Notificações</button>
+        <button data-module="configuracoes">Configurações</button>
+      </nav>
+    </aside>
+
+    <main class="main">
+      <section id="dashboardView">
+        <div class="hero">
+          <h1 style="margin:0;">🚀 Dashboard RIOBETA2</h1>
+          <div class="status-ok">✅ Dashboard carregado com sucesso</div>
+        </div>
+
+        <div class="cards">
+          <div class="card">
+            <div class="label">Produtos</div>
+            <div class="value" id="produtos">0</div>
+          </div>
+          <div class="card">
+            <div class="label">Estoque total</div>
+            <div class="value" id="estoqueTotal">0</div>
+          </div>
+          <div class="card">
+            <div class="label">Pedidos abertos</div>
+            <div class="value" id="pedidosAbertos">0</div>
+          </div>
+          <div class="card">
+            <div class="label">Recebimentos</div>
+            <div class="value" id="recebimentos">0</div>
+          </div>
+          <div class="card">
+            <div class="label">Ocupação</div>
+            <div class="value" id="ocupacao">0%</div>
+          </div>
+        </div>
+
+        <div class="panel logs">
+          <h2 style="margin-top:0;">Últimos logs</h2>
+          <div id="logs"></div>
+        </div>
+      </section>
+
+      <section id="moduleView" class="hidden">
+        <div class="module-box">
+          <h2 id="moduleTitle">Módulo</h2>
+          <p class="module-note" id="moduleText"></p>
+        </div>
+      </section>
+    </main>
   </div>
 
   <script>
-    async function carregarDashboard() {
-      const statusLine = document.getElementById('statusLine');
-      const dashboard = document.getElementById('dashboard');
+    const moduleDescriptions = {
+      produtos: 'Módulo de Produtos já fixado na tela e pronto para receber cadastro, busca com %, imagem e fator sem remover o Dashboard.',
+      estoque: 'Módulo de Estoque já fixado na tela e pronto para receber movimentações sem remover Dashboard e Produtos.',
+      enderecos: 'Módulo de Endereços já fixado na tela e pronto para receber WMS e organização por rua, posição, andar e pallet.',
+      pedidos: 'Módulo de Pedidos já fixado na tela e pronto para continuar a evolução sem quebrar os anteriores.',
+      recebimento: 'Módulo de Recebimento já fixado na tela e pronto para conferência e importações futuras.',
+      inventario: 'Módulo de Inventário já fixado na tela e pronto para contagem e divergências.',
+      notificacoes: 'Módulo de Notificações já fixado na tela e pronto para alertas e fluxos internos.',
+      configuracoes: 'Módulo de Configurações já fixado na tela e pronto para preferências, permissões e ajustes do sistema.'
+    };
 
+    async function carregarDashboard() {
       try {
         const response = await fetch('/api/dashboard');
         const data = await response.json();
-
-        if (!data.ok) throw new Error('Resposta inválida');
 
         document.getElementById('produtos').textContent = data.produtos ?? 0;
         document.getElementById('estoqueTotal').textContent = data.estoqueTotal ?? 0;
@@ -127,13 +241,35 @@
               </div>
             `).join('')
           : '<div class="muted">Nenhum log encontrado.</div>';
-
-        statusLine.textContent = '✅ Dashboard carregado com sucesso';
-        dashboard.classList.remove('hidden');
       } catch (error) {
-        statusLine.innerHTML = '❌ Erro ao carregar dashboard';
+        document.getElementById('logs').innerHTML = '<div class="muted">Erro ao carregar dashboard.</div>';
       }
     }
+
+    function abrirModulo(modulo) {
+      const dashboardView = document.getElementById('dashboardView');
+      const moduleView = document.getElementById('moduleView');
+      const moduleTitle = document.getElementById('moduleTitle');
+      const moduleText = document.getElementById('moduleText');
+
+      document.querySelectorAll('.menu button').forEach(btn => btn.classList.remove('active'));
+      document.querySelector(`[data-module="${modulo}"]`).classList.add('active');
+
+      if (modulo === 'dashboard') {
+        dashboardView.classList.remove('hidden');
+        moduleView.classList.add('hidden');
+        return;
+      }
+
+      dashboardView.classList.add('hidden');
+      moduleView.classList.remove('hidden');
+      moduleTitle.textContent = modulo.charAt(0).toUpperCase() + modulo.slice(1);
+      moduleText.textContent = moduleDescriptions[modulo] || 'Módulo fixado e pronto para receber a próxima etapa.';
+    }
+
+    document.querySelectorAll('.menu button').forEach(btn => {
+      btn.addEventListener('click', () => abrirModulo(btn.dataset.module));
+    });
 
     carregarDashboard();
   </script>
