@@ -167,3 +167,93 @@ padding:12px;
 text-align:left;
 border-bottom:1px solid #334155;
 }
+
+.produto-layout{
+display:flex;
+gap:20px;
+margin-top:20px;
+}
+
+.produto-form-card,
+.produto-table-card{
+flex:1;
+background:#1e293b;
+padding:20px;
+border-radius:15px;
+}
+
+.produto-form-card{
+max-width:360px;
+display:flex;
+flex-direction:column;
+gap:10px;
+}
+
+.produto-form-card input,
+.produto-table-card input{
+padding:12px;
+border:none;
+border-radius:10px;
+background:#0f172a;
+color:white;
+}
+
+.produto-form-card button,
+.produto-table-card button{
+padding:10px;
+border:none;
+border-radius:10px;
+background:#2563eb;
+color:white;
+cursor:pointer;
+}
+
+table{
+width:100%;
+margin-top:15px;
+border-collapse:collapse;
+}
+
+th,td{
+padding:12px;
+text-align:left;
+border-bottom:1px solid #334155;
+}
+
+.dashboard-row{
+display:flex;
+gap:20px;
+margin-top:20px;
+}
+
+.big-card{
+flex:1;
+background:#1e293b;
+padding:20px;
+border-radius:15px;
+}
+
+.fake-chart{
+height:200px;
+margin-top:20px;
+border-radius:10px;
+background:linear-gradient(90deg,#2563eb,#1d4ed8,#0f172a);
+}
+
+.fade-in{
+animation:fadeIn .25s ease;
+}
+
+.view-show{
+animation:fadeIn .2s ease;
+}
+
+.view-hide{
+opacity:.35;
+transition:.12s;
+}
+
+@keyframes fadeIn{
+from{opacity:0;transform:translateY(8px)}
+to{opacity:1;transform:translateY(0)}
+}
