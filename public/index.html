@@ -12,40 +12,44 @@
 </head>
 <body>
 
+<div class="mobile-overlay" id="mobileOverlay"></div>
+
 <div class="app-shell">
 
-<aside class="sidebar">
-  <div class="brand">
-    <div class="brand-icon">SLO</div>
-    <div>
-      <h2>SISTEMA LOGÍSTICO</h2>
-      <p>DE OPERAÇÃO</p>
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="brand-icon">SLO</div>
+      <div>
+        <h2>SISTEMA LOGÍSTICO</h2>
+        <p>DE OPERAÇÃO</p>
+      </div>
     </div>
-  </div>
 
-  <nav class="menu">
-    <button class="menu-item active" data-view="dashboard">Dashboard</button>
-    <button class="menu-item" data-view="produtos">Produtos</button>
-    <button class="menu-item" data-view="estoque">Estoque</button>
-    <button class="menu-item" data-view="pedidos">Pedidos</button>
-    <button class="menu-item" data-view="scanner">Scanner</button>
-    <button class="menu-item" data-view="wms">WMS</button>
-  </nav>
-</aside>
+    <nav class="menu">
+      <button class="menu-item active" data-view="dashboard">Dashboard</button>
+      <button class="menu-item" data-view="produtos">Produtos</button>
+      <button class="menu-item" data-view="estoque">Estoque</button>
+      <button class="menu-item" data-view="pedidos">Pedidos</button>
+      <button class="menu-item" data-view="scanner">Scanner</button>
+      <button class="menu-item" data-view="wms">WMS</button>
+    </nav>
+  </aside>
 
-<main class="main-content">
+  <main class="main-content">
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="mobile-menu-btn" id="mobileMenuBtn">☰</button>
+        <input class="search" placeholder="Pesquisar...">
+      </div>
+      <div id="clock">--:--</div>
+    </header>
 
-  <header class="topbar">
-    <input class="search" placeholder="Pesquisar...">
-    <div id="clock">--:--</div>
-  </header>
-
-  <section class="workspace" id="workspace"></section>
-
-</main>
+    <section class="workspace" id="workspace"></section>
+  </main>
 </div>
 
 <script src="/js/core/layout.js"></script>
 <script src="/js/core/router.js"></script>
+<script src="/js/core/mobile-menu.js"></script>
 </body>
 </html>
