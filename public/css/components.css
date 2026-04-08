@@ -116,3 +116,54 @@ transition:.12s;
 from{opacity:0;transform:translateY(8px)}
 to{opacity:1;transform:translateY(0)}
 }
+
+.produto-layout{
+display:flex;
+gap:20px;
+margin-top:20px;
+}
+
+.produto-form-card,
+.produto-table-card{
+flex:1;
+background:#1e293b;
+padding:20px;
+border-radius:15px;
+}
+
+.produto-form-card{
+max-width:350px;
+display:flex;
+flex-direction:column;
+gap:10px;
+}
+
+.produto-form-card input{
+padding:12px;
+border:none;
+border-radius:10px;
+background:#0f172a;
+color:white;
+}
+
+.produto-form-card button,
+.produto-table-card button{
+padding:10px;
+border:none;
+border-radius:10px;
+background:#2563eb;
+color:white;
+cursor:pointer;
+}
+
+table{
+width:100%;
+margin-top:15px;
+border-collapse:collapse;
+}
+
+th,td{
+padding:12px;
+text-align:left;
+border-bottom:1px solid #334155;
+}
