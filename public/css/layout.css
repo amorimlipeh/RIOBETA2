@@ -56,3 +56,136 @@ min-width:240px;
 }
 }
 
+
+/* ===== MOBILE RENDER FIX ===== */
+html, body {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+.main-content {
+  min-width: 0;
+}
+
+.workspace {
+  min-width: 0;
+  width: 100%;
+  overflow-x: hidden;
+}
+
+.topbar {
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.topbar input,
+.search {
+  width: 100%;
+  max-width: 100%;
+}
+
+.hero-card,
+.stat-card,
+.big-card,
+.produto-form-card,
+.produto-table-card {
+  width: 100%;
+  min-width: 0;
+}
+
+.produto-table-card {
+  overflow-x: auto;
+}
+
+.produto-table-card table {
+  min-width: 760px;
+}
+
+@media (max-width: 900px) {
+  .app-shell,
+  .app-container {
+    display: flex !important;
+    flex-direction: column !important;
+    grid-template-columns: 1fr !important;
+  }
+
+  .sidebar {
+    width: 100% !important;
+    min-width: 100% !important;
+    padding: 14px !important;
+    position: relative !important;
+  }
+
+  .brand,
+  .logo {
+    margin-bottom: 14px !important;
+  }
+
+  .menu {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px !important;
+  }
+
+  .menu-item {
+    width: 100% !important;
+    justify-content: center !important;
+    padding: 12px !important;
+    font-size: 14px !important;
+  }
+
+  .main-content {
+    width: 100% !important;
+    padding: 0 !important;
+  }
+
+  .workspace {
+    padding: 14px !important;
+  }
+
+  .grid-cards {
+    grid-template-columns: 1fr !important;
+  }
+
+  .dashboard-row {
+    grid-template-columns: 1fr !important;
+    display: grid !important;
+  }
+
+  .produto-layout {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 14px !important;
+  }
+
+  .produto-form-card {
+    max-width: 100% !important;
+  }
+
+  #clock {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 600px) {
+  .menu {
+    grid-template-columns: 1fr !important;
+  }
+
+  .hero-card h1 {
+    font-size: 20px !important;
+    line-height: 1.2;
+  }
+
+  .hero-card p,
+  .stat-card p,
+  .big-card p,
+  th, td {
+    font-size: 13px !important;
+  }
+
+  .produto-table-card table {
+    min-width: 680px;
+  }
+}
