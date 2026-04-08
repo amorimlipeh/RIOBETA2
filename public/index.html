@@ -15,101 +15,37 @@
 <div class="app-shell">
 
 <aside class="sidebar">
-<div class="brand">
-<div class="brand-icon">SLO</div>
-<div>
-<h2>SISTEMA LOGÍSTICO</h2>
-<p>DE OPERAÇÃO</p>
-</div>
-</div>
+  <div class="brand">
+    <div class="brand-icon">SLO</div>
+    <div>
+      <h2>SISTEMA LOGÍSTICO</h2>
+      <p>DE OPERAÇÃO</p>
+    </div>
+  </div>
 
-<nav class="menu">
-<button class="menu-item active">Dashboard</button>
-<button class="menu-item">Produtos</button>
-<button class="menu-item">Estoque</button>
-<button class="menu-item">Pedidos</button>
-<button class="menu-item">Scanner</button>
-<button class="menu-item">WMS</button>
-</nav>
+  <nav class="menu">
+    <button class="menu-item active" data-view="dashboard">Dashboard</button>
+    <button class="menu-item" data-view="produtos">Produtos</button>
+    <button class="menu-item" data-view="estoque">Estoque</button>
+    <button class="menu-item" data-view="pedidos">Pedidos</button>
+    <button class="menu-item" data-view="scanner">Scanner</button>
+    <button class="menu-item" data-view="wms">WMS</button>
+  </nav>
 </aside>
 
 <main class="main-content">
 
-<header class="topbar">
-<input class="search" placeholder="Pesquisar...">
-<div id="clock">--:--</div>
-</header>
+  <header class="topbar">
+    <input class="search" placeholder="Pesquisar...">
+    <div id="clock">--:--</div>
+  </header>
 
-<section class="workspace">
-
-<div class="hero-card">
-<h1>Dashboard Executivo</h1>
-<p>Painel central de gestão logística</p>
-</div>
-
-<div class="grid-cards">
-
-<div class="stat-card">
-<h3>Produtos</h3>
-<p>1.245</p>
-</div>
-
-<div class="stat-card">
-<h3>Pedidos</h3>
-<p>89</p>
-</div>
-
-<div class="stat-card">
-<h3>Estoque</h3>
-<p>22.450</p>
-</div>
-
-<div class="stat-card">
-<h3>WMS</h3>
-<p>97%</p>
-</div>
-
-</div>
-
-<div class="dashboard-row">
-
-<div class="big-card">
-<h3>📈 Performance Operacional</h3>
-<div class="fake-chart"></div>
-</div>
-
-<div class="big-card">
-<h3>🚨 Alertas</h3>
-<ul>
-<li>Estoque baixo: SKU-201</li>
-<li>Pedido atrasado: #5542</li>
-<li>Conferência pendente: 14</li>
-</ul>
-</div>
-
-</div>
-
-<div class="dashboard-row">
-
-<div class="big-card full">
-<h3>📋 Atividade Recente</h3>
-<ul>
-<li>João separou pedido #5511</li>
-<li>Maria ajustou estoque SKU-991</li>
-<li>Carlos conferiu contêiner CX-02</li>
-<li>Sistema sincronizado com sucesso</li>
-</ul>
-</div>
-
-</div>
-
-</section>
+  <section class="workspace" id="workspace"></section>
 
 </main>
-
 </div>
 
 <script src="/js/core/layout.js"></script>
-
+<script src="/js/core/router.js"></script>
 </body>
 </html>
