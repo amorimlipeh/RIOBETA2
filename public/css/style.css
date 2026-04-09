@@ -307,18 +307,30 @@ background:#475569;
     margin-top:18px;
     padding-top:14px;
     border-top:1px solid rgba(255,255,255,.06);
-    overflow-x:auto;
-    overflow-y:hidden;
+    overflow-x:auto !important;
+    overflow-y:hidden !important;
     -webkit-overflow-scrolling:touch;
+    white-space:nowrap !important;
+}
+
+.paginacao-obs-wrap::-webkit-scrollbar{
+    height:6px;
 }
 
 .paginacao-obs-inline{
-    min-width:max-content;
-    display:flex;
-    align-items:center;
-    gap:12px;
-    flex-wrap:nowrap;
+    display:inline-flex !important;
+    align-items:center !important;
+    gap:12px !important;
+    flex-wrap:nowrap !important;
+    white-space:nowrap !important;
+    min-width:max-content !important;
+    width:max-content !important;
     padding-bottom:4px;
+}
+
+.paginacao-obs-inline > *{
+    flex:0 0 auto !important;
+    white-space:nowrap !important;
 }
 
 .paginacao-obs-label,
@@ -326,7 +338,8 @@ background:#475569;
     color:#dbe7ff;
     font-size:14px;
     font-weight:600;
-    white-space:nowrap;
+    white-space:nowrap !important;
+    display:inline-block !important;
 }
 
 .paginacao-obs-select{
@@ -337,6 +350,8 @@ background:#475569;
     padding:10px 14px;
     font-weight:700;
     min-width:78px;
+    white-space:nowrap !important;
+    flex:0 0 auto !important;
 }
 
 .paginacao-obs-btn{
@@ -348,7 +363,8 @@ background:#475569;
     cursor:pointer;
     background:linear-gradient(90deg,#2f80ed,#2563eb);
     color:#fff;
-    white-space:nowrap;
+    white-space:nowrap !important;
+    flex:0 0 auto !important;
 }
 
 .paginacao-obs-btn[disabled]{
@@ -364,7 +380,8 @@ background:#475569;
     font-weight:700;
     min-width:100px;
     text-align:center;
-    white-space:nowrap;
+    white-space:nowrap !important;
+    flex:0 0 auto !important;
 }
 /* FIM CSS PAGINACAO OBS */
 
