@@ -377,5 +377,163 @@
 </script>
 <!-- FIM INTERCEPT EDITAR ESTOQUE -->
 
+
+<!-- INICIO PAGINACAO ENTERPRISE ESTOQUE -->
+<script>
+(function(){
+    function txt(v){
+        return String(v || "").replace(/\s+/g, " ").trim();
+    }
+
+    function tituloEh(el, titulo){
+        return txt(el.textContent).toLowerCase() === titulo.toLowerCase();
+    }
+
+    function encontrarSecaoPorTitulo(titulo){
+        const heads = [...document.querySelectorAll("h1,h2,h3,h4,h5,h6")];
+        const h = heads.find(el => tituloEh(el, titulo));
+        if(!h) return null;
+        return h.closest(".card, .bloco, .box, section, .modulo-card, .painel, div") || h.parentElement;
+    }
+
+    function pegarTabelaDaSecao(secao){
+        if(!secao) return null;
+        return secao.querySelector("table");
+    }
+
+    function pegarBodyTabela(table){
+        if(!table) return null;
+        return table.querySelector("tbody") || table;
+    }
+
+    function pegarLinhasDados(table){
+        if(!table) return [];
+        const tbody = table.querySelector("tbody");
+        if(tbody){
+            return [...tbody.querySelectorAll("tr")].filter(tr => tr.querySelectorAll("td").length > 0);
+        }
+        return [...table.querySelectorAll("tr")].filter(tr => tr.querySelectorAll("td").length > 0);
+    }
+
+    function criarControles(config){
+        const wrap = document.createElement("div");
+        wrap.className = "paginacao-enterprise-wrap";
+
+        wrap.innerHTML = `
+            <div class="paginacao-enterprise-left">
+                <span class="paginacao-enterprise-label">Mostrar</span>
+                <select class="paginacao-enterprise-select">
+                    <option value="10">10</option>
+                    <option value="20">20</option>
+                    <option value="50">50</option>
+                    <option value="100">100</option>
+                </select>
+            </div>
+
+            <div class="paginacao-enterprise-center">
+                <button type="button" class="paginacao-enterprise-btn btn-anterior">Anterior</button>
+                <div class="paginacao-enterprise-page-badge">Página 1/1</div>
+                <button type="button" class="paginacao-enterprise-btn btn-proximo">Próximo</button>
+            </div>
+
+            <div class="paginacao-enterprise-right">
+                <span class="paginacao-enterprise-info">Mostrando 0-0 de 0 registros</span>
+            </div>
+        `;
+
+        const select = wrap.querySelector(".paginacao-enterprise-select");
+        const btnAnt = wrap.querySelector(".btn-anterior");
+        const btnProx = wrap.querySelector(".btn-proximo");
+        const badge = wrap.querySelector(".paginacao-enterprise-page-badge");
+        const info = wrap.querySelector(".paginacao-enterprise-info");
+
+        select.value = String(config.pageSize);
+
+        return { wrap, select, btnAnt, btnProx, badge, info };
+    }
+
+    function aplicarPaginacaoNaSecao(tituloSecao){
+        const secao = encontrarSecaoPorTitulo(tituloSecao);
+        if(!secao) return;
+
+        if(secao.querySelector(".paginacao-enterprise-wrap")) return;
+
+        const table = pegarTabelaDaSecao(secao);
+        if(!table) return;
+
+        const rows = pegarLinhasDados(table);
+        if(!rows.length) return;
+
+        const state = {
+            page: 1,
+            pageSize: 10,
+            total: rows.length,
+            rows
+        };
+
+        const controls = criarControles(state);
+
+        function render(){
+            state.total = state.rows.length;
+            const totalPages = Math.max(1, Math.ceil(state.total / state.pageSize));
+            if(state.page > totalPages) state.page = totalPages;
+
+            const start = (state.page - 1) * state.pageSize;
+            const end = Math.min(start + state.pageSize, state.total);
+
+            state.rows.forEach((row, idx) => {
+                row.style.display = (idx >= start && idx < end) ? "" : "none";
+            });
+
+            controls.badge.textContent = `Página ${state.page}/${totalPages}`;
+            controls.info.textContent = `Mostrando ${state.total ? (start + 1) : 0}–${end} de ${state.total} registros`;
+            controls.btnAnt.disabled = state.page <= 1;
+            controls.btnProx.disabled = state.page >= totalPages;
+        }
+
+        controls.select.addEventListener("change", function(){
+            state.pageSize = parseInt(this.value, 10) || 10;
+            state.page = 1;
+            render();
+        });
+
+        controls.btnAnt.addEventListener("click", function(){
+            if(state.page > 1){
+                state.page--;
+                render();
+            }
+        });
+
+        controls.btnProx.addEventListener("click", function(){
+            const totalPages = Math.max(1, Math.ceil(state.total / state.pageSize));
+            if(state.page < totalPages){
+                state.page++;
+                render();
+            }
+        });
+
+        secao.appendChild(controls.wrap);
+        render();
+    }
+
+    function iniciarPaginacaoEnterprise(){
+        aplicarPaginacaoNaSecao("Saldo Consolidado por Produto");
+        aplicarPaginacaoNaSecao("Estoque por Endereço");
+        aplicarPaginacaoNaSecao("Estoque por Endereco");
+        aplicarPaginacaoNaSecao("Últimas Movimentações");
+        aplicarPaginacaoNaSecao("Ultimas Movimentações");
+        aplicarPaginacaoNaSecao("Ultimas Movimentacoes");
+    }
+
+    if(document.readyState === "loading"){
+        document.addEventListener("DOMContentLoaded", iniciarPaginacaoEnterprise);
+    }else{
+        iniciarPaginacaoEnterprise();
+    }
+
+    window.reiniciarPaginacaoEnterpriseEstoque = iniciarPaginacaoEnterprise;
+})();
+</script>
+<!-- FIM PAGINACAO ENTERPRISE ESTOQUE -->
 </body>
 </html>
