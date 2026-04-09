@@ -693,25 +693,38 @@ window.salvarEdicaoMovimentacao = async function () {
       return;
     }
 
-    await fetch('/api/movimentacoes/' + movimentacaoEditandoId + '/cancelar', {
-      method: 'PUT'
-    });
-
     const produtoBusca = document.getElementById('movProdutoBusca')?.value;
     const produto = encontrarProdutoPorBusca(produtoBusca);
-    const tipo = document.getElementById('movTipo').value;
-    const endereco = document.getElementById('movEndereco').value.trim();
-    const quantidade = Number(document.getElementById('movQuantidade').value || 0);
 
     if (!produto) {
       showModal('Selecione um produto válido para a edição.', 'error');
       return;
     }
 
-    const response = await fetch('/api/estoque/movimentar', {
-      method: 'POST',
+    const quantidade = Number(document.getElementById('movQuantidade').value || 0);
+
+    let payload;
+
+    if (movOriginal.tipo === 'transferencia') {
+      payload = {
+        produtoId: produto.id,
+        origem: movOriginal.origem,
+        destino: document.getElementById('movEndereco').value.trim(),
+        quantidade
+      };
+    } else {
+      payload = {
+        produtoId: produto.id,
+        tipo: document.getElementById('movTipo').value,
+        endereco: document.getElementById('movEndereco').value.trim(),
+        quantidade
+      };
+    }
+
+    const response = await fetch('/api/movimentacoes/' + movimentacaoEditandoId, {
+      method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ produtoId: produto.id, tipo, endereco, quantidade })
+      body: JSON.stringify(payload)
     });
 
     const data = await response.json();

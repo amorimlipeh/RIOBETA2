@@ -42,19 +42,13 @@ function recalcularEstoque() {
 
         estoqueMap[origemKey] = (estoqueMap[origemKey] || 0) - Number(m.quantidade || 0);
         estoqueMap[destinoKey] = (estoqueMap[destinoKey] || 0) + Number(m.quantidade || 0);
-      }
-
-      if (m.tipo === 'entrada') {
+      } else if (m.tipo === 'entrada') {
         const key = `${m.produtoId}@@${m.endereco}`;
         estoqueMap[key] = (estoqueMap[key] || 0) + Number(m.quantidade || 0);
-      }
-
-      if (m.tipo === 'saida') {
+      } else if (m.tipo === 'saida') {
         const key = `${m.produtoId}@@${m.endereco}`;
         estoqueMap[key] = (estoqueMap[key] || 0) - Number(m.quantidade || 0);
-      }
-
-      if (m.tipo === 'ajuste') {
+      } else if (m.tipo === 'ajuste') {
         const key = `${m.produtoId}@@${m.endereco}`;
         estoqueMap[key] = Number(m.quantidade || 0);
       }
@@ -88,6 +82,30 @@ function getSaldoEndereco(produtoId, endereco) {
     e => String(e.produtoId) === String(produtoId) && String(e.endereco) === String(endereco)
   );
   return Number(item?.quantidade || 0);
+}
+
+function saldoProjetadoSemMovimentacao(movId, produtoId, endereco) {
+  const movs = readJson(MOVS_FILE).filter(m => String(m.id) !== String(movId) && m.status !== 'cancelado');
+  let saldo = 0;
+
+  movs.forEach(m => {
+    if (m.tipo === 'transferencia') {
+      if (String(m.produtoId) === String(produtoId) && String(m.origem) === String(endereco)) {
+        saldo -= Number(m.quantidade || 0);
+      }
+      if (String(m.produtoId) === String(produtoId) && String(m.destino) === String(endereco)) {
+        saldo += Number(m.quantidade || 0);
+      }
+    } else {
+      if (String(m.produtoId) !== String(produtoId) || String(m.endereco) !== String(endereco)) return;
+
+      if (m.tipo === 'entrada') saldo += Number(m.quantidade || 0);
+      if (m.tipo === 'saida') saldo -= Number(m.quantidade || 0);
+      if (m.tipo === 'ajuste') saldo = Number(m.quantidade || 0);
+    }
+  });
+
+  return saldo;
 }
 
 /* PRODUTOS */
@@ -225,6 +243,103 @@ app.post('/api/estoque/transferir', (req, res) => {
   recalcularEstoque();
 
   res.json({ ok: true });
+});
+
+/* NOVO: editar movimentação em cima dela, sem cancelar */
+app.put('/api/movimentacoes/:id', (req, res) => {
+  const movs = readJson(MOVS_FILE);
+  const i = movs.findIndex(m => String(m.id) === String(req.params.id));
+
+  if (i === -1) {
+    return res.status(404).json({ ok: false, message: 'Movimentação não encontrada.' });
+  }
+
+  const atual = movs[i];
+  if (atual.status === 'cancelado') {
+    return res.status(400).json({ ok: false, message: 'Não é possível editar uma movimentação cancelada.' });
+  }
+
+  const qtd = Number(req.body.quantidade || 0);
+  if (!qtd || qtd < 0) {
+    return res.status(400).json({ ok: false, message: 'Quantidade inválida.' });
+  }
+
+  if (atual.tipo === 'transferencia') {
+    const produtoId = req.body.produtoId || atual.produtoId;
+    const origem = (req.body.origem || atual.origem || '').trim();
+    const destino = (req.body.destino || atual.destino || '').trim();
+
+    if (!produtoId || !origem || !destino) {
+      return res.status(400).json({ ok: false, message: 'Produto, origem e destino são obrigatórios.' });
+    }
+
+    if (String(origem) === String(destino)) {
+      return res.status(400).json({ ok: false, message: 'Origem e destino não podem ser iguais.' });
+    }
+
+    const saldoOrigemSemAtual = saldoProjetadoSemMovimentacao(atual.id, produtoId, origem);
+
+    if (saldoOrigemSemAtual <= 0) {
+      return res.status(400).json({ ok: false, message: 'Endereço de origem sem saldo.' });
+    }
+
+    if (qtd > saldoOrigemSemAtual) {
+      return res.status(400).json({
+        ok: false,
+        message: `Saldo insuficiente na origem. Saldo atual: ${saldoOrigemSemAtual}.`
+      });
+    }
+
+    movs[i] = {
+      ...atual,
+      produtoId,
+      origem,
+      destino,
+      quantidade: qtd,
+      editadoEm: new Date().toISOString()
+    };
+  } else {
+    const produtoId = req.body.produtoId || atual.produtoId;
+    const tipo = req.body.tipo || atual.tipo;
+    const endereco = (req.body.endereco || atual.endereco || '').trim();
+
+    if (!produtoId || !tipo || !endereco) {
+      return res.status(400).json({ ok: false, message: 'Produto, tipo e endereço são obrigatórios.' });
+    }
+
+    if (tipo === 'saida') {
+      const saldoSemAtual = saldoProjetadoSemMovimentacao(atual.id, produtoId, endereco);
+
+      if (saldoSemAtual <= 0) {
+        return res.status(400).json({ ok: false, message: 'Endereço sem saldo para saída.' });
+      }
+
+      if (qtd > saldoSemAtual) {
+        return res.status(400).json({
+          ok: false,
+          message: `Saldo insuficiente no endereço. Saldo atual: ${saldoSemAtual}.`
+        });
+      }
+    }
+
+    if (tipo === 'ajuste' && qtd < 0) {
+      return res.status(400).json({ ok: false, message: 'Ajuste negativo não é permitido.' });
+    }
+
+    movs[i] = {
+      ...atual,
+      produtoId,
+      tipo,
+      endereco,
+      quantidade: qtd,
+      editadoEm: new Date().toISOString()
+    };
+  }
+
+  saveJson(MOVS_FILE, movs);
+  recalcularEstoque();
+
+  res.json({ ok: true, movimentacao: movs[i] });
 });
 
 app.put('/api/movimentacoes/:id/cancelar', (req, res) => {
