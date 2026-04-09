@@ -53,14 +53,16 @@
 <script src="/js/core/mobile-menu.js"></script>
 
 </div>
-<!-- INICIO MODAL ESCOLHA EDICAO DINAMICO -->
+
+
+<!-- INICIO MODAL ESCOLHA EDICAO LIMPO -->
 <script>
-(function(){
+(function () {
     let itemSelecionadoEdicao = null;
 
-    function garantirModalEscolhaEdicao(){
+    function garantirModalEscolhaEdicao() {
         let modal = document.getElementById("modalEscolhaEdicao");
-        if(modal) return modal;
+        if (modal) return modal;
 
         modal = document.createElement("div");
         modal.id = "modalEscolhaEdicao";
@@ -69,18 +71,16 @@
                 <h3>Selecionar Tipo de Edição</h3>
                 <p>O que deseja editar?</p>
                 <div class="modal-buttons">
-                    <button class="btn-azul" id="btnEditarMovimentacao">Editar Movimentação</button>
-                    <button class="btn-verde" id="btnEditarTransferencia">Editar Transferência</button>
-                    <button class="btn-vermelho" id="btnCancelarEscolhaEdicao">Cancelar</button>
+                    <button type="button" class="btn-azul" id="btnEditarMovimentacao">Editar Movimentação</button>
+                    <button type="button" class="btn-verde" id="btnEditarTransferencia">Editar Transferência</button>
+                    <button type="button" class="btn-vermelho" id="btnCancelarEscolhaEdicao">Cancelar</button>
                 </div>
             </div>
         `;
         document.body.appendChild(modal);
 
         modal.addEventListener("click", function(e){
-            if(e.target === modal){
-                fecharModalEscolhaEdicao();
-            }
+            if (e.target === modal) fecharModalEscolhaEdicao();
         });
 
         modal.querySelector("#btnCancelarEscolhaEdicao").addEventListener("click", fecharModalEscolhaEdicao);
@@ -88,73 +88,36 @@
         modal.querySelector("#btnEditarMovimentacao").addEventListener("click", function(){
             const item = itemSelecionadoEdicao;
             fecharModalEscolhaEdicao();
-            if(!item) return;
-
-            if(typeof window.abrirFormularioEditarMovimentacao === "function") return window.abrirFormularioEditarMovimentacao(item);
-            if(typeof window.editarMovimentacao === "function") return window.editarMovimentacao(item);
-            if(typeof window.editarItemMovimentacao === "function") return window.editarItemMovimentacao(item);
-            if(typeof window.editarItem === "function") return window.editarItem(item);
-
-            console.warn("Função de edição de movimentação não encontrada.");
+            if (!item) return;
+            if (typeof window.abrirFormularioEditarMovimentacao === "function") return window.abrirFormularioEditarMovimentacao(item);
+            if (typeof window.editarMovimentacao === "function") return window.editarMovimentacao(item);
+            if (typeof window.editarItem === "function") return window.editarItem(item);
         });
 
         modal.querySelector("#btnEditarTransferencia").addEventListener("click", function(){
             const item = itemSelecionadoEdicao;
             fecharModalEscolhaEdicao();
-            if(!item) return;
-
-            if(typeof window.abrirFormularioEditarTransferencia === "function") return window.abrirFormularioEditarTransferencia(item);
-            if(typeof window.editarTransferencia === "function") return window.editarTransferencia(item);
-            if(typeof window.editarItemTransferencia === "function") return window.editarItemTransferencia(item);
-            if(typeof window.editarItem === "function") return window.editarItem(item);
-
-            console.warn("Função de edição de transferência não encontrada.");
+            if (!item) return;
+            if (typeof window.abrirFormularioEditarTransferencia === "function") return window.abrirFormularioEditarTransferencia(item);
+            if (typeof window.editarTransferencia === "function") return window.editarTransferencia(item);
+            if (typeof window.editarItem === "function") return window.editarItem(item);
         });
 
         return modal;
     }
 
     window.abrirModalEscolhaEdicao = function(item){
-        itemSelecionadoEdicao = item;
-        const modal = garantirModalEscolhaEdicao();
-        modal.classList.add("ativo");
+        itemSelecionadoEdicao = item || null;
+        garantirModalEscolhaEdicao().classList.add("ativo");
     };
 
     window.fecharModalEscolhaEdicao = function(){
         const modal = document.getElementById("modalEscolhaEdicao");
-        if(modal) modal.classList.remove("ativo");
+        if (modal) modal.classList.remove("ativo");
         itemSelecionadoEdicao = null;
     };
-
-    document.addEventListener("click", function(e){
-        const alvo = e.target.closest('[onclick*="editarItem("], [onclick*="editarMovimentacao("], [onclick*="editarTransferencia("]');
-        if(!alvo) return;
-
-        const secaoEstoque = alvo.closest("#estoque, .modulo-estoque, [data-modulo='estoque'], .aba-estoque, .secao-estoque");
-        if(!secaoEstoque && !document.body.innerText.includes("Últimas Movimentações")) return;
-
-        const onclickTxt = alvo.getAttribute("onclick") || "";
-        if(onclickTxt.includes("abrirModalEscolhaEdicao(")) return;
-
-        e.preventDefault();
-        e.stopPropagation();
-
-        let item = null;
-        if(window.itemEmEdicaoAtual) item = window.itemEmEdicaoAtual;
-        window.abrirModalEscolhaEdicao(item);
-    }, true);
-
-    document.addEventListener("DOMContentLoaded", function(){
-        document.querySelectorAll('[onclick*="editarItem("], [onclick*="editarMovimentacao("], [onclick*="editarTransferencia("]').forEach(function(el){
-            const txt = el.getAttribute("onclick") || "";
-            if(
-                txt.includes("abrirModalEscolhaEdicao(") ||
-                txt.includes("return false")
-            ) return;
-        });
-    });
 })();
 </script>
-<!-- FIM MODAL ESCOLHA EDICAO DINAMICO -->
+<!-- FIM MODAL ESCOLHA EDICAO LIMPO -->
 </body>
 </html>

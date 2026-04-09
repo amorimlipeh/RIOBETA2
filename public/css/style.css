@@ -216,3 +216,86 @@ background:#475569;
     padding-right: 5px;
 }
 /* FIM CSS MODAL ESCOLHA EDICAO */
+
+
+/* INICIO CSS MODAL ESCOLHA EDICAO LIMPO */
+#modalEscolhaEdicao {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.72);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 999999;
+    padding: 16px;
+}
+
+#modalEscolhaEdicao.ativo {
+    display: flex !important;
+}
+
+#modalEscolhaEdicao .modal-box {
+    width: min(92vw, 420px);
+    background: linear-gradient(180deg, #1e2b42 0%, #152033 100%);
+    border-radius: 16px;
+    padding: 22px;
+    text-align: center;
+    box-shadow: 0 20px 55px rgba(0,0,0,.45);
+    border: 1px solid rgba(255,255,255,.06);
+    animation: modalZoomIn .18s ease;
+}
+
+#modalEscolhaEdicao .modal-box h3 {
+    margin: 0 0 10px 0;
+    color: #fff;
+    font-size: 24px;
+    font-weight: 700;
+}
+
+#modalEscolhaEdicao .modal-box p {
+    margin: 0 0 18px 0;
+    color: #d7deea;
+    font-size: 16px;
+}
+
+#modalEscolhaEdicao .modal-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+#modalEscolhaEdicao .modal-buttons button {
+    border: 0;
+    border-radius: 12px;
+    padding: 14px 12px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+#modalEscolhaEdicao .btn-azul {
+    background: linear-gradient(90deg, #2f80ed, #2563eb);
+    color: #fff;
+}
+
+#modalEscolhaEdicao .btn-verde {
+    background: linear-gradient(90deg, #22c55e, #16a34a);
+    color: #fff;
+}
+
+#modalEscolhaEdicao .btn-vermelho {
+    background: linear-gradient(90deg, #ef4444, #dc2626);
+    color: #fff;
+}
+
+@keyframes modalZoomIn {
+    from {
+        opacity: 0;
+        transform: scale(.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+/* FIM CSS MODAL ESCOLHA EDICAO LIMPO */
