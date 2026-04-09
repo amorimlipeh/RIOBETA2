@@ -555,5 +555,61 @@
 })();
 </script>
 <!-- FIM PAGINACAO LIMPA -->
+
+<!-- INICIO FIX PAGINACAO LINHA UNICA -->
+<script>
+(function(){
+    function normalizarPaginacaoUmaLinha(){
+        document.querySelectorAll('.paginacao-obs-wrap').forEach(function(wrap){
+            if(wrap.querySelector('.paginacao-obs-inline-fix')) return;
+
+            const select = wrap.querySelector('select');
+            const btnAnt = wrap.querySelector('.btn-ant, .btn-anterior');
+            const btnProx = wrap.querySelector('.btn-prox, .btn-proximo');
+            const badge = wrap.querySelector('.paginacao-obs-badge');
+            const info = wrap.querySelector('.paginacao-obs-info');
+
+            if(!select || !btnAnt || !btnProx || !badge || !info) return;
+
+            wrap.innerHTML = '';
+
+            const linha = document.createElement('div');
+            linha.className = 'paginacao-obs-inline-fix';
+
+            const label = document.createElement('span');
+            label.className = 'paginacao-obs-label';
+            label.textContent = 'Mostrar';
+
+            linha.appendChild(label);
+            linha.appendChild(select);
+            linha.appendChild(btnAnt);
+            linha.appendChild(badge);
+            linha.appendChild(btnProx);
+            linha.appendChild(info);
+
+            wrap.appendChild(linha);
+        });
+    }
+
+    if(document.readyState === 'loading'){
+        document.addEventListener('DOMContentLoaded', normalizarPaginacaoUmaLinha);
+    } else {
+        normalizarPaginacaoUmaLinha();
+    }
+
+    setTimeout(normalizarPaginacaoUmaLinha, 400);
+    setTimeout(normalizarPaginacaoUmaLinha, 1200);
+    setTimeout(normalizarPaginacaoUmaLinha, 2500);
+
+    const obs = new MutationObserver(function(){
+        normalizarPaginacaoUmaLinha();
+    });
+
+    window.addEventListener('load', function(){
+        obs.observe(document.body, { childList:true, subtree:true });
+    });
+})();
+</script>
+<!-- FIM FIX PAGINACAO LINHA UNICA -->
 </body>
 </html>
