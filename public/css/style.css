@@ -301,32 +301,24 @@ background:#475569;
 /* FIM CSS MODAL ESCOLHA EDICAO LIMPO */
 
 
-/* INICIO CSS PAGINACAO OBS */
 
+/* INICIO CSS PAGINACAO OBS */
 .paginacao-obs-wrap{
     margin-top:18px;
     padding-top:14px;
     border-top:1px solid rgba(255,255,255,.06);
-
-    display:flex;
-    flex-direction:column;
-    gap:14px;
+    overflow-x:auto;
+    overflow-y:hidden;
+    -webkit-overflow-scrolling:touch;
 }
 
-.paginacao-obs-top{
+.paginacao-obs-inline{
+    min-width:max-content;
     display:flex;
-    flex-wrap:wrap;
-    justify-content:space-between;
     align-items:center;
     gap:12px;
-}
-
-.paginacao-obs-left,
-.paginacao-obs-center{
-    display:flex;
-    align-items:center;
-    gap:10px;
-    flex-wrap:wrap;
+    flex-wrap:nowrap;
+    padding-bottom:4px;
 }
 
 .paginacao-obs-label,
@@ -334,6 +326,7 @@ background:#475569;
     color:#dbe7ff;
     font-size:14px;
     font-weight:600;
+    white-space:nowrap;
 }
 
 .paginacao-obs-select{
@@ -343,7 +336,7 @@ background:#475569;
     border-radius:10px;
     padding:10px 14px;
     font-weight:700;
-    min-width:75px;
+    min-width:78px;
 }
 
 .paginacao-obs-btn{
@@ -355,6 +348,7 @@ background:#475569;
     cursor:pointer;
     background:linear-gradient(90deg,#2f80ed,#2563eb);
     color:#fff;
+    white-space:nowrap;
 }
 
 .paginacao-obs-btn[disabled]{
@@ -370,33 +364,8 @@ background:#475569;
     font-weight:700;
     min-width:100px;
     text-align:center;
+    white-space:nowrap;
 }
-
-.paginacao-obs-right{
-    width:100%;
-}
-
-@media(max-width:768px){
-
-    .paginacao-obs-top{
-        flex-direction:column;
-        align-items:flex-start;
-    }
-
-    .paginacao-obs-center{
-        width:100%;
-        justify-content:space-between;
-    }
-
-    .paginacao-obs-btn{
-        flex:1;
-    }
-
-    .paginacao-obs-badge{
-        flex:1;
-    }
-
-}
-
 /* FIM CSS PAGINACAO OBS */
+
 
