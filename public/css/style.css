@@ -300,8 +300,8 @@ background:#475569;
 }
 /* FIM CSS MODAL ESCOLHA EDICAO LIMPO */
 
-/* INICIO CSS PAGINACAO LIMPA */
-.paginacao-limpa-wrap{
+/* INICIO CSS PAGINACAO OBS */
+.paginacao-obs-wrap{
     margin-top:16px;
     padding-top:14px;
     border-top:1px solid rgba(255,255,255,.06);
@@ -311,21 +311,21 @@ background:#475569;
     justify-content:space-between;
     gap:12px;
 }
-.paginacao-limpa-left,
-.paginacao-limpa-center,
-.paginacao-limpa-right{
+.paginacao-obs-left,
+.paginacao-obs-center,
+.paginacao-obs-right{
     display:flex;
     align-items:center;
     gap:10px;
     flex-wrap:wrap;
 }
-.paginacao-limpa-label,
-.paginacao-limpa-info{
+.paginacao-obs-label,
+.paginacao-obs-info{
     color:#dbe7ff;
     font-size:14px;
     font-weight:600;
 }
-.paginacao-limpa-select{
+.paginacao-obs-select{
     background:#0a1530;
     color:#fff;
     border:1px solid rgba(255,255,255,.08);
@@ -336,7 +336,7 @@ background:#475569;
     font-weight:700;
     outline:none;
 }
-.paginacao-limpa-btn{
+.paginacao-obs-btn{
     border:none;
     border-radius:10px;
     padding:10px 14px;
@@ -346,11 +346,11 @@ background:#475569;
     background:linear-gradient(90deg,#2f80ed,#2563eb);
     color:#fff;
 }
-.paginacao-limpa-btn[disabled]{
+.paginacao-obs-btn[disabled]{
     opacity:.45;
     cursor:not-allowed;
 }
-.paginacao-limpa-badge{
+.paginacao-obs-badge{
     min-width:108px;
     text-align:center;
     padding:10px 12px;
@@ -361,21 +361,21 @@ background:#475569;
     font-size:14px;
 }
 @media (max-width: 768px){
-    .paginacao-limpa-wrap{
+    .paginacao-obs-wrap{
         flex-direction:column;
         align-items:stretch;
     }
-    .paginacao-limpa-left,
-    .paginacao-limpa-center,
-    .paginacao-limpa-right{
+    .paginacao-obs-left,
+    .paginacao-obs-center,
+    .paginacao-obs-right{
         justify-content:center;
     }
-    .paginacao-limpa-btn{
+    .paginacao-obs-btn{
         flex:1 1 auto;
     }
-    .paginacao-limpa-badge{
+    .paginacao-obs-badge{
         width:100%;
         min-width:unset;
     }
 }
-/* FIM CSS PAGINACAO LIMPA */
+/* FIM CSS PAGINACAO OBS */

@@ -383,85 +383,106 @@
 
 
 
+
+
 <!-- INICIO PAGINACAO LIMPA -->
 <script>
 (function(){
+    const TARGETS = [
+        "Lista de Produtos",
+        "Saldo Consolidado por Produto",
+        "Estoque por Endereço",
+        "Estoque por Endereco",
+        "Últimas Movimentações",
+        "Ultimas Movimentações",
+        "Ultimas Movimentacoes"
+    ];
+
     function txt(v){
         return String(v || "").replace(/\s+/g, " ").trim();
     }
 
-    function encontrarSecao(titulos){
-        const hs = [...document.querySelectorAll("h1,h2,h3,h4,h5,h6")];
-        for(const titulo of titulos){
-            const h = hs.find(el => txt(el.textContent).toLowerCase() === titulo.toLowerCase());
-            if(h){
-                return h.closest(".card, .bloco, .box, section, .modulo-card, .painel, div") || h.parentElement;
-            }
-        }
-        return null;
+    function normalize(v){
+        return txt(v)
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "")
+            .toLowerCase();
     }
 
-    function pegarTabela(secao){
+    function isTargetTitle(text){
+        const n = normalize(text);
+        return TARGETS.some(t => normalize(t) === n);
+    }
+
+    function findRenderedSectionByTitle(titleText){
+        const all = [...document.querySelectorAll("h1,h2,h3,h4,h5,h6,strong,.titulo,.title,.card-title,div,span")];
+        const hit = all.find(el => isTargetTitle(el.textContent));
+        if(!hit) return null;
+        return hit.closest(".card, .bloco, .box, section, .modulo-card, .painel, .module-card, .widget, div") || hit.parentElement;
+    }
+
+    function findTableInSection(secao){
         if(!secao) return null;
         return secao.querySelector("table");
     }
 
-    function pegarLinhas(tabela){
-        if(!tabela) return [];
-        const tbody = tabela.querySelector("tbody");
-        const linhas = tbody ? [...tbody.querySelectorAll("tr")] : [...tabela.querySelectorAll("tr")];
-        return linhas.filter(tr => tr.querySelectorAll("td").length > 0);
+    function getRows(table){
+        if(!table) return [];
+        const tbody = table.querySelector("tbody");
+        const rows = tbody ? [...tbody.querySelectorAll("tr")] : [...table.querySelectorAll("tr")];
+        return rows.filter(tr => tr.querySelectorAll("td").length > 0);
     }
 
-    function criarControles(){
+    function createControls(){
         const wrap = document.createElement("div");
-        wrap.className = "paginacao-limpa-wrap";
+        wrap.className = "paginacao-obs-wrap";
         wrap.innerHTML = `
-            <div class="paginacao-limpa-left">
-                <span class="paginacao-limpa-label">Mostrar</span>
-                <select class="paginacao-limpa-select">
+            <div class="paginacao-obs-left">
+                <span class="paginacao-obs-label">Mostrar</span>
+                <select class="paginacao-obs-select">
                     <option value="10">10</option>
                     <option value="20">20</option>
                     <option value="50">50</option>
                     <option value="100">100</option>
                 </select>
             </div>
-            <div class="paginacao-limpa-center">
-                <button type="button" class="paginacao-limpa-btn btn-ant">Anterior</button>
-                <div class="paginacao-limpa-badge">Página 1/1</div>
-                <button type="button" class="paginacao-limpa-btn btn-prox">Próximo</button>
+            <div class="paginacao-obs-center">
+                <button type="button" class="paginacao-obs-btn btn-ant">Anterior</button>
+                <div class="paginacao-obs-badge">Página 1/1</div>
+                <button type="button" class="paginacao-obs-btn btn-prox">Próximo</button>
             </div>
-            <div class="paginacao-limpa-right">
-                <span class="paginacao-limpa-info">Mostrando 0–0 de 0 registros</span>
+            <div class="paginacao-obs-right">
+                <span class="paginacao-obs-info">Mostrando 0–0 de 0 registros</span>
             </div>
         `;
         return wrap;
     }
 
-    function aplicar(secao, key){
+    function applyPaginationToSectionTitle(title){
+        const secao = findRenderedSectionByTitle(title);
         if(!secao) return;
-        const tabela = pegarTabela(secao);
+
+        const tabela = findTableInSection(secao);
         if(!tabela) return;
 
-        const linhas = pegarLinhas(tabela);
+        const linhas = getRows(tabela);
         if(linhas.length <= 10) return;
 
-        const antiga = secao.querySelector('.paginacao-limpa-wrap');
-        if(antiga) antiga.remove();
+        const old = secao.querySelector(".paginacao-obs-wrap");
+        if(old) return;
 
         const state = {
             page: 1,
             pageSize: 10,
-            rows: linhas,
-            key
+            rows: linhas
         };
 
-        const controls = criarControles();
-        const select = controls.querySelector(".paginacao-limpa-select");
+        const controls = createControls();
+        const select = controls.querySelector(".paginacao-obs-select");
         const btnAnt = controls.querySelector(".btn-ant");
         const btnProx = controls.querySelector(".btn-prox");
-        const badge = controls.querySelector(".paginacao-limpa-badge");
-        const info = controls.querySelector(".paginacao-limpa-info");
+        const badge = controls.querySelector(".paginacao-obs-badge");
+        const info = controls.querySelector(".paginacao-obs-info");
 
         function render(){
             const total = state.rows.length;
@@ -506,24 +527,30 @@
         render();
     }
 
-    function iniciar(){
-        aplicar(encontrarSecao(["Lista de Produtos"]), "lista_produtos");
-        aplicar(encontrarSecao(["Saldo Consolidado por Produto"]), "saldo_consolidado");
-        aplicar(encontrarSecao(["Estoque por Endereço", "Estoque por Endereco"]), "estoque_endereco");
-        aplicar(encontrarSecao(["Últimas Movimentações", "Ultimas Movimentações", "Ultimas Movimentacoes"]), "ultimas_mov");
+    function initPaginationObs(){
+        TARGETS.forEach(applyPaginationToSectionTitle);
     }
 
     if(document.readyState === "loading"){
-        document.addEventListener("DOMContentLoaded", iniciar);
+        document.addEventListener("DOMContentLoaded", initPaginationObs);
     } else {
-        iniciar();
+        initPaginationObs();
     }
 
-    setTimeout(iniciar, 500);
-    setTimeout(iniciar, 1200);
-    setTimeout(iniciar, 2200);
+    setTimeout(initPaginationObs, 500);
+    setTimeout(initPaginationObs, 1200);
+    setTimeout(initPaginationObs, 2500);
+    setTimeout(initPaginationObs, 4000);
 
-    window.reiniciarPaginacaoLimpa = iniciar;
+    const observer = new MutationObserver(function(){
+        initPaginationObs();
+    });
+
+    window.addEventListener("load", function(){
+        observer.observe(document.body, { childList:true, subtree:true });
+    });
+
+    window.reiniciarPaginacaoLimpa = initPaginationObs;
 })();
 </script>
 <!-- FIM PAGINACAO LIMPA -->
