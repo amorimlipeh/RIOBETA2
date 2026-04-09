@@ -3,223 +3,53 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>RIO BETA 2</title>
+<title>Sistema Logístico de Operação</title>
 
-<style>
-body{
-margin:0;
-font-family:Arial;
-background:#020817;
-color:#fff;
-}
-
-.card{
-background:#1e293b;
-padding:20px;
-margin:15px;
-border-radius:20px;
-}
-
-input,select,button{
-width:100%;
-padding:14px;
-margin-top:10px;
-border:none;
-border-radius:12px;
-font-size:16px;
-}
-
-input,select{
-background:#020617;
-color:#fff;
-}
-
-button{
-background:#2563eb;
-color:#fff;
-font-weight:bold;
-cursor:pointer;
-}
-
-button:hover{
-opacity:.9;
-}
-
-.badge{
-padding:6px 12px;
-border-radius:30px;
-font-size:12px;
-font-weight:bold;
-display:inline-block;
-}
-
-.verde{background:#16a34a;}
-.amarelo{background:#ca8a04;}
-.vermelho{background:#dc2626;}
-.roxo{background:#9333ea;}
-
-table{
-width:100%;
-border-collapse:collapse;
-margin-top:15px;
-}
-
-th,td{
-padding:10px;
-text-align:left;
-border-bottom:1px solid rgba(255,255,255,.1);
-}
-
-.cancelado{
-opacity:.5;
-text-decoration:line-through;
-}
-
-h2{
-margin:0 0 15px 0;
-}
-</style>
+<link rel="stylesheet" href="/css/core.css">
+<link rel="stylesheet" href="/css/layout.css">
+<link rel="stylesheet" href="/css/theme.css">
+<link rel="stylesheet" href="/css/components.css">
 </head>
 <body>
 
-<div class="card">
-<h2>Nova Movimentação</h2>
+<div class="mobile-overlay" id="mobileOverlay"></div>
 
-<select id="produtoSelect"></select>
+<div class="app-shell">
 
-<select id="tipoMov">
-<option value="entrada">Entrada</option>
-<option value="saida">Saída</option>
-<option value="ajuste">Ajuste</option>
-</select>
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="brand-icon">SLO</div>
+      <div>
+        <h2>SISTEMA LOGÍSTICO</h2>
+        <p>DE OPERAÇÃO</p>
+      </div>
+    </div>
 
-<input id="enderecoMov" placeholder="Endereço">
-<input id="quantidadeMov" type="number" placeholder="Quantidade">
+    <nav class="menu">
+      <button class="menu-item active" data-view="dashboard"><span class="menu-icon">🏠</span><span>Dashboard</span></button>
+      <button class="menu-item" data-view="produtos"><span class="menu-icon">📦</span><span>Produtos</span></button>
+      <button class="menu-item" data-view="estoque"><span class="menu-icon">📊</span><span>Estoque</span></button>
+      <button class="menu-item" data-view="pedidos"><span class="menu-icon">🧾</span><span>Pedidos</span></button>
+      <button class="menu-item" data-view="scanner"><span class="menu-icon">📷</span><span>Scanner</span></button>
+      <button class="menu-item" data-view="wms"><span class="menu-icon">🗺️</span><span>WMS</span></button>
+    </nav>
+  </aside>
 
-<button onclick="salvarMov()">Salvar Movimentação</button>
+  <main class="main-content">
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="mobile-menu-btn" id="mobileMenuBtn">☰</button>
+        <input class="search" placeholder="Pesquisar...">
+      </div>
+      <div id="clock" class="clock-badge">--:--</div>
+    </header>
+
+    <section class="workspace" id="workspace"></section>
+  </main>
 </div>
 
-
-<div class="card">
-<h2>Transferência entre Endereços</h2>
-
-<select id="produtoTransfer"></select>
-
-<input id="origemTransfer" placeholder="Origem">
-<input id="destinoTransfer" placeholder="Destino">
-<input id="quantidadeTransfer" type="number" placeholder="Quantidade">
-
-<button onclick="transferir()">Transferir</button>
-</div>
-
-
-<div class="card">
-<h2>Últimas Movimentações</h2>
-
-<table>
-<thead>
-<tr>
-<th>Tipo</th>
-<th>Produto</th>
-<th>Qtd</th>
-<th>Status</th>
-<th>Ação</th>
-</tr>
-</thead>
-<tbody id="movBody"></tbody>
-</table>
-</div>
-
-
-<script>
-let produtos=[];
-
-async function carregarProdutos(){
-const res=await fetch('/api/produtos');
-produtos=await res.json();
-
-const html=produtos.map(p=>
-`<option value="${p.id}">${p.nome}</option>`
-).join('');
-
-document.getElementById('produtoSelect').innerHTML=html;
-document.getElementById('produtoTransfer').innerHTML=html;
-}
-
-async function salvarMov(){
-await fetch('/api/estoque/movimentar',{
-method:'POST',
-headers:{'Content-Type':'application/json'},
-body:JSON.stringify({
-produtoId:produtoSelect.value,
-tipo:tipoMov.value,
-endereco:enderecoMov.value,
-quantidade:Number(quantidadeMov.value)
-})
-});
-
-location.reload();
-}
-
-async function transferir(){
-await fetch('/api/estoque/transferir',{
-method:'POST',
-headers:{'Content-Type':'application/json'},
-body:JSON.stringify({
-produtoId:produtoTransfer.value,
-origem:origemTransfer.value,
-destino:destinoTransfer.value,
-quantidade:Number(quantidadeTransfer.value)
-})
-});
-
-location.reload();
-}
-
-async function cancelarMov(id){
-await fetch('/api/movimentacoes/'+id+'/cancelar',{
-method:'PUT'
-});
-
-location.reload();
-}
-
-async function carregarMovs(){
-const res=await fetch('/api/movimentacoes');
-const movs=await res.json();
-
-movBody.innerHTML=movs.map(m=>{
-
-const produto=produtos.find(p=>p.id==m.produtoId);
-
-return `
-<tr class="${m.status==='cancelado'?'cancelado':''}">
-<td>${m.tipo}</td>
-<td>${produto?.nome||'-'}</td>
-<td>${m.quantidade}</td>
-<td>
-<span class="badge ${m.status==='ativo'?'verde':'vermelho'}">
-${m.status}
-</span>
-</td>
-<td>
-${m.status==='ativo'
-? `<button onclick="cancelarMov('${m.id}')">Cancelar</button>`
-: '-'}
-</td>
-</tr>
-`;
-
-}).join('');
-}
-
-async function init(){
-await carregarProdutos();
-await carregarMovs();
-}
-
-init();
-</script>
-
+<script src="/js/core/layout.js"></script>
+<script src="/js/core/router.js"></script>
+<script src="/js/core/mobile-menu.js"></script>
 </body>
 </html>

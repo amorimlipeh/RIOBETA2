@@ -16,11 +16,8 @@ function closeMobileMenu() {
 if (mobileMenuBtn) {
   mobileMenuBtn.addEventListener('click', () => {
     const isOpen = sidebar.classList.contains('sidebar-open');
-    if (isOpen) {
-      closeMobileMenu();
-    } else {
-      openMobileMenu();
-    }
+    if (isOpen) closeMobileMenu();
+    else openMobileMenu();
   });
 }
 
@@ -30,14 +27,10 @@ if (mobileOverlay) {
 
 menuItems.forEach(item => {
   item.addEventListener('click', () => {
-    if (window.innerWidth <= 900) {
-      closeMobileMenu();
-    }
+    if (window.innerWidth <= 900) closeMobileMenu();
   });
 });
 
 window.addEventListener('resize', () => {
-  if (window.innerWidth > 900) {
-    closeMobileMenu();
-  }
+  if (window.innerWidth > 900) closeMobileMenu();
 });
