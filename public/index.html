@@ -979,5 +979,394 @@ setTimeout(renderProdutosPedidoBusca,200);
 </script>
 
 
+
+<!-- INICIO PEDIDOS PATCH SAFE FINAL -->
+<script>
+(function(){
+    const produtosPedidoSafe = [
+        { codigo:"TST001", nome:"Caixa Organizadora Média", fator:12, imagem:"" },
+        { codigo:"TST002", nome:"Plástico Bolha Premium", fator:10, imagem:"" },
+        { codigo:"TST003", nome:"Etiqueta Logística", fator:20, imagem:"" },
+        { codigo:"TST004", nome:"Papel Kraft Bobina", fator:15, imagem:"" },
+        { codigo:"TST005", nome:"Fita Adesiva Transparente", fator:6, imagem:"" }
+    ];
+
+    let produtoSelecionadoSafe = null;
+    let pedidoItensSafe = [];
+
+    function txt(v){
+        return String(v || "").trim();
+    }
+
+    function norm(v){
+        return txt(v).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+    }
+
+    function calc(qtd, fator){
+        qtd = Math.max(1, parseInt(qtd || 1, 10) || 1);
+        fator = Math.max(1, parseInt(fator || 1, 10) || 1);
+        return {
+            quantidadeTotal: qtd,
+            fator: fator,
+            caixasFechadas: Math.floor(qtd / fator),
+            unidadesAvulsas: qtd % fator
+        };
+    }
+
+    function garantirMiniQtd(){
+        const lista = document.getElementById("listaBuscaProdutosPedido");
+        if(!lista) return null;
+
+        let box = document.getElementById("boxQtdProdutoPedidoSafe");
+        if(box) return box;
+
+        box = document.createElement("div");
+        box.id = "boxQtdProdutoPedidoSafe";
+        box.style.display = "none";
+        box.style.background = "#0b1730";
+        box.style.borderRadius = "12px";
+        box.style.padding = "12px";
+        box.style.marginTop = "10px";
+        box.style.marginBottom = "14px";
+        box.innerHTML = `
+            <div id="tituloQtdProdutoPedidoSafe" style="color:#fff;font-weight:800;margin-bottom:10px;">Produto</div>
+
+            <label style="display:block;color:#cbd5e1;font-size:12px;font-weight:700;margin-bottom:6px;">
+                Quantidade Total (UN)
+            </label>
+            <input
+                id="quantidadeProdutoPedidoSafe"
+                type="number"
+                min="1"
+                step="1"
+                value="1"
+                style="
+                    width:100%;
+                    padding:12px;
+                    border:none;
+                    border-radius:10px;
+                    background:#162742;
+                    color:#fff;
+                    outline:none;
+                    margin-bottom:10px;
+                "
+            >
+
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                <div style="background:#162742;border-radius:10px;padding:10px;">
+                    <div style="color:#cbd5e1;font-size:12px;font-weight:700;">Caixas Fechadas</div>
+                    <div id="cxFechadasPedidoSafe" style="color:#fff;font-size:20px;font-weight:800;">0</div>
+                </div>
+                <div style="background:#162742;border-radius:10px;padding:10px;">
+                    <div style="color:#cbd5e1;font-size:12px;font-weight:700;">Unidades Avulsas</div>
+                    <div id="unAvulsasPedidoSafe" style="color:#fff;font-size:20px;font-weight:800;">0</div>
+                </div>
+            </div>
+        `;
+
+        lista.insertAdjacentElement("afterend", box);
+
+        const qtd = document.getElementById("quantidadeProdutoPedidoSafe");
+        if(qtd){
+            qtd.addEventListener("input", atualizarPreviewQtdSafe);
+        }
+
+        return box;
+    }
+
+    function atualizarPreviewQtdSafe(){
+        if(!produtoSelecionadoSafe) return;
+        const qtdEl = document.getElementById("quantidadeProdutoPedidoSafe");
+        const cxEl = document.getElementById("cxFechadasPedidoSafe");
+        const avEl = document.getElementById("unAvulsasPedidoSafe");
+
+        const d = calc(qtdEl ? qtdEl.value : 1, produtoSelecionadoSafe.fator);
+        if(qtdEl) qtdEl.value = d.quantidadeTotal;
+        if(cxEl) cxEl.textContent = d.caixasFechadas;
+        if(avEl) avEl.textContent = d.unidadesAvulsas;
+    }
+
+    function renderListaProdutosPedidoSafe(filtro){
+        const lista = document.getElementById("listaBuscaProdutosPedido");
+        if(!lista) return;
+
+        const termo = norm(filtro);
+        const filtrados = produtosPedidoSafe.filter(p => {
+            return !termo || norm(p.codigo).includes(termo) || norm(p.nome).includes(termo);
+        });
+
+        if(!filtrados.length){
+            lista.innerHTML = '<div style="color:#cbd5e1;padding:8px 2px;">Nenhum produto encontrado.</div>';
+            return;
+        }
+
+        lista.innerHTML = filtrados.map((p, i) => `
+            <div
+                data-pedido-safe-idx="${i}"
+                style="
+                    background:${produtoSelecionadoSafe && produtoSelecionadoSafe.codigo === p.codigo ? '#2f6df6' : '#0b1730'};
+                    padding:12px;
+                    border-radius:12px;
+                    margin-top:10px;
+                    display:flex;
+                    gap:12px;
+                    align-items:center;
+                    cursor:pointer;
+                    border:${produtoSelecionadoSafe && produtoSelecionadoSafe.codigo === p.codigo ? '1px solid rgba(255,255,255,.35)' : '1px solid transparent'};
+                "
+            >
+                <div style="
+                    width:55px;
+                    height:55px;
+                    background:#09152c;
+                    border-radius:10px;
+                    display:flex;
+                    align-items:center;
+                    justify-content:center;
+                    color:white;
+                    font-size:12px;
+                ">IMG</div>
+
+                <div>
+                    <b style="color:white;">${p.codigo}</b><br>
+                    <span style="color:#ddd;">${p.nome}</span><br>
+                    <small style="color:#8fb3ff;">Fator: ${p.fator} un/cx</small>
+                </div>
+            </div>
+        `).join("");
+
+        Array.from(lista.querySelectorAll("[data-pedido-safe-idx]")).forEach((el, idx) => {
+            el.onclick = function(){
+                produtoSelecionadoSafe = filtrados[idx];
+                const box = garantirMiniQtd();
+                const titulo = document.getElementById("tituloQtdProdutoPedidoSafe");
+                const qtd = document.getElementById("quantidadeProdutoPedidoSafe");
+                if(box) box.style.display = "block";
+                if(titulo) titulo.textContent = `${produtoSelecionadoSafe.codigo} - ${produtoSelecionadoSafe.nome}`;
+                if(qtd) qtd.value = 1;
+                atualizarPreviewQtdSafe();
+                renderListaProdutosPedidoSafe(filtro);
+            };
+        });
+    }
+
+    function garantirAreaItensPedidoSafe(){
+        const titulo = Array.from(document.querySelectorAll("*"))
+            .find(el => txt(el.innerText) === "Itens do Pedido");
+        if(!titulo) return null;
+
+        const card = titulo.closest("div");
+        if(!card) return null;
+
+        let lista = document.getElementById("pedidoItensListaSafe");
+        if(!lista){
+            const vazio = Array.from(card.querySelectorAll("p,div"))
+                .find(el => txt(el.innerText) === "Nenhum item adicionado.");
+            if(vazio) vazio.remove();
+
+            lista = document.createElement("div");
+            lista.id = "pedidoItensListaSafe";
+            lista.style.display = "flex";
+            lista.style.flexDirection = "column";
+            lista.style.gap = "12px";
+            card.appendChild(lista);
+        }
+
+        let resumo = document.getElementById("pedidoResumoSafe");
+        if(!resumo){
+            resumo = document.createElement("div");
+            resumo.id = "pedidoResumoSafe";
+            resumo.style.marginTop = "14px";
+            resumo.style.background = "#162742";
+            resumo.style.borderRadius = "12px";
+            resumo.style.padding = "14px";
+            resumo.style.color = "#fff";
+            resumo.style.fontWeight = "700";
+            card.appendChild(resumo);
+        }
+
+        return { lista, resumo };
+    }
+
+    function renderResumoSafe(){
+        const area = garantirAreaItensPedidoSafe();
+        if(!area) return;
+
+        const totalItens = pedidoItensSafe.length;
+        const totalUN = pedidoItensSafe.reduce((a,b)=>a + b.quantidadeTotal, 0);
+        const totalCX = pedidoItensSafe.reduce((a,b)=>a + b.caixasFechadas, 0);
+        const totalAv = pedidoItensSafe.reduce((a,b)=>a + b.unidadesAvulsas, 0);
+
+        area.resumo.innerHTML = `
+            <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;">
+                <div><div style="font-size:12px;color:#cbd5e1;">Total Itens</div><div style="font-size:20px;">${totalItens}</div></div>
+                <div><div style="font-size:12px;color:#cbd5e1;">Total UN</div><div style="font-size:20px;">${totalUN}</div></div>
+                <div><div style="font-size:12px;color:#cbd5e1;">Caixas Fechadas</div><div style="font-size:20px;">${totalCX}</div></div>
+                <div><div style="font-size:12px;color:#cbd5e1;">UN Avulsas</div><div style="font-size:20px;">${totalAv}</div></div>
+            </div>
+        `;
+    }
+
+    function renderItensSafe(){
+        const area = garantirAreaItensPedidoSafe();
+        if(!area) return;
+
+        if(!pedidoItensSafe.length){
+            area.lista.innerHTML = '<div style="color:#cbd5e1;">Nenhum item adicionado.</div>';
+            renderResumoSafe();
+            return;
+        }
+
+        area.lista.innerHTML = pedidoItensSafe.map((item, idx) => `
+            <div style="
+                display:grid;
+                grid-template-columns:56px 1fr auto;
+                gap:12px;
+                align-items:center;
+                background:#162742;
+                padding:14px;
+                border-radius:12px;
+            ">
+                <div style="
+                    width:56px;
+                    height:56px;
+                    background:#2f6df6;
+                    border-radius:10px;
+                    display:flex;
+                    align-items:center;
+                    justify-content:center;
+                    color:#fff;
+                    font-size:11px;
+                    font-weight:800;
+                ">IMG</div>
+
+                <div style="display:flex;flex-direction:column;gap:4px;color:#fff;">
+                    <div style="font-weight:800;">${item.codigo} - ${item.nome}</div>
+                    <div style="color:#7fb0ff;font-size:12px;">Fator Conversão: ${item.fator} un/cx</div>
+                    <div style="color:#dbe7ff;font-size:13px;">Quantidade Total: ${item.quantidadeTotal} un</div>
+                    <div style="color:#dbe7ff;font-size:13px;">Caixas Fechadas: ${item.caixasFechadas}</div>
+                    <div style="color:#dbe7ff;font-size:13px;">Unidades Avulsas: ${item.unidadesAvulsas}</div>
+                </div>
+
+                <div style="display:flex;flex-direction:column;gap:8px;align-items:center;">
+                    <div style="font-size:20px;">✅</div>
+                    <button
+                        data-remove-safe="${idx}"
+                        style="
+                            border:none;
+                            border-radius:10px;
+                            background:#ef4444;
+                            color:#fff;
+                            padding:8px 10px;
+                            cursor:pointer;
+                            font-weight:700;
+                        "
+                    >Remover</button>
+                </div>
+            </div>
+        `).join("");
+
+        Array.from(area.lista.querySelectorAll("[data-remove-safe]")).forEach(btn => {
+            btn.onclick = function(){
+                const idx = Number(this.getAttribute("data-remove-safe"));
+                pedidoItensSafe.splice(idx, 1);
+                renderItensSafe();
+            };
+        });
+
+        renderResumoSafe();
+    }
+
+    function confirmarProdutoPedidoSafe(){
+        if(!produtoSelecionadoSafe) return;
+
+        const qtdEl = document.getElementById("quantidadeProdutoPedidoSafe");
+        const dados = calc(qtdEl ? qtdEl.value : 1, produtoSelecionadoSafe.fator);
+
+        const existente = pedidoItensSafe.find(it => it.codigo === produtoSelecionadoSafe.codigo);
+
+        if(existente){
+            const soma = calc(existente.quantidadeTotal + dados.quantidadeTotal, produtoSelecionadoSafe.fator);
+            existente.quantidadeTotal = soma.quantidadeTotal;
+            existente.caixasFechadas = soma.caixasFechadas;
+            existente.unidadesAvulsas = soma.unidadesAvulsas;
+        }else{
+            pedidoItensSafe.push({
+                codigo: produtoSelecionadoSafe.codigo,
+                nome: produtoSelecionadoSafe.nome,
+                fator: produtoSelecionadoSafe.fator,
+                quantidadeTotal: dados.quantidadeTotal,
+                caixasFechadas: dados.caixasFechadas,
+                unidadesAvulsas: dados.unidadesAvulsas
+            });
+        }
+
+        const modal = document.getElementById("modalProdutoPedido");
+        if(modal) modal.style.display = "none";
+        produtoSelecionadoSafe = null;
+        renderItensSafe();
+    }
+
+    function bindSafePedidos(){
+        const btnAdd = document.getElementById("btnAdicionarProdutoPedido");
+        const btnConfirmar = document.getElementById("btnConfirmarProdutoPedido");
+        const btnCancelar = document.getElementById("btnCancelarProdutoPedido");
+        const busca = document.getElementById("buscaProdutoPedido");
+
+        if(btnAdd && !btnAdd.dataset.safeBind){
+            btnAdd.dataset.safeBind = "1";
+            btnAdd.addEventListener("click", function(){
+                setTimeout(function(){
+                    produtoSelecionadoSafe = null;
+                    const box = garantirMiniQtd();
+                    if(box) box.style.display = "none";
+                    renderListaProdutosPedidoSafe("");
+                }, 100);
+            });
+        }
+
+        if(btnConfirmar && !btnConfirmar.dataset.safeBind){
+            btnConfirmar.dataset.safeBind = "1";
+            btnConfirmar.onclick = function(e){
+                e.preventDefault();
+                confirmarProdutoPedidoSafe();
+            };
+        }
+
+        if(btnCancelar && !btnCancelar.dataset.safeBind){
+            btnCancelar.dataset.safeBind = "1";
+            btnCancelar.onclick = function(){
+                const modal = document.getElementById("modalProdutoPedido");
+                if(modal) modal.style.display = "none";
+            };
+        }
+
+        if(busca && !busca.dataset.safeBind){
+            busca.dataset.safeBind = "1";
+            busca.addEventListener("input", function(){
+                renderListaProdutosPedidoSafe(this.value);
+            });
+        }
+
+        renderItensSafe();
+    }
+
+    function initSafePedidos(){
+        bindSafePedidos();
+    }
+
+    if(document.readyState === "loading"){
+        document.addEventListener("DOMContentLoaded", initSafePedidos);
+    }else{
+        initSafePedidos();
+    }
+
+    setTimeout(initSafePedidos, 400);
+    setTimeout(initSafePedidos, 1200);
+    setTimeout(initSafePedidos, 2500);
+})();
+</script>
+<!-- FIM PEDIDOS PATCH SAFE FINAL -->
+
 </body>
 </html>
