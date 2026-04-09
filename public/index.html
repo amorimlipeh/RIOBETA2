@@ -378,287 +378,154 @@
 <!-- FIM INTERCEPT EDITAR ESTOQUE -->
 
 
-<!-- INICIO PAGINACAO ENTERPRISE ESTOQUE -->
+
+
+
+
+
+<!-- INICIO PAGINACAO LIMPA -->
 <script>
 (function(){
     function txt(v){
         return String(v || "").replace(/\s+/g, " ").trim();
     }
 
-    function tituloEh(el, titulo){
-        return txt(el.textContent).toLowerCase() === titulo.toLowerCase();
+    function encontrarSecao(titulos){
+        const hs = [...document.querySelectorAll("h1,h2,h3,h4,h5,h6")];
+        for(const titulo of titulos){
+            const h = hs.find(el => txt(el.textContent).toLowerCase() === titulo.toLowerCase());
+            if(h){
+                return h.closest(".card, .bloco, .box, section, .modulo-card, .painel, div") || h.parentElement;
+            }
+        }
+        return null;
     }
 
-    function encontrarSecaoPorTitulo(titulo){
-        const heads = [...document.querySelectorAll("h1,h2,h3,h4,h5,h6")];
-        const h = heads.find(el => tituloEh(el, titulo));
-        if(!h) return null;
-        return h.closest(".card, .bloco, .box, section, .modulo-card, .painel, div") || h.parentElement;
-    }
-
-    function pegarTabelaDaSecao(secao){
+    function pegarTabela(secao){
         if(!secao) return null;
         return secao.querySelector("table");
     }
 
-    function pegarBodyTabela(table){
-        if(!table) return null;
-        return table.querySelector("tbody") || table;
+    function pegarLinhas(tabela){
+        if(!tabela) return [];
+        const tbody = tabela.querySelector("tbody");
+        const linhas = tbody ? [...tbody.querySelectorAll("tr")] : [...tabela.querySelectorAll("tr")];
+        return linhas.filter(tr => tr.querySelectorAll("td").length > 0);
     }
 
-    function pegarLinhasDados(table){
-        if(!table) return [];
-        const tbody = table.querySelector("tbody");
-        if(tbody){
-            return [...tbody.querySelectorAll("tr")].filter(tr => tr.querySelectorAll("td").length > 0);
-        }
-        return [...table.querySelectorAll("tr")].filter(tr => tr.querySelectorAll("td").length > 0);
-    }
-
-    function criarControles(config){
+    function criarControles(){
         const wrap = document.createElement("div");
-        wrap.className = "paginacao-enterprise-wrap";
-
+        wrap.className = "paginacao-limpa-wrap";
         wrap.innerHTML = `
-            <div class="paginacao-enterprise-left">
-                <span class="paginacao-enterprise-label">Mostrar</span>
-                <select class="paginacao-enterprise-select">
+            <div class="paginacao-limpa-left">
+                <span class="paginacao-limpa-label">Mostrar</span>
+                <select class="paginacao-limpa-select">
                     <option value="10">10</option>
                     <option value="20">20</option>
                     <option value="50">50</option>
                     <option value="100">100</option>
                 </select>
             </div>
-
-            <div class="paginacao-enterprise-center">
-                <button type="button" class="paginacao-enterprise-btn btn-anterior">Anterior</button>
-                <div class="paginacao-enterprise-page-badge">Página 1/1</div>
-                <button type="button" class="paginacao-enterprise-btn btn-proximo">Próximo</button>
+            <div class="paginacao-limpa-center">
+                <button type="button" class="paginacao-limpa-btn btn-ant">Anterior</button>
+                <div class="paginacao-limpa-badge">Página 1/1</div>
+                <button type="button" class="paginacao-limpa-btn btn-prox">Próximo</button>
             </div>
-
-            <div class="paginacao-enterprise-right">
-                <span class="paginacao-enterprise-info">Mostrando 0-0 de 0 registros</span>
+            <div class="paginacao-limpa-right">
+                <span class="paginacao-limpa-info">Mostrando 0–0 de 0 registros</span>
             </div>
         `;
-
-        const select = wrap.querySelector(".paginacao-enterprise-select");
-        const btnAnt = wrap.querySelector(".btn-anterior");
-        const btnProx = wrap.querySelector(".btn-proximo");
-        const badge = wrap.querySelector(".paginacao-enterprise-page-badge");
-        const info = wrap.querySelector(".paginacao-enterprise-info");
-
-        select.value = String(config.pageSize);
-
-        return { wrap, select, btnAnt, btnProx, badge, info };
+        return wrap;
     }
 
-    function aplicarPaginacaoNaSecao(tituloSecao){
-        const secao = encontrarSecaoPorTitulo(tituloSecao);
+    function aplicar(secao, key){
         if(!secao) return;
+        const tabela = pegarTabela(secao);
+        if(!tabela) return;
 
-        if(secao.querySelector(".paginacao-enterprise-wrap")) return;
+        const linhas = pegarLinhas(tabela);
+        if(linhas.length <= 10) return;
 
-        const table = pegarTabelaDaSecao(secao);
-        if(!table) return;
-
-        const rows = pegarLinhasDados(table);
-        if(!rows.length) return;
+        const antiga = secao.querySelector('.paginacao-limpa-wrap');
+        if(antiga) antiga.remove();
 
         const state = {
             page: 1,
             pageSize: 10,
-            total: rows.length,
-            rows
+            rows: linhas,
+            key
         };
 
-        const controls = criarControles(state);
+        const controls = criarControles();
+        const select = controls.querySelector(".paginacao-limpa-select");
+        const btnAnt = controls.querySelector(".btn-ant");
+        const btnProx = controls.querySelector(".btn-prox");
+        const badge = controls.querySelector(".paginacao-limpa-badge");
+        const info = controls.querySelector(".paginacao-limpa-info");
 
         function render(){
-            state.total = state.rows.length;
-            const totalPages = Math.max(1, Math.ceil(state.total / state.pageSize));
+            const total = state.rows.length;
+            const totalPages = Math.max(1, Math.ceil(total / state.pageSize));
             if(state.page > totalPages) state.page = totalPages;
 
             const start = (state.page - 1) * state.pageSize;
-            const end = Math.min(start + state.pageSize, state.total);
+            const end = Math.min(start + state.pageSize, total);
 
             state.rows.forEach((row, idx) => {
                 row.style.display = (idx >= start && idx < end) ? "" : "none";
             });
 
-            controls.badge.textContent = `Página ${state.page}/${totalPages}`;
-            controls.info.textContent = `Mostrando ${state.total ? (start + 1) : 0}–${end} de ${state.total} registros`;
-            controls.btnAnt.disabled = state.page <= 1;
-            controls.btnProx.disabled = state.page >= totalPages;
+            badge.textContent = `Página ${state.page}/${totalPages}`;
+            info.textContent = `Mostrando ${total ? start + 1 : 0}–${end} de ${total} registros`;
+            btnAnt.disabled = state.page <= 1;
+            btnProx.disabled = state.page >= totalPages;
         }
 
-        controls.select.addEventListener("change", function(){
+        select.addEventListener("change", function(){
             state.pageSize = parseInt(this.value, 10) || 10;
             state.page = 1;
             render();
         });
 
-        controls.btnAnt.addEventListener("click", function(){
+        btnAnt.addEventListener("click", function(){
             if(state.page > 1){
                 state.page--;
                 render();
             }
         });
 
-        controls.btnProx.addEventListener("click", function(){
-            const totalPages = Math.max(1, Math.ceil(state.total / state.pageSize));
+        btnProx.addEventListener("click", function(){
+            const totalPages = Math.max(1, Math.ceil(state.rows.length / state.pageSize));
             if(state.page < totalPages){
                 state.page++;
                 render();
             }
         });
 
-        secao.appendChild(controls.wrap);
+        secao.appendChild(controls);
         render();
     }
 
-    function iniciarPaginacaoEnterprise(){
-        aplicarPaginacaoNaSecao("Saldo Consolidado por Produto");
-        aplicarPaginacaoNaSecao("Estoque por Endereço");
-        aplicarPaginacaoNaSecao("Estoque por Endereco");
-        aplicarPaginacaoNaSecao("Últimas Movimentações");
-        aplicarPaginacaoNaSecao("Ultimas Movimentações");
-        aplicarPaginacaoNaSecao("Ultimas Movimentacoes");
+    function iniciar(){
+        aplicar(encontrarSecao(["Lista de Produtos"]), "lista_produtos");
+        aplicar(encontrarSecao(["Saldo Consolidado por Produto"]), "saldo_consolidado");
+        aplicar(encontrarSecao(["Estoque por Endereço", "Estoque por Endereco"]), "estoque_endereco");
+        aplicar(encontrarSecao(["Últimas Movimentações", "Ultimas Movimentações", "Ultimas Movimentacoes"]), "ultimas_mov");
     }
 
     if(document.readyState === "loading"){
-        document.addEventListener("DOMContentLoaded", iniciarPaginacaoEnterprise);
-    }else{
-        iniciarPaginacaoEnterprise();
+        document.addEventListener("DOMContentLoaded", iniciar);
+    } else {
+        iniciar();
     }
 
-    window.reiniciarPaginacaoEnterpriseEstoque = iniciarPaginacaoEnterprise;
+    setTimeout(iniciar, 500);
+    setTimeout(iniciar, 1200);
+    setTimeout(iniciar, 2200);
+
+    window.reiniciarPaginacaoLimpa = iniciar;
 })();
 </script>
-<!-- FIM PAGINACAO ENTERPRISE ESTOQUE -->
-
-<!-- INICIO PAGINACAO UNIVERSAL -->
-<script>
-(function(){
-
-function criarPaginacao(secao){
-
-    if(!secao) return;
-    if(secao.querySelector(".controle-paginacao")) return;
-
-    let itens = [...secao.children].filter(el =>
-        !el.classList.contains("controle-paginacao")
-    );
-
-    if(itens.length <= 10) return;
-
-    let paginaAtual = 1;
-    let porPagina = 10;
-
-    const controle = document.createElement("div");
-    controle.className = "controle-paginacao";
-    controle.style.cssText = `
-        margin-top:20px;
-        display:flex;
-        flex-wrap:wrap;
-        gap:10px;
-        justify-content:center;
-        align-items:center;
-    `;
-
-    controle.innerHTML = `
-        <select id="selectPaginaQtd" style="
-            padding:10px;
-            border-radius:8px;
-            background:#132238;
-            color:white;
-            border:none;
-        ">
-            <option>10</option>
-            <option>20</option>
-            <option>50</option>
-            <option>100</option>
-        </select>
-
-        <button id="btnAnterior" style="
-            padding:10px 15px;
-            border:none;
-            border-radius:8px;
-            background:#2563eb;
-            color:white;
-        ">Anterior</button>
-
-        <span id="paginaInfo" style="
-            color:white;
-            font-weight:bold;
-        ">Página 1</span>
-
-        <button id="btnProximo" style="
-            padding:10px 15px;
-            border:none;
-            border-radius:8px;
-            background:#2563eb;
-            color:white;
-        ">Próximo</button>
-    `;
-
-    secao.appendChild(controle);
-
-    const btnAnterior = controle.querySelector("#btnAnterior");
-    const btnProximo = controle.querySelector("#btnProximo");
-    const paginaInfo = controle.querySelector("#paginaInfo");
-    const selectQtd = controle.querySelector("#selectPaginaQtd");
-
-    function renderizar(){
-
-        itens.forEach((el,i)=>{
-            let inicio = (paginaAtual-1)*porPagina;
-            let fim = inicio+porPagina;
-
-            el.style.display = (
-                i>=inicio && i<fim
-            ) ? "" : "none";
-        });
-
-        let totalPaginas = Math.ceil(itens.length/porPagina);
-
-        paginaInfo.innerHTML =
-            "Página " + paginaAtual + " de " + totalPaginas;
-    }
-
-    btnAnterior.onclick = ()=>{
-        if(paginaAtual>1){
-            paginaAtual--;
-            renderizar();
-        }
-    };
-
-    btnProximo.onclick = ()=>{
-        let totalPaginas = Math.ceil(itens.length/porPagina);
-
-        if(paginaAtual<totalPaginas){
-            paginaAtual++;
-            renderizar();
-        }
-    };
-
-    selectQtd.onchange = ()=>{
-        porPagina = parseInt(selectQtd.value);
-        paginaAtual = 1;
-        renderizar();
-    };
-
-    renderizar();
-}
-
-window.addEventListener("load", ()=>{
-
-    document.querySelectorAll("table, .table, .lista, .grid, .tabela, .listagem")
-    .forEach(criarPaginacao);
-
-});
-})();
-</script>
-<!-- FIM PAGINACAO UNIVERSAL -->
-
+<!-- FIM PAGINACAO LIMPA -->
 </body>
 </html>

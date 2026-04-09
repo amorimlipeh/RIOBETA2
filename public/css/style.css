@@ -300,8 +300,8 @@ background:#475569;
 }
 /* FIM CSS MODAL ESCOLHA EDICAO LIMPO */
 
-/* INICIO CSS PAGINACAO ENTERPRISE ESTOQUE */
-.paginacao-enterprise-wrap{
+/* INICIO CSS PAGINACAO LIMPA */
+.paginacao-limpa-wrap{
     margin-top:16px;
     padding-top:14px;
     border-top:1px solid rgba(255,255,255,.06);
@@ -311,25 +311,21 @@ background:#475569;
     justify-content:space-between;
     gap:12px;
 }
-
-.paginacao-enterprise-left,
-.paginacao-enterprise-center,
-.paginacao-enterprise-right{
+.paginacao-limpa-left,
+.paginacao-limpa-center,
+.paginacao-limpa-right{
     display:flex;
     align-items:center;
     gap:10px;
     flex-wrap:wrap;
 }
-
-.paginacao-enterprise-label,
-.paginacao-enterprise-info,
-.paginacao-enterprise-page{
+.paginacao-limpa-label,
+.paginacao-limpa-info{
     color:#dbe7ff;
     font-size:14px;
     font-weight:600;
 }
-
-.paginacao-enterprise-select{
+.paginacao-limpa-select{
     background:#0a1530;
     color:#fff;
     border:1px solid rgba(255,255,255,.08);
@@ -340,8 +336,7 @@ background:#475569;
     font-weight:700;
     outline:none;
 }
-
-.paginacao-enterprise-btn{
+.paginacao-limpa-btn{
     border:none;
     border-radius:10px;
     padding:10px 14px;
@@ -350,17 +345,13 @@ background:#475569;
     cursor:pointer;
     background:linear-gradient(90deg,#2f80ed,#2563eb);
     color:#fff;
-    box-shadow:0 8px 20px rgba(37,99,235,.18);
 }
-
-.paginacao-enterprise-btn[disabled]{
+.paginacao-limpa-btn[disabled]{
     opacity:.45;
     cursor:not-allowed;
-    box-shadow:none;
 }
-
-.paginacao-enterprise-page-badge{
-    min-width:96px;
+.paginacao-limpa-badge{
+    min-width:108px;
     text-align:center;
     padding:10px 12px;
     border-radius:10px;
@@ -369,26 +360,22 @@ background:#475569;
     font-weight:700;
     font-size:14px;
 }
-
 @media (max-width: 768px){
-    .paginacao-enterprise-wrap{
+    .paginacao-limpa-wrap{
         flex-direction:column;
         align-items:stretch;
     }
-
-    .paginacao-enterprise-left,
-    .paginacao-enterprise-center,
-    .paginacao-enterprise-right{
+    .paginacao-limpa-left,
+    .paginacao-limpa-center,
+    .paginacao-limpa-right{
         justify-content:center;
     }
-
-    .paginacao-enterprise-btn{
+    .paginacao-limpa-btn{
         flex:1 1 auto;
     }
-
-    .paginacao-enterprise-page-badge{
-        min-width:unset;
+    .paginacao-limpa-badge{
         width:100%;
+        min-width:unset;
     }
 }
-/* FIM CSS PAGINACAO ENTERPRISE ESTOQUE */
+/* FIM CSS PAGINACAO LIMPA */
