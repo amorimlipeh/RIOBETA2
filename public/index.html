@@ -535,5 +535,130 @@
 })();
 </script>
 <!-- FIM PAGINACAO ENTERPRISE ESTOQUE -->
+
+<!-- INICIO PAGINACAO UNIVERSAL -->
+<script>
+(function(){
+
+function criarPaginacao(secao){
+
+    if(!secao) return;
+    if(secao.querySelector(".controle-paginacao")) return;
+
+    let itens = [...secao.children].filter(el =>
+        !el.classList.contains("controle-paginacao")
+    );
+
+    if(itens.length <= 10) return;
+
+    let paginaAtual = 1;
+    let porPagina = 10;
+
+    const controle = document.createElement("div");
+    controle.className = "controle-paginacao";
+    controle.style.cssText = `
+        margin-top:20px;
+        display:flex;
+        flex-wrap:wrap;
+        gap:10px;
+        justify-content:center;
+        align-items:center;
+    `;
+
+    controle.innerHTML = `
+        <select id="selectPaginaQtd" style="
+            padding:10px;
+            border-radius:8px;
+            background:#132238;
+            color:white;
+            border:none;
+        ">
+            <option>10</option>
+            <option>20</option>
+            <option>50</option>
+            <option>100</option>
+        </select>
+
+        <button id="btnAnterior" style="
+            padding:10px 15px;
+            border:none;
+            border-radius:8px;
+            background:#2563eb;
+            color:white;
+        ">Anterior</button>
+
+        <span id="paginaInfo" style="
+            color:white;
+            font-weight:bold;
+        ">Página 1</span>
+
+        <button id="btnProximo" style="
+            padding:10px 15px;
+            border:none;
+            border-radius:8px;
+            background:#2563eb;
+            color:white;
+        ">Próximo</button>
+    `;
+
+    secao.appendChild(controle);
+
+    const btnAnterior = controle.querySelector("#btnAnterior");
+    const btnProximo = controle.querySelector("#btnProximo");
+    const paginaInfo = controle.querySelector("#paginaInfo");
+    const selectQtd = controle.querySelector("#selectPaginaQtd");
+
+    function renderizar(){
+
+        itens.forEach((el,i)=>{
+            let inicio = (paginaAtual-1)*porPagina;
+            let fim = inicio+porPagina;
+
+            el.style.display = (
+                i>=inicio && i<fim
+            ) ? "" : "none";
+        });
+
+        let totalPaginas = Math.ceil(itens.length/porPagina);
+
+        paginaInfo.innerHTML =
+            "Página " + paginaAtual + " de " + totalPaginas;
+    }
+
+    btnAnterior.onclick = ()=>{
+        if(paginaAtual>1){
+            paginaAtual--;
+            renderizar();
+        }
+    };
+
+    btnProximo.onclick = ()=>{
+        let totalPaginas = Math.ceil(itens.length/porPagina);
+
+        if(paginaAtual<totalPaginas){
+            paginaAtual++;
+            renderizar();
+        }
+    };
+
+    selectQtd.onchange = ()=>{
+        porPagina = parseInt(selectQtd.value);
+        paginaAtual = 1;
+        renderizar();
+    };
+
+    renderizar();
+}
+
+window.addEventListener("load", ()=>{
+
+    document.querySelectorAll("table, .table, .lista, .grid, .tabela, .listagem")
+    .forEach(criarPaginacao);
+
+});
+})();
+</script>
+<!-- FIM PAGINACAO UNIVERSAL -->
+
 </body>
 </html>
