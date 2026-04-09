@@ -42,6 +42,13 @@ function gerarSKU() {
   return 'SKU-' + Math.floor(Math.random() * 999999);
 }
 
+function getEnderecoStatus(qtd) {
+  const n = Number(qtd || 0);
+  if (n <= 0) return { classe: 'status-zero', texto: 'Zerado' };
+  if (n <= 10) return { classe: 'status-baixo', texto: 'Baixo' };
+  return { classe: 'status-ok', texto: 'Normal' };
+}
+
 function dashboardView() {
   return `
     <div class="hero-card fade-in">
@@ -207,6 +214,7 @@ function estoqueView() {
               <th>Produto</th>
               <th>Endereço</th>
               <th>Qtd</th>
+              <th>Status</th>
             </tr>
           </thead>
           <tbody id="enderecosTabela"></tbody>
@@ -289,11 +297,14 @@ function renderTabelaEnderecos() {
 
   estoque.forEach(item => {
     const produto = produtos.find(p => String(p.id) === String(item.produtoId));
+    const status = getEnderecoStatus(item.quantidade);
+
     tabela.innerHTML += `
       <tr>
         <td>${produto ? produto.nome : item.produtoId}</td>
         <td>${item.endereco}</td>
         <td>${item.quantidade}</td>
+        <td><span class="badge ${status.classe}">${status.texto}</span></td>
       </tr>
     `;
   });
@@ -315,7 +326,7 @@ function renderTabelaMovimentacoes() {
         <td>${produto ? produto.nome : item.produtoId}</td>
         <td>${item.tipo === 'transferencia' ? `${item.origem} → ${item.destino}` : (item.endereco || '-')}</td>
         <td>${item.quantidade}</td>
-        <td><span class="badge ${status === 'ativo' ? 'verde' : 'vermelho'}">${status}</span></td>
+        <td><span class="badge ${status === 'ativo' ? 'status-ok' : 'status-zero'}">${status}</span></td>
         <td>
           ${status === 'ativo' ? `<button onclick="cancelarMovimentacao('${item.id}')">Cancelar</button>` : '-'}
         </td>
