@@ -841,5 +841,75 @@ setTimeout(criarPedidosLayout,3000);
 </script>
 <!-- FIM PEDIDOS ADD PRODUTO SAFE -->
 
+
+
+<!-- MODAL PRODUTO PEDIDOS -->
+<div id="modalProdutoPedido" style="
+display:none;
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:rgba(0,0,0,0.65);
+z-index:9999;
+justify-content:center;
+align-items:center;
+padding:20px;
+box-sizing:border-box;
+">
+
+<div style="
+background:#162b4d;
+width:100%;
+max-width:650px;
+border-radius:18px;
+padding:25px;
+">
+
+<h3 style="color:white;margin-bottom:15px;">Adicionar Produto</h3>
+
+<input
+id="buscaProdutoPedido"
+placeholder="Pesquisar produto..."
+style="
+width:100%;
+padding:14px;
+border-radius:10px;
+border:none;
+margin-bottom:15px;
+"
+>
+
+<div style="
+display:flex;
+justify-content:flex-end;
+gap:10px;
+">
+
+<button onclick="fecharModalProdutoPedido()">Cancelar</button>
+<button>Adicionar</button>
+
+</div>
+</div>
+</div>
+
+<script>
+function abrirModalProdutoPedido(){
+document.getElementById("modalProdutoPedido").style.display="flex";
+}
+
+function fecharModalProdutoPedido(){
+document.getElementById("modalProdutoPedido").style.display="none";
+}
+
+document.addEventListener("click",function(e){
+if(e.target.id==="btnAdicionarProdutoPedido"){
+abrirModalProdutoPedido();
+}
+});
+</script>
+
+
 </body>
 </html>
