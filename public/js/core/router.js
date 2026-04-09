@@ -7,13 +7,12 @@ let produtoEditandoId = null;
 async function carregarProdutos() {
   try {
     const response = await fetch('/api/produtos');
-    produtos = await response.json();
+    const data = await response.json();
 
-    produtos = produtos.map((produto, index) => ({
+    produtos = (Array.isArray(data) ? data : []).map((produto, index) => ({
       ...produto,
-      id: produto.id || `legacy-${index}-${Date.now()}`
+      id: produto.id || `legacy-${produto.codigo || index}`
     }));
-
   } catch {
     produtos = [];
   }
@@ -60,7 +59,6 @@ function produtosView() {
     </div>
 
     <div class="produto-layout fade-in">
-
       <div class="produto-form-card">
         <h3>${produtoEditandoId ? 'Editar Produto' : 'Novo Produto'}</h3>
 
@@ -76,17 +74,11 @@ function produtosView() {
           ${produtoEditandoId ? 'Salvar Alterações' : 'Salvar Produto'}
         </button>
 
-        ${
-          produtoEditandoId
-            ? `<button onclick="cancelarEdicao()" style="background:#475569">Cancelar</button>`
-            : ''
-        }
-
+        ${produtoEditandoId ? `<button onclick="cancelarEdicao()" style="background:#475569">Cancelar</button>` : ''}
       </div>
 
       <div class="produto-table-card">
         <h3>Lista de Produtos</h3>
-
         <input id="pesquisaProduto" onkeyup="filtrarProdutos()" placeholder="Pesquisar produto">
 
         <table>
@@ -99,11 +91,9 @@ function produtosView() {
               <th>Ações</th>
             </tr>
           </thead>
-
           <tbody id="produtosTabela"></tbody>
         </table>
       </div>
-
     </div>
   `;
 }
@@ -126,9 +116,9 @@ function renderTabela(lista = produtos) {
   lista.forEach((produto) => {
     tabela.innerHTML += `
       <tr>
-        <td>${produto.nome}</td>
-        <td>${produto.categoria}</td>
-        <td>${produto.quantidade}</td>
+        <td>${produto.nome || '-'}</td>
+        <td>${produto.categoria || '-'}</td>
+        <td>${produto.quantidade || 0}</td>
         <td>${produto.sku || '-'}</td>
         <td style="display:flex;gap:6px;">
           <button onclick="editarProduto('${produto.id}')">Editar</button>
@@ -139,13 +129,30 @@ function renderTabela(lista = produtos) {
   });
 }
 
+function preencherFormulario(produto) {
+  const campos = {
+    codigo: produto.codigo || '',
+    nome: produto.nome || '',
+    categoria: produto.categoria || '',
+    quantidade: produto.quantidade || '',
+    fator: produto.fator || '',
+    sku: produto.sku || '',
+    imagem: produto.imagem || ''
+  };
+
+  Object.entries(campos).forEach(([id, valor]) => {
+    const el = document.getElementById(id);
+    if (el) el.value = valor;
+  });
+}
+
 window.filtrarProdutos = function () {
-  const termo = document.getElementById('pesquisaProduto').value.toLowerCase();
+  const termo = (document.getElementById('pesquisaProduto')?.value || '').toLowerCase();
 
   const filtrados = produtos.filter(produto =>
-    produto.nome.toLowerCase().includes(termo) ||
-    produto.categoria.toLowerCase().includes(termo) ||
-    (produto.sku || '').toLowerCase().includes(termo)
+    String(produto.nome || '').toLowerCase().includes(termo) ||
+    String(produto.categoria || '').toLowerCase().includes(termo) ||
+    String(produto.sku || '').toLowerCase().includes(termo)
   );
 
   renderTabela(filtrados);
@@ -162,15 +169,18 @@ window.salvarProduto = async function () {
     imagem: document.getElementById('imagem').value
   };
 
+  if (!payload.codigo || !payload.nome) {
+    alert('Código e nome são obrigatórios.');
+    return;
+  }
+
   if (produtoEditandoId) {
     await fetch('/api/produtos/' + produtoEditandoId, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     });
-
     produtoEditandoId = null;
-
   } else {
     await fetch('/api/produtos', {
       method: 'POST',
@@ -180,45 +190,33 @@ window.salvarProduto = async function () {
   }
 
   await carregarProdutos();
-  renderView('produtos');
+  await renderView('produtos', { skipLoad: true });
 };
 
-window.editarProduto = function (id) {
-  const produto = produtos.find(p => p.id === id);
-
+window.editarProduto = async function (id) {
+  const produto = produtos.find(p => String(p.id) === String(id));
   if (!produto) return;
 
   produtoEditandoId = id;
 
-  renderView('produtos');
-
-  setTimeout(() => {
-    document.getElementById('codigo').value = produto.codigo;
-    document.getElementById('nome').value = produto.nome;
-    document.getElementById('categoria').value = produto.categoria;
-    document.getElementById('quantidade').value = produto.quantidade;
-    document.getElementById('fator').value = produto.fator;
-    document.getElementById('sku').value = produto.sku;
-    document.getElementById('imagem').value = produto.imagem;
-  }, 100);
+  workspace.innerHTML = views.produtos();
+  renderTabela();
+  preencherFormulario(produto);
 };
 
-window.cancelarEdicao = function () {
+window.cancelarEdicao = async function () {
   produtoEditandoId = null;
-  renderView('produtos');
+  await renderView('produtos', { skipLoad: true });
 };
 
 window.removerProduto = async function (id) {
-  await fetch('/api/produtos/' + id, {
-    method: 'DELETE'
-  });
-
+  await fetch('/api/produtos/' + id, { method: 'DELETE' });
   await carregarProdutos();
-  renderView('produtos');
+  await renderView('produtos', { skipLoad: true });
 };
 
-async function renderView(view) {
-  if (view === 'dashboard' || view === 'produtos') {
+async function renderView(view, options = {}) {
+  if (!options.skipLoad && (view === 'dashboard' || view === 'produtos')) {
     await carregarProdutos();
   }
 
@@ -232,9 +230,8 @@ async function renderView(view) {
 buttons.forEach(button => {
   button.addEventListener('click', async () => {
     buttons.forEach(btn => btn.classList.remove('active'));
-
     button.classList.add('active');
-
+    produtoEditandoId = null;
     await renderView(button.dataset.view);
   });
 });

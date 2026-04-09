@@ -61,8 +61,34 @@ app.post('/api/produtos', (req, res) => {
   res.json({ ok: true, produto: novoProduto });
 });
 
+app.put('/api/produtos/:id', (req, res) => {
+  const { id } = req.params;
+  const { codigo, nome, categoria, quantidade, fator, sku, imagem } = req.body || {};
+
+  const produtos = readProdutos();
+  const index = produtos.findIndex(p => String(p.id) === String(id));
+
+  if (index === -1) {
+    return res.status(404).json({ ok: false, message: 'Produto não encontrado.' });
+  }
+
+  produtos[index] = {
+    ...produtos[index],
+    codigo: String(codigo || produtos[index].codigo).trim(),
+    nome: String(nome || produtos[index].nome).trim(),
+    categoria: String(categoria || '').trim(),
+    quantidade: Number(quantidade || 0),
+    fator: Number(fator || 0),
+    sku: String(sku || '').trim(),
+    imagem: String(imagem || '').trim()
+  };
+
+  saveProdutos(produtos);
+  res.json({ ok: true, produto: produtos[index] });
+});
+
 app.delete('/api/produtos/:id', (req, res) => {
-  const produtos = readProdutos().filter(p => p.id !== req.params.id);
+  const produtos = readProdutos().filter(p => String(p.id) !== String(req.params.id));
   saveProdutos(produtos);
   res.json({ ok: true });
 });
