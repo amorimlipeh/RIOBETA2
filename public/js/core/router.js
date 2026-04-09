@@ -168,19 +168,34 @@ function estoqueView() {
         <button onclick="movimentarEstoque()">Salvar Movimentação</button>
       </div>
 
-      <div class="produto-table-card">
-        <h3>Saldo Consolidado por Produto</h3>
-        <table>
-          <thead>
-            <tr>
-              <th>Código</th>
-              <th>Produto</th>
-              <th>Total</th>
-            </tr>
-          </thead>
-          <tbody id="estoqueTabela"></tbody>
-        </table>
+      <div class="produto-form-card">
+        <h3>Transferência entre Endereços</h3>
+
+        <select id="transfProduto">
+          <option value="">Selecione o produto</option>
+          ${produtos.map(p => `<option value="${p.id}">${p.nome} (${p.codigo})</option>`).join('')}
+        </select>
+
+        <input id="transfOrigem" placeholder="Endereço de origem">
+        <input id="transfDestino" placeholder="Endereço de destino">
+        <input id="transfQuantidade" type="number" placeholder="Quantidade">
+
+        <button onclick="transferirEstoque()">Transferir</button>
       </div>
+    </div>
+
+    <div class="produto-table-card fade-in">
+      <h3>Saldo Consolidado por Produto</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Código</th>
+            <th>Produto</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody id="estoqueTabela"></tbody>
+      </table>
     </div>
 
     <div class="dashboard-row fade-in">
@@ -207,6 +222,8 @@ function estoqueView() {
               <th>Produto</th>
               <th>Endereço</th>
               <th>Qtd</th>
+              <th>Status</th>
+              <th>Ação</th>
             </tr>
           </thead>
           <tbody id="movTabela"></tbody>
@@ -290,12 +307,18 @@ function renderTabelaMovimentacoes() {
 
   movimentacoes.slice(0, 10).forEach(item => {
     const produto = produtos.find(p => String(p.id) === String(item.produtoId));
+    const status = item.status || 'ativo';
+
     tabela.innerHTML += `
-      <tr>
+      <tr class="${status === 'cancelado' ? 'cancelado' : ''}">
         <td>${item.tipo}</td>
         <td>${produto ? produto.nome : item.produtoId}</td>
-        <td>${item.endereco}</td>
+        <td>${item.tipo === 'transferencia' ? `${item.origem} → ${item.destino}` : (item.endereco || '-')}</td>
         <td>${item.quantidade}</td>
+        <td><span class="badge ${status === 'ativo' ? 'verde' : 'vermelho'}">${status}</span></td>
+        <td>
+          ${status === 'ativo' ? `<button onclick="cancelarMovimentacao('${item.id}')">Cancelar</button>` : '-'}
+        </td>
       </tr>
     `;
   });
@@ -401,6 +424,40 @@ window.movimentarEstoque = async function () {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ produtoId, tipo, endereco, quantidade })
+  });
+
+  await carregarProdutos();
+  await carregarEstoque();
+  await carregarMovimentacoes();
+  await renderView('estoque', { skipLoad: true });
+};
+
+window.transferirEstoque = async function () {
+  const produtoId = document.getElementById('transfProduto').value;
+  const origem = document.getElementById('transfOrigem').value.trim();
+  const destino = document.getElementById('transfDestino').value.trim();
+  const quantidade = Number(document.getElementById('transfQuantidade').value || 0);
+
+  if (!produtoId || !origem || !destino || !quantidade) {
+    alert('Produto, origem, destino e quantidade são obrigatórios.');
+    return;
+  }
+
+  await fetch('/api/estoque/transferir', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ produtoId, origem, destino, quantidade })
+  });
+
+  await carregarProdutos();
+  await carregarEstoque();
+  await carregarMovimentacoes();
+  await renderView('estoque', { skipLoad: true });
+};
+
+window.cancelarMovimentacao = async function (id) {
+  await fetch('/api/movimentacoes/' + id + '/cancelar', {
+    method: 'PUT'
   });
 
   await carregarProdutos();
