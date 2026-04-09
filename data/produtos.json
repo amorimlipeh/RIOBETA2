@@ -1,1 +1,122 @@
-[]
+[
+  {
+    "codigo": "TST001",
+    "nome": "Caixa Organizadora Média",
+    "quantidade": 120,
+    "endereco": "0100101"
+  },
+  {
+    "codigo": "TST002",
+    "nome": "Plástico Bolha Premium",
+    "quantidade": 85,
+    "endereco": "0100102"
+  },
+  {
+    "codigo": "TST003",
+    "nome": "Etiqueta Logística",
+    "quantidade": 300,
+    "endereco": "0100103"
+  },
+  {
+    "codigo": "TST004",
+    "nome": "Papel Kraft Bobina",
+    "quantidade": 70,
+    "endereco": "0100104"
+  },
+  {
+    "codigo": "TST005",
+    "nome": "Fita Adesiva Transparente",
+    "quantidade": 220,
+    "endereco": "0100105"
+  },
+  {
+    "codigo": "TST006",
+    "nome": "Caixa Pequena Delivery",
+    "quantidade": 500,
+    "endereco": "0100106"
+  },
+  {
+    "codigo": "TST007",
+    "nome": "Caixa Grande Reforçada",
+    "quantidade": 140,
+    "endereco": "0100107"
+  },
+  {
+    "codigo": "TST008",
+    "nome": "Envelope Segurança",
+    "quantidade": 260,
+    "endereco": "0100108"
+  },
+  {
+    "codigo": "TST009",
+    "nome": "Suporte Acrílico Display",
+    "quantidade": 90,
+    "endereco": "0100109"
+  },
+  {
+    "codigo": "TST010",
+    "nome": "Bobina Térmica 80mm",
+    "quantidade": 180,
+    "endereco": "0100110"
+  },
+  {
+    "codigo": "TST011",
+    "nome": "Impressora Etiquetas",
+    "quantidade": 15,
+    "endereco": "0100111"
+  },
+  {
+    "codigo": "TST012",
+    "nome": "Leitor Código Barras",
+    "quantidade": 22,
+    "endereco": "0100112"
+  },
+  {
+    "codigo": "TST013",
+    "nome": "Coletor Dados Mobile",
+    "quantidade": 12,
+    "endereco": "0100113"
+  },
+  {
+    "codigo": "TST014",
+    "nome": "Pallet Madeira PBR",
+    "quantidade": 44,
+    "endereco": "0100114"
+  },
+  {
+    "codigo": "TST015",
+    "nome": "Stretch Filme Preto",
+    "quantidade": 160,
+    "endereco": "0100115"
+  },
+  {
+    "codigo": "TST016",
+    "nome": "Stretch Filme Transparente",
+    "quantidade": 175,
+    "endereco": "0100116"
+  },
+  {
+    "codigo": "TST017",
+    "nome": "Lacre Numerado",
+    "quantidade": 600,
+    "endereco": "0100117"
+  },
+  {
+    "codigo": "TST018",
+    "nome": "Cinta de Amarração",
+    "quantidade": 55,
+    "endereco": "0100118"
+  },
+  {
+    "codigo": "TST019",
+    "nome": "Proteção Cantoneira",
+    "quantidade": 130,
+    "endereco": "0100119"
+  },
+  {
+    "codigo": "TST020",
+    "nome": "Etiqueta Fragil",
+    "quantidade": 280,
+    "endereco": "0100120"
+  }
+]
