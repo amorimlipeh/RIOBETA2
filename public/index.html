@@ -61,6 +61,10 @@
 
 
 
+
+
+
+
 <!-- INICIO INTERCEPT EDITAR ESTOQUE -->
 <script>
 (function(){
@@ -106,14 +110,70 @@
         return alvo;
     }
 
+    function linhasDeTabela(secao){
+        if(!secao) return [];
+        return [...secao.querySelectorAll("tr")].filter(tr => {
+            const tds = tr.querySelectorAll("td,th");
+            return tds.length > 0;
+        });
+    }
+
+    function extrairTextoLinha(tr){
+        return [...tr.querySelectorAll("td,th,span,div")].map(x => normalizarTexto(x.textContent)).filter(Boolean);
+    }
+
+    function pareceCodigo(txt){
+        return /^[a-z]{2,}\d+[a-z0-9]*$/i.test(txt || "");
+    }
+
+    function pareceEndereco(txt){
+        return /(^\d{6,8}$)|(^\d{2}[-/]\d{3}[-/]\d[-/]\d$)/.test(txt || "");
+    }
+
+    function pareceNumero(txt){
+        return /^\d+[.,]?\d*$/.test((txt || "").replace(/\s/g,''));
+    }
+
+    function buscarFallbackProdutoEnderecoQtd(){
+        const out = { codigo:"", produto:"", endereco:"", qtd:"" };
+
+        const secaoSaldo = encontrarSecaoPorTitulo("Saldo Consolidado por Produto");
+        const secaoEndereco = encontrarSecaoPorTitulo("Estoque por Endereço") || encontrarSecaoPorTitulo("Estoque por Endereco");
+
+        if(secaoSaldo){
+            const trs = linhasDeTabela(secaoSaldo);
+            for(const tr of trs){
+                const vals = extrairTextoLinha(tr);
+                const codigo = vals.find(v => pareceCodigo(v));
+                const produto = vals.find(v => /[a-zà-ú]/i.test(v) && !pareceCodigo(v) && !pareceNumero(v) && !pareceEndereco(v));
+                if(codigo && produto){
+                    out.codigo = codigo;
+                    out.produto = produto;
+                    break;
+                }
+            }
+        }
+
+        if(secaoEndereco){
+            const trs = linhasDeTabela(secaoEndereco);
+            for(const tr of trs){
+                const vals = extrairTextoLinha(tr);
+                const endereco = vals.find(v => pareceEndereco(v));
+                const qtd = vals.find(v => pareceNumero(v) && !pareceEndereco(v));
+                const produto = vals.find(v => /[a-zà-ú]/i.test(v) && !pareceCodigo(v) && !pareceNumero(v) && !pareceEndereco(v));
+                if(produto && !out.produto) out.produto = produto;
+                if(endereco && !out.endereco) out.endereco = endereco;
+                if(qtd && !out.qtd) out.qtd = qtd;
+                if(out.endereco && out.qtd) break;
+            }
+        }
+
+        return out;
+    }
+
     function extrairDadosDaLinha(botao){
         const linha = botao.closest("tr") || botao.closest(".linha") || botao.closest(".card") || botao.parentElement;
-        if(!linha) return {};
-
-        const secao = botao.closest(".card, .bloco, .box, section, .modulo-card, .painel") || document.body;
-        const titulos = [...secao.querySelectorAll("h1,h2,h3,h4,h5,h6")].map(x => normalizarTexto(x.textContent).toLowerCase());
-
-        const celulas = [...linha.querySelectorAll("td,th,span,div")].map(x => normalizarTexto(x.textContent)).filter(Boolean);
+        const celulas = linha ? [...linha.querySelectorAll("td,th,span,div")].map(x => normalizarTexto(x.textContent)).filter(Boolean) : [];
 
         const dados = {
             bruto: celulas,
@@ -132,41 +192,38 @@
 
             if(!dados.tipo && ["entrada","saida","saída","transferencia","transferência","ajuste"].includes(low)){
                 dados.tipo = c;
+                continue;
             }
 
-            if(!dados.qtd && /^\d+[.,]?\d*$/.test(c)){
-                dados.qtd = c;
-            }
-
-            if(!dados.endereco && /(\d{6,8}|(\d{2}[-/]\d{3}[-/]\d[-/]\d))/.test(c)){
+            if(!dados.endereco && pareceEndereco(c)){
                 dados.endereco = c;
+                continue;
             }
 
-            if(!dados.codigo && /^[a-z]{2,}\d+[a-z0-9]*$/i.test(c)){
+            if(!dados.codigo && pareceCodigo(c)){
                 dados.codigo = c;
+                continue;
             }
 
-            if(!dados.produto && /[a-zà-ú]/i.test(c) && c.length > 3 && !dados.tipo){
-                if(!/editar|cancelar|ativo|inativo|status|a[çc][aã]o/i.test(low)){
-                    dados.produto = c;
-                }
+            if(!dados.qtd && pareceNumero(c) && !pareceEndereco(c) && c.length <= 8){
+                dados.qtd = c;
+                continue;
+            }
+
+            if(!dados.produto && /[a-zà-ú]/i.test(c) && !/editar|cancelar|ativo|status|ação|acao|entrada|sa[ií]da|transfer/i.test(low) && !pareceCodigo(c)){
+                dados.produto = c;
             }
         }
 
-        if(!dados.produto){
-            const txt = normalizarTexto(linha.textContent);
-            const partes = txt.split(/\s{2,}| \| | - /).map(s=>s.trim()).filter(Boolean);
-            const cand = partes.find(p => /[a-zà-ú]/i.test(p) && !/editar|cancelar|ativo|entrada|sa[ií]da|transfer/i.test(p.toLowerCase()));
-            if(cand) dados.produto = cand;
-        }
+        const fallback = buscarFallbackProdutoEnderecoQtd();
 
-        if(dados.tipo && /transfer/i.test(dados.tipo) && !dados.origem && !dados.destino){
-            const enderecos = celulas.filter(c => /(\d{6,8}|(\d{2}[-/]\d{3}[-/]\d[-/]\d))/.test(c));
-            if(enderecos[0]) dados.origem = enderecos[0];
-            if(enderecos[1]) dados.destino = enderecos[1];
-        }
+        if(!dados.codigo) dados.codigo = fallback.codigo || "";
+        if(!dados.produto) dados.produto = fallback.produto || "";
+        if(!dados.endereco) dados.endereco = fallback.endereco || "";
+        if(!dados.qtd) dados.qtd = fallback.qtd || "";
 
-        if(!dados.origem && dados.endereco) dados.origem = dados.endereco;
+        if(!dados.origem) dados.origem = dados.endereco || "";
+        if(!dados.destino) dados.destino = "";
 
         return dados;
     }
@@ -245,22 +302,14 @@
         });
 
         modal.querySelector("#btnFecharEscolha").onclick = ()=> modal.remove();
-
-        modal.querySelector("#btnEscolhaMov").onclick = function(){
-            modal.remove();
-            preencherFormularioMovimentacao();
-        };
-
-        modal.querySelector("#btnEscolhaTransf").onclick = function(){
-            modal.remove();
-            preencherFormularioTransferencia();
-        };
+        modal.querySelector("#btnEscolhaMov").onclick = ()=> { modal.remove(); preencherFormularioMovimentacao(); };
+        modal.querySelector("#btnEscolhaTransf").onclick = ()=> { modal.remove(); preencherFormularioTransferencia(); };
 
         return modal;
     }
 
     function preencherFormularioMovimentacao(){
-        const secao = encontrarSecaoPorTitulo("Editar Movimentação") || encontrarSecaoPorTitulo("Nova Movimentação");
+        const secao = encontrarSecaoPorTitulo("Nova Movimentação") || encontrarSecaoPorTitulo("Editar Movimentação");
         if(!secao){
             alert("Formulário de movimentação não encontrado.");
             return;
@@ -269,15 +318,13 @@
         const dados = itemEdicaoAtual || {};
         const inputs = pegarInputsDaSecao(secao);
 
-        let selectTipo = inputs.find(el => el.tagName === "SELECT");
-        let inputProduto = preencherPorPlaceholder(inputs, ["código", "codigo", "produto", "nome"], dados.codigo || dados.produto);
-        let inputEndereco = preencherPorPlaceholder(inputs, ["endereço wms", "endereco wms", "endereço", "endereco"], dados.endereco || dados.origem || "");
-        let inputQtd = preencherPorPlaceholder(inputs, ["quantidade", "qtd"], dados.qtd || "");
+        const inputProduto = preencherPorPlaceholder(inputs, ["código", "codigo", "produto", "nome"], dados.codigo || dados.produto || "");
+        const inputEndereco = preencherPorPlaceholder(inputs, ["endereço wms", "endereco wms", "endereço", "endereco"], dados.endereco || "");
+        const inputQtd = preencherPorPlaceholder(inputs, ["quantidade", "qtd"], dados.qtd || "");
 
+        const selectTipo = inputs.find(el => el.tagName === "SELECT");
         if(selectTipo && dados.tipo){
-            const tipo = dados.tipo.toLowerCase()
-                .replace("saída","saida")
-                .replace("transferência","transferencia");
+            const tipo = dados.tipo.toLowerCase().replace("saída","saida").replace("transferência","transferencia");
             const op = [...selectTipo.options].find(o =>
                 o.value.toLowerCase().includes(tipo) || o.textContent.toLowerCase().includes(tipo)
             );
@@ -288,13 +335,6 @@
         }
 
         secao.scrollIntoView({ behavior:"smooth", block:"center" });
-
-        // se existir função antiga, chama depois do preenchimento
-        if(typeof window.editarMovimentacao === "function"){
-            try { window.editarMovimentacao(itemEdicaoAtual); } catch(e) {}
-        } else if(typeof window.editarItem === "function"){
-            try { window.editarItem(itemEdicaoAtual); } catch(e) {}
-        }
     }
 
     function preencherFormularioTransferencia(){
@@ -312,29 +352,19 @@
         preencherPorPlaceholder(inputs, ["destino"], dados.destino || "");
         preencherPorPlaceholder(inputs, ["quantidade", "qtd"], dados.qtd || "");
 
-        secao.scrollIntoView({ behavior:"smooth", block:"center" });
-
-        // muda visual do botão para edição, sem depender de função inexistente
-        const btn = [...secao.querySelectorAll("button")].find(b => /transferir/i.test(normalizarTexto(b.textContent)));
+        const btn = [...secao.querySelectorAll("button")].find(b => /transferir|salvar edição de transferência/i.test(normalizarTexto(b.textContent)));
         if(btn){
             btn.textContent = "Salvar Edição de Transferência";
             btn.dataset.modoEdicaoTransferencia = "1";
         }
+
+        secao.scrollIntoView({ behavior:"smooth", block:"center" });
     }
 
     document.addEventListener("click", function(e){
         const botao = e.target.closest("button");
         if(!botao) return;
         if(normalizarTexto(botao.textContent).toLowerCase() !== "editar") return;
-
-        const cardUltimas = [...document.querySelectorAll("h1,h2,h3,h4,h5,h6")].find(h =>
-            normalizarTexto(h.textContent).toLowerCase() === "últimas movimentações" ||
-            normalizarTexto(h.textContent).toLowerCase() === "ultimas movimentações" ||
-            normalizarTexto(h.textContent).toLowerCase() === "ultimas movimentacoes"
-        );
-
-        const dentroHistorico = cardUltimas ? !!botao.closest(".card, .bloco, .box, section, .modulo-card, .painel") : true;
-        if(!dentroHistorico) return;
 
         e.preventDefault();
         e.stopImmediatePropagation();
