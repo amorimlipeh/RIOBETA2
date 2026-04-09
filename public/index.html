@@ -418,6 +418,29 @@ function criarPedidosLayout(){
 
     bloco.id="pedidosV2Base";
 
+bloco.innerHTML += `
+<div class="pedido-box">
+    <h2>Novo Pedido</h2>
+
+    <input type="text" placeholder="Cliente" id="pedidoCliente">
+
+    <input type="text" placeholder="Representante" id="pedidoRepresentante">
+
+    <input type="date" id="pedidoData">
+
+    <input type="text" placeholder="Nº Pedido" id="pedidoNumero">
+
+    <button id="btnAdicionarProdutoPedido">+ Adicionar Produto</button>
+
+    <div id="itensPedidoBox">
+        <h3>Itens do Pedido</h3>
+        <p>Nenhum item adicionado.</p>
+    </div>
+</div>
+`;
+
+
+
     bloco.style.marginTop="20px";
 
     bloco.innerHTML=`
