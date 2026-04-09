@@ -11,7 +11,6 @@ async function carregarProdutos() {
   try {
     const response = await fetch('/api/produtos');
     const data = await response.json();
-
     produtos = (Array.isArray(data) ? data : []).map((produto, index) => ({
       ...produto,
       id: produto.id || `legacy-${produto.codigo || index}`
@@ -50,6 +49,22 @@ function getEnderecoStatus(qtd) {
   return { classe: 'status-ok', texto: 'Normal' };
 }
 
+function getTipoBadge(tipo) {
+  if (tipo === 'entrada') return { classe: 'tipo-entrada', texto: 'Entrada' };
+  if (tipo === 'saida') return { classe: 'tipo-saida', texto: 'Saída' };
+  if (tipo === 'transferencia') return { classe: 'tipo-transferencia', texto: 'Transferência' };
+  return { classe: 'tipo-ajuste', texto: 'Ajuste' };
+}
+
+function formatarDataHora(iso) {
+  if (!iso) return '-';
+  try {
+    return new Date(iso).toLocaleString('pt-BR');
+  } catch {
+    return iso;
+  }
+}
+
 function showModal(message, type = 'success') {
   const existente = document.getElementById('systemModal');
   if (existente) existente.remove();
@@ -74,6 +89,51 @@ function showModal(message, type = 'success') {
   modal.addEventListener('click', (e) => {
     if (e.target === modal) close();
   });
+}
+
+function showConfirmModal(message) {
+  return new Promise((resolve) => {
+    const existente = document.getElementById('confirmModal');
+    if (existente) existente.remove();
+
+    const modal = document.createElement('div');
+    modal.id = 'confirmModal';
+    modal.className = 'system-modal-backdrop';
+    modal.innerHTML = `
+      <div class="system-modal-card warning">
+        <div class="system-modal-title">Confirmar ação</div>
+        <div class="system-modal-message">${message}</div>
+        <div class="system-modal-actions">
+          <button class="system-modal-btn btn-secondary" id="confirmNo">Voltar</button>
+          <button class="system-modal-btn" id="confirmYes">Confirmar</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+
+    const close = (result) => {
+      modal.remove();
+      resolve(result);
+    };
+
+    document.getElementById('confirmNo')?.addEventListener('click', () => close(false));
+    document.getElementById('confirmYes')?.addEventListener('click', () => close(true));
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) close(false);
+    });
+  });
+}
+
+function setButtonLoading(button, textLoading) {
+  if (!button) return () => {};
+  const original = button.innerHTML;
+  button.disabled = true;
+  button.dataset.originalHtml = original;
+  button.innerHTML = textLoading;
+  return () => {
+    button.disabled = false;
+    button.innerHTML = button.dataset.originalHtml || original;
+  };
 }
 
 function produtoOptionLabel(produto) {
@@ -156,7 +216,7 @@ function produtosView() {
         <input id="sku" placeholder="SKU (Opcional)">
         <input id="imagem" placeholder="URL da Imagem">
 
-        <button onclick="salvarProduto()">
+        <button id="btnSalvarProduto" onclick="salvarProduto()">
           ${produtoEditandoId ? 'Salvar Alterações' : 'Salvar Produto'}
         </button>
 
@@ -229,7 +289,7 @@ function estoqueView() {
         <input id="movEndereco" placeholder="Endereço WMS (ex: 01-010-1-1)">
         <input id="movQuantidade" type="number" placeholder="Quantidade">
 
-        <button onclick="${movimentacaoEditandoId ? 'salvarEdicaoMovimentacao()' : 'movimentarEstoque()'}">
+        <button id="btnSalvarMovimentacao" onclick="${movimentacaoEditandoId ? 'salvarEdicaoMovimentacao()' : 'movimentarEstoque()'}">
           ${movimentacaoEditandoId ? 'Salvar Edição' : 'Salvar Movimentação'}
         </button>
         ${movimentacaoEditandoId ? `<button onclick="cancelarEdicaoMovimentacao()" style="background:#475569">Cancelar Edição</button>` : ''}
@@ -243,7 +303,7 @@ function estoqueView() {
         <input id="transfDestino" placeholder="Endereço de destino">
         <input id="transfQuantidade" type="number" placeholder="Quantidade">
 
-        <button onclick="transferirEstoque()">Transferir</button>
+        <button id="btnTransferir" onclick="transferirEstoque()">Transferir</button>
       </div>
     </div>
 
@@ -286,6 +346,7 @@ function estoqueView() {
               <th>Produto</th>
               <th>Endereço</th>
               <th>Qtd</th>
+              <th>Data/Hora</th>
               <th>Status</th>
               <th>Ação</th>
             </tr>
@@ -319,9 +380,9 @@ function renderTabela(lista = produtos) {
         <td>${produto.categoria || '-'}</td>
         <td>${produto.quantidade || 0}</td>
         <td>${produto.sku || '-'}</td>
-        <td style="display:flex;gap:6px;">
-          <button onclick="editarProduto('${produto.id}')">Editar</button>
-          <button onclick="removerProduto('${produto.id}')">Excluir</button>
+        <td style="display:flex;gap:6px;flex-wrap:wrap;">
+          <button class="btn-action btn-edit" onclick="editarProduto('${produto.id}')">Editar</button>
+          <button class="btn-action btn-delete" onclick="removerProduto('${produto.id}')">Excluir</button>
         </td>
       </tr>
     `;
@@ -375,17 +436,19 @@ function renderTabelaMovimentacoes() {
   movimentacoes.slice(0, 10).forEach(item => {
     const produto = produtos.find(p => String(p.id) === String(item.produtoId));
     const status = item.status || 'ativo';
+    const tipoBadge = getTipoBadge(item.tipo);
 
     tabela.innerHTML += `
       <tr class="${status === 'cancelado' ? 'cancelado' : ''}">
-        <td>${item.tipo}</td>
+        <td><span class="badge ${tipoBadge.classe}">${tipoBadge.texto}</span></td>
         <td>${produto ? produto.nome : item.produtoId}</td>
         <td>${item.tipo === 'transferencia' ? `${item.origem} → ${item.destino}` : (item.endereco || '-')}</td>
         <td>${item.quantidade}</td>
+        <td>${formatarDataHora(item.data)}</td>
         <td><span class="badge ${status === 'ativo' ? 'status-ok' : 'status-zero'}">${status}</span></td>
         <td style="display:flex;gap:6px;flex-wrap:wrap;">
-          ${status === 'ativo' ? `<button onclick="editarMovimentacao('${item.id}')">Editar</button>` : '-'}
-          ${status === 'ativo' ? `<button onclick="cancelarMovimentacao('${item.id}')">Cancelar</button>` : ''}
+          ${status === 'ativo' ? `<button class="btn-action btn-edit" onclick="editarMovimentacao('${item.id}')">Editar</button>` : '-'}
+          ${status === 'ativo' ? `<button class="btn-action btn-cancel" onclick="cancelarMovimentacao('${item.id}')">Cancelar</button>` : ''}
         </td>
       </tr>
     `;
@@ -422,41 +485,49 @@ window.filtrarProdutos = function () {
 };
 
 window.salvarProduto = async function () {
-  const codigoEl = document.getElementById('codigo');
-  const skuEl = document.getElementById('sku');
+  const btn = document.getElementById('btnSalvarProduto');
+  const resetBtn = setButtonLoading(btn, 'Salvando...');
 
-  const payload = {
-    codigo: codigoEl.value,
-    nome: document.getElementById('nome').value,
-    categoria: document.getElementById('categoria').value,
-    quantidade: Number(document.getElementById('quantidade').value),
-    fator: Number(document.getElementById('fator').value),
-    sku: skuEl.value || gerarSKU(),
-    imagem: document.getElementById('imagem').value
-  };
+  try {
+    const codigoEl = document.getElementById('codigo');
+    const skuEl = document.getElementById('sku');
 
-  if (!payload.codigo || !payload.nome) {
-    showModal('Código e nome são obrigatórios.', 'error');
-    return;
+    const payload = {
+      codigo: codigoEl.value,
+      nome: document.getElementById('nome').value,
+      categoria: document.getElementById('categoria').value,
+      quantidade: Number(document.getElementById('quantidade').value),
+      fator: Number(document.getElementById('fator').value),
+      sku: skuEl.value || gerarSKU(),
+      imagem: document.getElementById('imagem').value
+    };
+
+    if (!payload.codigo || !payload.nome) {
+      showModal('Código e nome são obrigatórios.', 'error');
+      return;
+    }
+
+    if (produtoEditandoId) {
+      await fetch('/api/produtos/' + produtoEditandoId, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      produtoEditandoId = null;
+    } else {
+      await fetch('/api/produtos', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+    }
+
+    await carregarProdutos();
+    await renderView('produtos', { skipLoad: true });
+    showModal('Produto salvo com sucesso.', 'success');
+  } finally {
+    resetBtn();
   }
-
-  if (produtoEditandoId) {
-    await fetch('/api/produtos/' + produtoEditandoId, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
-    produtoEditandoId = null;
-  } else {
-    await fetch('/api/produtos', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
-  }
-
-  await carregarProdutos();
-  await renderView('produtos', { skipLoad: true });
 };
 
 window.editarProduto = async function (id) {
@@ -476,88 +547,109 @@ window.cancelarEdicao = async function () {
 };
 
 window.removerProduto = async function (id) {
+  const confirmar = await showConfirmModal('Tem certeza que deseja excluir este produto?');
+  if (!confirmar) return;
+
   await fetch('/api/produtos/' + id, { method: 'DELETE' });
   await carregarProdutos();
   await renderView('produtos', { skipLoad: true });
+  showModal('Produto excluído com sucesso.', 'success');
 };
 
 window.movimentarEstoque = async function () {
-  const produtoBusca = document.getElementById('movProdutoBusca')?.value;
-  const produto = encontrarProdutoPorBusca(produtoBusca);
-  const tipo = document.getElementById('movTipo').value;
-  const endereco = document.getElementById('movEndereco').value.trim();
-  const quantidade = Number(document.getElementById('movQuantidade').value || 0);
+  const btn = document.getElementById('btnSalvarMovimentacao');
+  const resetBtn = setButtonLoading(btn, movimentacaoEditandoId ? 'Salvando...' : 'Processando...');
 
-  if (!produto) {
-    showModal('Selecione um produto válido para a movimentação.', 'error');
-    return;
+  try {
+    const produtoBusca = document.getElementById('movProdutoBusca')?.value;
+    const produto = encontrarProdutoPorBusca(produtoBusca);
+    const tipo = document.getElementById('movTipo').value;
+    const endereco = document.getElementById('movEndereco').value.trim();
+    const quantidade = Number(document.getElementById('movQuantidade').value || 0);
+
+    if (!produto) {
+      showModal('Selecione um produto válido para a movimentação.', 'error');
+      return;
+    }
+
+    if (!endereco || !quantidade) {
+      showModal('Endereço e quantidade são obrigatórios.', 'error');
+      return;
+    }
+
+    const response = await fetch('/api/estoque/movimentar', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ produtoId: produto.id, tipo, endereco, quantidade })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      showModal(data.message || 'Erro ao movimentar estoque.', 'error');
+      return;
+    }
+
+    showModal('Movimentação realizada com sucesso.', 'success');
+
+    await carregarProdutos();
+    await carregarEstoque();
+    await carregarMovimentacoes();
+    await renderView('estoque', { skipLoad: true });
+  } finally {
+    resetBtn();
   }
-
-  if (!endereco || !quantidade) {
-    showModal('Endereço e quantidade são obrigatórios.', 'error');
-    return;
-  }
-
-  const response = await fetch('/api/estoque/movimentar', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ produtoId: produto.id, tipo, endereco, quantidade })
-  });
-
-  const data = await response.json();
-
-  if (!response.ok) {
-    showModal(data.message || 'Erro ao movimentar estoque.', 'error');
-    return;
-  }
-
-  showModal('Movimentação realizada com sucesso.', 'success');
-
-  await carregarProdutos();
-  await carregarEstoque();
-  await carregarMovimentacoes();
-  await renderView('estoque', { skipLoad: true });
 };
 
 window.transferirEstoque = async function () {
-  const produtoBusca = document.getElementById('transfProdutoBusca')?.value;
-  const produto = encontrarProdutoPorBusca(produtoBusca);
-  const origem = document.getElementById('transfOrigem').value.trim();
-  const destino = document.getElementById('transfDestino').value.trim();
-  const quantidade = Number(document.getElementById('transfQuantidade').value || 0);
+  const btn = document.getElementById('btnTransferir');
+  const resetBtn = setButtonLoading(btn, 'Transferindo...');
 
-  if (!produto) {
-    showModal('Selecione um produto válido para a transferência.', 'error');
-    return;
+  try {
+    const produtoBusca = document.getElementById('transfProdutoBusca')?.value;
+    const produto = encontrarProdutoPorBusca(produtoBusca);
+    const origem = document.getElementById('transfOrigem').value.trim();
+    const destino = document.getElementById('transfDestino').value.trim();
+    const quantidade = Number(document.getElementById('transfQuantidade').value || 0);
+
+    if (!produto) {
+      showModal('Selecione um produto válido para a transferência.', 'error');
+      return;
+    }
+
+    if (!origem || !destino || !quantidade) {
+      showModal('Origem, destino e quantidade são obrigatórios.', 'error');
+      return;
+    }
+
+    const response = await fetch('/api/estoque/transferir', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ produtoId: produto.id, origem, destino, quantidade })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      showModal(data.message || 'Erro ao transferir estoque.', 'error');
+      return;
+    }
+
+    showModal('Transferência realizada com sucesso.', 'success');
+
+    await carregarProdutos();
+    await carregarEstoque();
+    await carregarMovimentacoes();
+    await renderView('estoque', { skipLoad: true });
+  } finally {
+    resetBtn();
   }
-
-  if (!origem || !destino || !quantidade) {
-    showModal('Origem, destino e quantidade são obrigatórios.', 'error');
-    return;
-  }
-
-  const response = await fetch('/api/estoque/transferir', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ produtoId: produto.id, origem, destino, quantidade })
-  });
-
-  const data = await response.json();
-
-  if (!response.ok) {
-    showModal(data.message || 'Erro ao transferir estoque.', 'error');
-    return;
-  }
-
-  showModal('Transferência realizada com sucesso.', 'success');
-
-  await carregarProdutos();
-  await carregarEstoque();
-  await carregarMovimentacoes();
-  await renderView('estoque', { skipLoad: true });
 };
 
 window.cancelarMovimentacao = async function (id) {
+  const confirmar = await showConfirmModal('Tem certeza que deseja cancelar esta movimentação?');
+  if (!confirmar) return;
+
   await fetch('/api/movimentacoes/' + id + '/cancelar', {
     method: 'PUT'
   });
@@ -566,6 +658,7 @@ window.cancelarMovimentacao = async function (id) {
   await carregarEstoque();
   await carregarMovimentacoes();
   await renderView('estoque', { skipLoad: true });
+  showModal('Movimentação cancelada com sucesso.', 'success');
 };
 
 window.editarMovimentacao = function (id) {
@@ -590,47 +683,54 @@ window.editarMovimentacao = function (id) {
 window.salvarEdicaoMovimentacao = async function () {
   if (!movimentacaoEditandoId) return;
 
-  const movOriginal = movimentacoes.find(m => String(m.id) === String(movimentacaoEditandoId));
-  if (!movOriginal) {
-    showModal('Movimentação original não encontrada.', 'error');
-    return;
+  const btn = document.getElementById('btnSalvarMovimentacao');
+  const resetBtn = setButtonLoading(btn, 'Salvando...');
+
+  try {
+    const movOriginal = movimentacoes.find(m => String(m.id) === String(movimentacaoEditandoId));
+    if (!movOriginal) {
+      showModal('Movimentação original não encontrada.', 'error');
+      return;
+    }
+
+    await fetch('/api/movimentacoes/' + movimentacaoEditandoId + '/cancelar', {
+      method: 'PUT'
+    });
+
+    const produtoBusca = document.getElementById('movProdutoBusca')?.value;
+    const produto = encontrarProdutoPorBusca(produtoBusca);
+    const tipo = document.getElementById('movTipo').value;
+    const endereco = document.getElementById('movEndereco').value.trim();
+    const quantidade = Number(document.getElementById('movQuantidade').value || 0);
+
+    if (!produto) {
+      showModal('Selecione um produto válido para a edição.', 'error');
+      return;
+    }
+
+    const response = await fetch('/api/estoque/movimentar', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ produtoId: produto.id, tipo, endereco, quantidade })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      showModal(data.message || 'Erro ao salvar edição.', 'error');
+      return;
+    }
+
+    movimentacaoEditandoId = null;
+    showModal('Movimentação editada com sucesso.', 'success');
+
+    await carregarProdutos();
+    await carregarEstoque();
+    await carregarMovimentacoes();
+    await renderView('estoque', { skipLoad: true });
+  } finally {
+    resetBtn();
   }
-
-  await fetch('/api/movimentacoes/' + movimentacaoEditandoId + '/cancelar', {
-    method: 'PUT'
-  });
-
-  const produtoBusca = document.getElementById('movProdutoBusca')?.value;
-  const produto = encontrarProdutoPorBusca(produtoBusca);
-  const tipo = document.getElementById('movTipo').value;
-  const endereco = document.getElementById('movEndereco').value.trim();
-  const quantidade = Number(document.getElementById('movQuantidade').value || 0);
-
-  if (!produto) {
-    showModal('Selecione um produto válido para a edição.', 'error');
-    return;
-  }
-
-  const response = await fetch('/api/estoque/movimentar', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ produtoId: produto.id, tipo, endereco, quantidade })
-  });
-
-  const data = await response.json();
-
-  if (!response.ok) {
-    showModal(data.message || 'Erro ao salvar edição.', 'error');
-    return;
-  }
-
-  movimentacaoEditandoId = null;
-  showModal('Movimentação editada com sucesso.', 'success');
-
-  await carregarProdutos();
-  await carregarEstoque();
-  await carregarMovimentacoes();
-  await renderView('estoque', { skipLoad: true });
 };
 
 window.cancelarEdicaoMovimentacao = async function () {
