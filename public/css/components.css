@@ -356,3 +356,134 @@ width:100%;
     max-width:100% !important;
   }
 }
+
+/* ===== BUILD 7.4 REFINO MOBILE ===== */
+.menu-item{
+display:flex;
+align-items:center;
+gap:10px;
+}
+
+.menu-icon{
+width:20px;
+display:inline-flex;
+align-items:center;
+justify-content:center;
+opacity:.95;
+}
+
+.clock-badge{
+display:flex;
+align-items:center;
+justify-content:center;
+padding:10px 14px;
+border-radius:12px;
+background:rgba(15,23,42,.95);
+color:#fff;
+font-weight:600;
+min-width:82px;
+white-space:nowrap;
+box-shadow:0 6px 16px rgba(0,0,0,.18);
+}
+
+.topbar{
+display:flex;
+align-items:center;
+justify-content:space-between;
+gap:12px;
+padding:10px 0 18px 0;
+}
+
+.topbar-left{
+display:flex;
+align-items:center;
+gap:12px;
+width:100%;
+min-width:0;
+}
+
+.search{
+height:46px;
+}
+
+.mobile-menu-btn{
+transition:transform .2s ease, box-shadow .2s ease;
+}
+
+.mobile-menu-btn:active{
+transform:scale(.96);
+}
+
+.mobile-overlay{
+transition:opacity .28s ease;
+}
+
+@media (max-width: 900px){
+  .sidebar{
+    width:82vw !important;
+    max-width:320px !important;
+    min-width:0 !important;
+    border-top-right-radius:18px;
+    border-bottom-right-radius:18px;
+    transform:translateX(-110%);
+    transition:transform .32s cubic-bezier(.22,.8,.2,1);
+  }
+
+  .sidebar.sidebar-open{
+    transform:translateX(0);
+  }
+
+  .brand{
+    padding-right:8px;
+  }
+
+  .topbar{
+    position:sticky;
+    top:0;
+    padding:10px 0 14px 0;
+    margin-bottom:8px;
+  }
+
+  .topbar-left{
+    flex:1;
+  }
+
+  .search{
+    width:100% !important;
+    max-width:100% !important;
+    margin:0 !important;
+  }
+
+  #clock{
+    font-size:13px;
+    min-width:70px;
+    padding:10px 10px;
+  }
+
+  .menu{
+    gap:10px !important;
+  }
+
+  .menu-item{
+    justify-content:flex-start !important;
+    padding:14px 16px !important;
+    border-radius:14px;
+  }
+}
+
+@media (max-width: 520px){
+  .clock-badge{
+    min-width:64px;
+    font-size:12px;
+    padding:9px 8px;
+  }
+
+  .search{
+    height:44px;
+    font-size:14px;
+  }
+
+  .menu-item span:last-child{
+    font-size:14px;
+  }
+}
