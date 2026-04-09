@@ -391,462 +391,104 @@
 
 
 
+
+
 <!-- INICIO PEDIDOS V2 BASE -->
 <script>
 (function(){
-    function txt(v){
-        return String(v || "").trim();
-    }
 
-    function normalize(v){
-        return txt(v).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
-    }
+function criarPedidosLayout(){
 
-    function findPedidosSection(){
-        const heads = [...document.querySelectorAll("h1,h2,h3,h4,h5,h6,div,strong,span")];
-        const hit = heads.find(el => normalize(el.textContent) === "modulo pedidos");
-        if(!hit) return null;
-        return hit.closest(".card, .bloco, .box, section, .modulo-card, .painel, .module-card, .widget, div") || hit.parentElement;
-    }
+    if(document.getElementById("pedidosV2Base")) return;
 
-    function showToast(msg){
-        let t = document.getElementById("pedidosV2Toast");
-        if(!t){
-            t = document.createElement("div");
-            t.id = "pedidosV2Toast";
-            t.className = "pedidos-v2-toast";
-            document.body.appendChild(t);
+    let titulo=null;
+
+    document.querySelectorAll("*").forEach(el=>{
+        if(
+            el.innerText &&
+            el.innerText.trim() === "Módulo Pedidos"
+        ){
+            titulo=el;
         }
-        t.textContent = msg;
-        t.classList.add("ativo");
-        clearTimeout(t._timer);
-        t._timer = setTimeout(() => t.classList.remove("ativo"), 1800);
-    }
+    });
 
-    async function fetchProdutosBase(){
-        const tries = [
-            "/api/produtos",
-            "/api/products",
-            "/data/produtos.json",
-            "/server/data/produtos.json",
-            "/public/data/produtos.json"
-        ];
-        for(const url of tries){
-            try{
-                const r = await fetch(url, { cache:"no-store" });
-                if(!r.ok) continue;
-                const json = await r.json();
-                if(Array.isArray(json)) return json;
-                if(Array.isArray(json.produtos)) return json.produtos;
-                if(Array.isArray(json.items)) return json.items;
-            }catch(e){}
-        }
-        return [];
-    }
+    if(!titulo) return;
 
-    function num(v){
-        const n = Number(String(v ?? "").replace(",", "."));
-        return isNaN(n) ? 0 : n;
-    }
+    const bloco=document.createElement("div");
 
-    function getFator(prod){
-        return num(
-            prod.fator ??
-            prod.fatorConversao ??
-            prod.fator_conversao ??
-            prod.qtdCaixa ??
-            prod.caixa ??
-            prod.unidadesPorCaixa ??
-            1
-        ) || 1;
-    }
+    bloco.id="pedidosV2Base";
 
-    function getCodigo(prod){
-        return txt(prod.codigo || prod.code || prod.sku || prod.id || "");
-    }
+    bloco.style.marginTop="20px";
 
-    function getNome(prod){
-        return txt(prod.nome || prod.name || prod.descricao || prod.description || "Produto");
-    }
+    bloco.innerHTML=`
+    <div style="
+        background:linear-gradient(180deg,#23344d,#1b2940);
+        padding:20px;
+        border-radius:18px;
+        margin-bottom:20px;
+    ">
 
-    function getImagem(prod){
-        return txt(
-            prod.imagem ||
-            prod.image ||
-            prod.foto ||
-            prod.imagemUrl ||
-            prod.urlImagem ||
-            ""
-        );
-    }
+        <h2 style="color:white;margin-bottom:20px;">Novo Pedido</h2>
 
-    function getStatusItem(raw){
-        return raw === true ? "conferido" : (raw || "pendente");
-    }
+        <div style="
+            display:grid;
+            grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+            gap:12px;
+        ">
+            <input placeholder="Cliente" class="form-control">
+            <input placeholder="Representante" class="form-control">
+            <input type="date" class="form-control">
+            <input placeholder="Nº Pedido" class="form-control">
+        </div>
 
-    function caixasFrom(qtd, fator){
-        fator = num(fator) || 1;
-        qtd = num(qtd);
-        return (qtd / fator).toFixed(2).replace(/\.00$/, "");
-    }
+        <button id="abrirCatalogoPedido" style="
+            margin-top:15px;
+            width:100%;
+            background:#2563eb;
+            color:#fff;
+            border:none;
+            padding:14px;
+            border-radius:12px;
+            font-weight:bold;
+        ">
+            + Adicionar Produto
+        </button>
 
-    function buildPedidosV2(section){
-        if(!section) return;
-        if(document.getElementById("pedidosV2Base")) return;
+    </div>
 
-        const host = section.parentElement || section;
-        const wrap = document.createElement("div");
-        wrap.id = "pedidosV2Base";
-        wrap.className = "pedidos-v2-wrap";
-        wrap.innerHTML = `
-            <div class="pedidos-v2-card">
-                <h2 class="pedidos-v2-title">Novo Pedido</h2>
+    <div style="
+        background:linear-gradient(180deg,#23344d,#1b2940);
+        padding:20px;
+        border-radius:18px;
+    ">
 
-                <div class="pedidos-v2-grid-4">
-                    <div class="pedidos-v2-field">
-                        <label class="pedidos-v2-label">Cliente</label>
-                        <input id="pedidoCliente" class="pedidos-v2-input" placeholder="Nome do cliente">
-                    </div>
+        <h3 style="color:white;margin-bottom:15px;">Itens do Pedido</h3>
 
-                    <div class="pedidos-v2-field">
-                        <label class="pedidos-v2-label">Representante</label>
-                        <input id="pedidoRepresentante" class="pedidos-v2-input" placeholder="Nome do representante">
-                    </div>
+        <div id="listaItensPedido" style="
+            color:#cbd5e1;
+        ">
+            Nenhum item adicionado.
+        </div>
 
-                    <div class="pedidos-v2-field">
-                        <label class="pedidos-v2-label">Data</label>
-                        <input id="pedidoData" type="date" class="pedidos-v2-input">
-                    </div>
+    </div>
+    `;
 
-                    <div class="pedidos-v2-field">
-                        <label class="pedidos-v2-label">Nº Pedido / Status</label>
-                        <div class="pedidos-v2-grid" style="grid-template-columns:1fr 160px;">
-                            <input id="pedidoNumero" class="pedidos-v2-input" placeholder="Ex: PED-001">
-                            <select id="pedidoStatus" class="pedidos-v2-select">
-                                <option value="pendente">Pendente</option>
-                                <option value="em_montagem">Em montagem</option>
-                                <option value="concluido">Concluído</option>
-                                <option value="expedido">Expedido</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
+    titulo.parentNode.insertBefore(
+        bloco,
+        titulo.nextSibling
+    );
 
-                <div class="pedidos-v2-btn-row" style="margin-top:14px;">
-                    <button id="btnAbrirCatalogoPedido" class="pedidos-v2-btn">Adicionar Produto</button>
-                    <button id="btnLimparPedido" class="pedidos-v2-btn pedidos-v2-btn-sec">Limpar Pedido</button>
-                </div>
-            </div>
+}
 
-            <div class="pedidos-v2-divider"></div>
+document.addEventListener("DOMContentLoaded",criarPedidosLayout);
 
-            <div class="pedidos-v2-card">
-                <h3 class="pedidos-v2-title" style="font-size:22px;">Itens do Pedido</h3>
-                <div id="pedidoItensLista" class="pedidos-v2-items">
-                    <div class="pedidos-v2-empty">Nenhum item adicionado ao pedido.</div>
-                </div>
-            </div>
+setTimeout(criarPedidosLayout,500);
+setTimeout(criarPedidosLayout,1500);
+setTimeout(criarPedidosLayout,3000);
 
-            <div class="pedidos-v2-divider"></div>
-
-            <div class="pedidos-v2-card">
-                <h3 class="pedidos-v2-title" style="font-size:22px;">Resumo</h3>
-                <div class="pedidos-v2-summary">
-                    <div class="pedidos-v2-summary-card">
-                        <div class="pedidos-v2-summary-label">Total de Itens</div>
-                        <div id="resumoItens" class="pedidos-v2-summary-value">0</div>
-                    </div>
-                    <div class="pedidos-v2-summary-card">
-                        <div class="pedidos-v2-summary-label">Total Unidades</div>
-                        <div id="resumoUnidades" class="pedidos-v2-summary-value">0</div>
-                    </div>
-                    <div class="pedidos-v2-summary-card">
-                        <div class="pedidos-v2-summary-label">Total Caixas</div>
-                        <div id="resumoCaixas" class="pedidos-v2-summary-value">0</div>
-                    </div>
-                </div>
-
-                <div class="pedidos-v2-btn-row" style="margin-top:16px;">
-                    <button id="btnSalvarPedido" class="pedidos-v2-btn pedidos-v2-btn-green">Salvar Pedido</button>
-                </div>
-            </div>
-        `;
-
-        section.style.display = "none";
-        host.appendChild(wrap);
-
-        if(!document.getElementById("pedidoCatalogoModal")){
-            const modal = document.createElement("div");
-            modal.id = "pedidoCatalogoModal";
-            modal.className = "pedidos-v2-modal";
-            modal.innerHTML = `
-                <div class="pedidos-v2-modal-box">
-                    <div class="pedidos-v2-modal-head">
-                        <div class="pedidos-v2-modal-title">Catálogo de Produtos</div>
-                        <button class="pedidos-v2-close" id="btnFecharCatalogoPedido">Fechar</button>
-                    </div>
-                    <input id="pedidoCatalogoBusca" class="pedidos-v2-search" placeholder="Pesquisar produto por código ou nome">
-                    <div id="pedidoCatalogoLista" class="pedidos-v2-catalog"></div>
-                </div>
-            `;
-            document.body.appendChild(modal);
-        }
-    }
-
-    const pedidosState = {
-        produtos: [],
-        itens: []
-    };
-
-    function renderResumo(){
-        const totalItens = pedidosState.itens.length;
-        const totalUnidades = pedidosState.itens.reduce((acc, it) => acc + num(it.quantidade), 0);
-        const totalCaixas = pedidosState.itens.reduce((acc, it) => acc + (num(it.quantidade) / (num(it.fator) || 1)), 0);
-
-        const elItens = document.getElementById("resumoItens");
-        const elUn = document.getElementById("resumoUnidades");
-        const elCx = document.getElementById("resumoCaixas");
-
-        if(elItens) elItens.textContent = String(totalItens);
-        if(elUn) elUn.textContent = String(totalUnidades);
-        if(elCx) elCx.textContent = totalCaixas.toFixed(2).replace(/\.00$/, "");
-    }
-
-    function renderItensPedido(){
-        const box = document.getElementById("pedidoItensLista");
-        if(!box) return;
-
-        if(!pedidosState.itens.length){
-            box.innerHTML = '<div class="pedidos-v2-empty">Nenhum item adicionado ao pedido.</div>';
-            renderResumo();
-            return;
-        }
-
-        box.innerHTML = pedidosState.itens.map((item, idx) => {
-            const checked = item.statusItem === "conferido";
-            const img = item.imagem
-                ? `<img src="${item.imagem}" alt="${item.nome}" onerror="this.parentElement.innerHTML='<div class=&quot;pedidos-v2-noimg&quot;>SEM IMG</div>';">`
-                : `<div class="pedidos-v2-noimg">SEM IMG</div>`;
-            return `
-                <div class="pedidos-v2-item" data-item-index="${idx}">
-                    <div class="pedidos-v2-thumb">${img}</div>
-
-                    <div class="pedidos-v2-info">
-                        <div class="pedidos-v2-code">${item.codigo}</div>
-                        <div class="pedidos-v2-name">${item.nome}</div>
-                        <div class="pedidos-v2-meta">
-                            <span>Fator: ${item.fator} un/cx</span>
-                            <span>Qtd: ${item.quantidade} un</span>
-                            <span>Caixas: ${caixasFrom(item.quantidade, item.fator)}</span>
-                            <span>Status: ${item.statusItem}</span>
-                        </div>
-                    </div>
-
-                    <div class="pedidos-v2-actions">
-                        <button class="pedidos-v2-check ${checked ? "ativo" : ""}" data-check-index="${idx}">✅</button>
-                        <button class="pedidos-v2-remove" data-remove-index="${idx}">Remover</button>
-                    </div>
-                </div>
-            `;
-        }).join("");
-
-        box.querySelectorAll("[data-check-index]").forEach(btn => {
-            btn.onclick = function(){
-                const idx = Number(this.dataset.checkIndex);
-                const item = pedidosState.itens[idx];
-                if(!item) return;
-                item.statusItem = item.statusItem === "conferido" ? "pendente" : "conferido";
-                renderItensPedido();
-            };
-        });
-
-        box.querySelectorAll("[data-remove-index]").forEach(btn => {
-            btn.onclick = function(){
-                const idx = Number(this.dataset.removeIndex);
-                pedidosState.itens.splice(idx, 1);
-                renderItensPedido();
-                showToast("Item removido do pedido.");
-            };
-        });
-
-        renderResumo();
-    }
-
-    function renderCatalogo(lista){
-        const box = document.getElementById("pedidoCatalogoLista");
-        if(!box) return;
-
-        if(!lista.length){
-            box.innerHTML = `<div class="pedidos-v2-empty">Nenhum produto encontrado.</div>`;
-            return;
-        }
-
-        box.innerHTML = lista.map((prod, idx) => {
-            const codigo = getCodigo(prod);
-            const nome = getNome(prod);
-            const fator = getFator(prod);
-            const imagem = getImagem(prod);
-            const img = imagem
-                ? `<img src="${imagem}" alt="${nome}" onerror="this.parentElement.innerHTML='<div class=&quot;pedidos-v2-noimg&quot;>SEM IMG</div>';">`
-                : `<div class="pedidos-v2-noimg">SEM IMG</div>`;
-
-            return `
-                <div class="pedidos-v2-catalog-item" data-catalog-idx="${idx}">
-                    <div class="pedidos-v2-catalog-thumb">${img}</div>
-
-                    <div>
-                        <div class="pedidos-v2-catalog-code">${codigo}</div>
-                        <div class="pedidos-v2-catalog-name">${nome}</div>
-                        <div class="pedidos-v2-catalog-meta">
-                            <span>Fator: ${fator} un/cx</span>
-                        </div>
-                    </div>
-
-                    <div class="pedidos-v2-catalog-actions">
-                        <input type="number" min="1" step="1" value="1" class="pedidos-v2-qtd" data-qtd-idx="${idx}">
-                        <button class="pedidos-v2-add" data-add-idx="${idx}">Adicionar</button>
-                    </div>
-                </div>
-            `;
-        }).join("");
-
-        box.querySelectorAll("[data-add-idx]").forEach(btn => {
-            btn.onclick = function(){
-                const idx = Number(this.dataset.addIdx);
-                const prod = lista[idx];
-                const qtdEl = document.querySelector(`[data-qtd-idx="${idx}"]`);
-                const quantidade = Math.max(1, num(qtdEl ? qtdEl.value : 1));
-
-                pedidosState.itens.push({
-                    codigo: getCodigo(prod),
-                    nome: getNome(prod),
-                    imagem: getImagem(prod),
-                    quantidade,
-                    fator: getFator(prod),
-                    caixas: caixasFrom(quantidade, getFator(prod)),
-                    statusItem: "pendente"
-                });
-
-                renderItensPedido();
-                closeCatalogo();
-                showToast("Produto adicionado ao pedido.");
-            };
-        });
-    }
-
-    function openCatalogo(){
-        const modal = document.getElementById("pedidoCatalogoModal");
-        if(modal) modal.classList.add("ativo");
-        renderCatalogo(pedidosState.produtos);
-        const busca = document.getElementById("pedidoCatalogoBusca");
-        if(busca) busca.value = "";
-    }
-
-    function closeCatalogo(){
-        const modal = document.getElementById("pedidoCatalogoModal");
-        if(modal) modal.classList.remove("ativo");
-    }
-
-    function bindPedidosEvents(){
-        const btnAbrir = document.getElementById("btnAbrirCatalogoPedido");
-        const btnLimpar = document.getElementById("btnLimparPedido");
-        const btnSalvar = document.getElementById("btnSalvarPedido");
-        const btnFechar = document.getElementById("btnFecharCatalogoPedido");
-        const busca = document.getElementById("pedidoCatalogoBusca");
-
-        if(btnAbrir) btnAbrir.onclick = openCatalogo;
-        if(btnLimpar) btnLimpar.onclick = function(){
-            pedidosState.itens = [];
-            renderItensPedido();
-            showToast("Pedido limpo.");
-        };
-        if(btnFechar) btnFechar.onclick = closeCatalogo;
-
-        const modal = document.getElementById("pedidoCatalogoModal");
-        if(modal){
-            modal.onclick = function(e){
-                if(e.target === modal) closeCatalogo();
-            };
-        }
-
-        if(busca){
-            busca.oninput = function(){
-                const q = normalize(this.value);
-                const filtrados = pedidosState.produtos.filter(prod => {
-                    const codigo = normalize(getCodigo(prod));
-                    const nome = normalize(getNome(prod));
-                    return codigo.includes(q) || nome.includes(q);
-                });
-                renderCatalogo(filtrados);
-            };
-        }
-
-        if(btnSalvar){
-            btnSalvar.onclick = async function(){
-                const pedido = {
-                    id: txt(document.getElementById("pedidoNumero")?.value) || ("PED-" + Date.now()),
-                    cliente: txt(document.getElementById("pedidoCliente")?.value),
-                    representante: txt(document.getElementById("pedidoRepresentante")?.value),
-                    data: txt(document.getElementById("pedidoData")?.value),
-                    status: txt(document.getElementById("pedidoStatus")?.value) || "pendente",
-                    itens: pedidosState.itens
-                };
-
-                const listaLocal = JSON.parse(localStorage.getItem("pedidos_v2_local") || "[]");
-                listaLocal.push(pedido);
-                localStorage.setItem("pedidos_v2_local", JSON.stringify(listaLocal));
-
-                try{
-                    await fetch("/api/pedidos", {
-                        method:"POST",
-                        headers:{ "Content-Type":"application/json" },
-                        body: JSON.stringify(pedido)
-                    });
-                }catch(e){}
-
-                showToast("Pedido salvo com sucesso.");
-            };
-        }
-    }
-
-    function preencherBasePedido(){
-        const dataEl = document.getElementById("pedidoData");
-        const numeroEl = document.getElementById("pedidoNumero");
-        if(dataEl && !dataEl.value){
-            const d = new Date();
-            const yyyy = d.getFullYear();
-            const mm = String(d.getMonth() + 1).padStart(2, "0");
-            const dd = String(d.getDate()).padStart(2, "0");
-            dataEl.value = `${yyyy}-${mm}-${dd}`;
-        }
-        if(numeroEl && !numeroEl.value){
-            numeroEl.value = "PED-" + Date.now().toString().slice(-6);
-        }
-    }
-
-    async function initPedidosV2(){
-        const secao = findPedidosSection();
-        if(!secao) return;
-
-        buildPedidosV2(secao);
-        bindPedidosEvents();
-        preencherBasePedido();
-        renderItensPedido();
-
-        pedidosState.produtos = await fetchProdutosBase();
-        if(!Array.isArray(pedidosState.produtos)) pedidosState.produtos = [];
-    }
-
-    if(document.readyState === "loading"){
-        document.addEventListener("DOMContentLoaded", initPedidosV2);
-    }else{
-        initPedidosV2();
-    }
-
-    setTimeout(initPedidosV2, 800);
-    setTimeout(initPedidosV2, 1800);
 })();
 </script>
 <!-- FIM PEDIDOS V2 BASE -->
+
 </body>
 </html>
