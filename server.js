@@ -7,96 +7,135 @@ const PORT = process.env.PORT || 3000;
 
 const DATA_DIR = path.join(__dirname, 'data');
 const PRODUTOS_FILE = path.join(DATA_DIR, 'produtos.json');
+const ESTOQUE_FILE = path.join(DATA_DIR, 'estoque_enderecos.json');
+const MOVS_FILE = path.join(DATA_DIR, 'movimentacoes.json');
 const PUBLIC_DIR = path.join(__dirname, 'public');
-
-if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
-if (!fs.existsSync(PRODUTOS_FILE)) fs.writeFileSync(PRODUTOS_FILE, '[]', 'utf8');
 
 app.use(express.json());
 app.use(express.static(PUBLIC_DIR));
 
-function readProdutos() {
-  try {
-    return JSON.parse(fs.readFileSync(PRODUTOS_FILE, 'utf8') || '[]');
-  } catch {
-    return [];
-  }
+function ensure(file){
+  if(!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR,{recursive:true});
+  if(!fs.existsSync(file)) fs.writeFileSync(file,'[]');
 }
 
-function saveProdutos(produtos) {
-  fs.writeFileSync(PRODUTOS_FILE, JSON.stringify(produtos, null, 2), 'utf8');
-}
+ensure(PRODUTOS_FILE);
+ensure(ESTOQUE_FILE);
+ensure(MOVS_FILE);
 
-app.get('/api/health', (req, res) => {
-  res.json({ ok: true, status: 'online' });
-});
+const readJson = (file)=>JSON.parse(fs.readFileSync(file,'utf8')||'[]');
+const saveJson = (file,data)=>fs.writeFileSync(file,JSON.stringify(data,null,2));
 
-app.get('/api/produtos', (req, res) => {
-  res.json(readProdutos());
-});
+/* PRODUTOS */
+app.get('/api/produtos',(req,res)=>res.json(readJson(PRODUTOS_FILE)));
 
-app.post('/api/produtos', (req, res) => {
-  const { codigo, nome, categoria, quantidade, fator, sku, imagem } = req.body || {};
+app.post('/api/produtos',(req,res)=>{
+  const produtos = readJson(PRODUTOS_FILE);
 
-  if (!codigo || !nome) {
-    return res.status(400).json({ ok: false, message: 'Código e nome são obrigatórios.' });
-  }
-
-  const produtos = readProdutos();
-
-  const novoProduto = {
+  const novo = {
     id: Date.now().toString(),
-    codigo: String(codigo).trim(),
-    nome: String(nome).trim(),
-    categoria: String(categoria || '').trim(),
-    quantidade: Number(quantidade || 0),
-    fator: Number(fator || 0),
-    sku: String(sku || '').trim(),
-    imagem: String(imagem || '').trim()
+    ...req.body,
+    estoqueTotal: 0
   };
 
-  produtos.push(novoProduto);
-  saveProdutos(produtos);
+  produtos.push(novo);
+  saveJson(PRODUTOS_FILE,produtos);
 
-  res.json({ ok: true, produto: novoProduto });
+  res.json(novo);
 });
 
-app.put('/api/produtos/:id', (req, res) => {
-  const { id } = req.params;
-  const { codigo, nome, categoria, quantidade, fator, sku, imagem } = req.body || {};
+app.put('/api/produtos/:id',(req,res)=>{
+  const produtos = readJson(PRODUTOS_FILE);
 
-  const produtos = readProdutos();
-  const index = produtos.findIndex(p => String(p.id) === String(id));
+  const i = produtos.findIndex(p=>p.id==req.params.id);
 
-  if (index === -1) {
-    return res.status(404).json({ ok: false, message: 'Produto não encontrado.' });
+  produtos[i] = { ...produtos[i], ...req.body };
+
+  saveJson(PRODUTOS_FILE,produtos);
+
+  res.json(produtos[i]);
+});
+
+app.delete('/api/produtos/:id',(req,res)=>{
+  let produtos = readJson(PRODUTOS_FILE);
+
+  produtos = produtos.filter(p=>p.id!=req.params.id);
+
+  saveJson(PRODUTOS_FILE,produtos);
+
+  res.json({ok:true});
+});
+
+/* ESTOQUE */
+app.get('/api/estoque',(req,res)=>{
+  res.json(readJson(ESTOQUE_FILE));
+});
+
+app.get('/api/movimentacoes',(req,res)=>{
+  res.json(readJson(MOVS_FILE));
+});
+
+app.post('/api/estoque/movimentar',(req,res)=>{
+  const { produtoId,endereco,quantidade,tipo } = req.body;
+
+  const estoque = readJson(ESTOQUE_FILE);
+  const produtos = readJson(PRODUTOS_FILE);
+  const movs = readJson(MOVS_FILE);
+
+  let registro = estoque.find(e=>
+    e.produtoId===produtoId &&
+    e.endereco===endereco
+  );
+
+  if(!registro){
+    registro={
+      produtoId,
+      endereco,
+      quantidade:0
+    };
+
+    estoque.push(registro);
   }
 
-  produtos[index] = {
-    ...produtos[index],
-    codigo: String(codigo || produtos[index].codigo).trim(),
-    nome: String(nome || produtos[index].nome).trim(),
-    categoria: String(categoria || '').trim(),
-    quantidade: Number(quantidade || 0),
-    fator: Number(fator || 0),
-    sku: String(sku || '').trim(),
-    imagem: String(imagem || '').trim()
-  };
+  if(tipo==='entrada'){
+    registro.quantidade += Number(quantidade);
+  }
 
-  saveProdutos(produtos);
-  res.json({ ok: true, produto: produtos[index] });
+  if(tipo==='saida'){
+    registro.quantidade -= Number(quantidade);
+  }
+
+  if(tipo==='ajuste'){
+    registro.quantidade = Number(quantidade);
+  }
+
+  const produto = produtos.find(p=>p.id===produtoId);
+
+  produto.estoqueTotal =
+    estoque
+    .filter(e=>e.produtoId===produtoId)
+    .reduce((acc,e)=>acc+e.quantidade,0);
+
+  movs.unshift({
+    id:Date.now().toString(),
+    produtoId,
+    endereco,
+    quantidade,
+    tipo,
+    data:new Date().toISOString()
+  });
+
+  saveJson(ESTOQUE_FILE,estoque);
+  saveJson(PRODUTOS_FILE,produtos);
+  saveJson(MOVS_FILE,movs);
+
+  res.json({ok:true});
 });
 
-app.delete('/api/produtos/:id', (req, res) => {
-  const produtos = readProdutos().filter(p => String(p.id) !== String(req.params.id));
-  saveProdutos(produtos);
-  res.json({ ok: true });
+app.get('*',(req,res)=>{
+  res.sendFile(path.join(PUBLIC_DIR,'index.html'));
 });
 
-app.get('*', (req, res) => {
-  res.sendFile(path.join(PUBLIC_DIR, 'index.html'));
-});
-
-app.listen(PORT, () => {
-  console.log(`Servidor rodando na porta ${PORT}`);
+app.listen(PORT,()=>{
+  console.log('Servidor rodando porta',PORT);
 });
