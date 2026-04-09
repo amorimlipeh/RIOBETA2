@@ -8,6 +8,12 @@ async function carregarProdutos() {
   try {
     const response = await fetch('/api/produtos');
     produtos = await response.json();
+
+    produtos = produtos.map((produto, index) => ({
+      ...produto,
+      id: produto.id || `legacy-${index}-${Date.now()}`
+    }));
+
   } catch {
     produtos = [];
   }
@@ -54,6 +60,7 @@ function produtosView() {
     </div>
 
     <div class="produto-layout fade-in">
+
       <div class="produto-form-card">
         <h3>${produtoEditandoId ? 'Editar Produto' : 'Novo Produto'}</h3>
 
@@ -74,18 +81,19 @@ function produtosView() {
             ? `<button onclick="cancelarEdicao()" style="background:#475569">Cancelar</button>`
             : ''
         }
+
       </div>
 
       <div class="produto-table-card">
         <h3>Lista de Produtos</h3>
 
-        <input id="pesquisaProduto" onkeyup="filtrarProdutos()" placeholder="Pesquisar por código, nome ou SKU">
+        <input id="pesquisaProduto" onkeyup="filtrarProdutos()" placeholder="Pesquisar produto">
 
         <table>
           <thead>
             <tr>
-              <th>Código</th>
               <th>Nome</th>
+              <th>Categoria</th>
               <th>Qtd</th>
               <th>SKU</th>
               <th>Ações</th>
@@ -95,6 +103,7 @@ function produtosView() {
           <tbody id="produtosTabela"></tbody>
         </table>
       </div>
+
     </div>
   `;
 }
@@ -117,11 +126,11 @@ function renderTabela(lista = produtos) {
   lista.forEach((produto) => {
     tabela.innerHTML += `
       <tr>
-        <td>${produto.codigo}</td>
         <td>${produto.nome}</td>
+        <td>${produto.categoria}</td>
         <td>${produto.quantidade}</td>
         <td>${produto.sku || '-'}</td>
-        <td>
+        <td style="display:flex;gap:6px;">
           <button onclick="editarProduto('${produto.id}')">Editar</button>
           <button onclick="removerProduto('${produto.id}')">Excluir</button>
         </td>
@@ -134,8 +143,8 @@ window.filtrarProdutos = function () {
   const termo = document.getElementById('pesquisaProduto').value.toLowerCase();
 
   const filtrados = produtos.filter(produto =>
-    produto.codigo.toLowerCase().includes(termo) ||
     produto.nome.toLowerCase().includes(termo) ||
+    produto.categoria.toLowerCase().includes(termo) ||
     (produto.sku || '').toLowerCase().includes(termo)
   );
 
@@ -177,6 +186,8 @@ window.salvarProduto = async function () {
 window.editarProduto = function (id) {
   const produto = produtos.find(p => p.id === id);
 
+  if (!produto) return;
+
   produtoEditandoId = id;
 
   renderView('produtos');
@@ -198,7 +209,9 @@ window.cancelarEdicao = function () {
 };
 
 window.removerProduto = async function (id) {
-  await fetch('/api/produtos/' + id, { method: 'DELETE' });
+  await fetch('/api/produtos/' + id, {
+    method: 'DELETE'
+  });
 
   await carregarProdutos();
   renderView('produtos');
