@@ -494,15 +494,11 @@ setTimeout(criarPedidosLayout,3000);
 
 
 
-
-
-
 <!-- INICIO PEDIDOS ADD PRODUTO SAFE -->
 <script>
 (function(){
     let pedidosProdutosCache = [];
     let pedidoProdutoSelecionado = null;
-    let pedidoItens = [];
 
     function txt(v){
         return String(v || "").trim();
@@ -510,24 +506,6 @@ setTimeout(criarPedidosLayout,3000);
 
     function norm(v){
         return txt(v).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
-    }
-
-    function num(v){
-        const n = Number(String(v ?? "").replace(",", "."));
-        return isNaN(n) ? 0 : n;
-    }
-
-    function calcularDetalhes(quantidadeTotal, fator){
-        quantidadeTotal = Math.max(0, Math.floor(num(quantidadeTotal)));
-        fator = Math.max(1, Math.floor(num(fator)));
-        const caixasFechadas = Math.floor(quantidadeTotal / fator);
-        const unidadesAvulsas = quantidadeTotal % fator;
-        return {
-            quantidadeTotal,
-            fator,
-            caixasFechadas,
-            unidadesAvulsas
-        };
     }
 
     async function carregarProdutosPedido(){
@@ -597,7 +575,7 @@ setTimeout(criarPedidosLayout,3000);
         modal.innerHTML = `
             <div style="
                 width:100%;
-                max-width:620px;
+                max-width:560px;
                 background:#162742;
                 border-radius:18px;
                 padding:20px;
@@ -623,69 +601,7 @@ setTimeout(criarPedidosLayout,3000);
                     "
                 >
 
-                <div id="listaBuscaProdutosPedido" style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px;"></div>
-
-                <div id="boxQuantidadePedido" style="
-                    display:none;
-                    background:#0b1730;
-                    border-radius:14px;
-                    padding:14px;
-                    margin-bottom:14px;
-                ">
-                    <div style="color:#fff;font-weight:800;margin-bottom:10px;" id="tituloProdutoSelecionadoPedido">Produto</div>
-
-                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-                        <div>
-                            <label style="display:block;color:#dbe7ff;font-size:12px;font-weight:700;margin-bottom:6px;">Quantidade Total (UN)</label>
-                            <input
-                                id="quantidadeTotalPedido"
-                                type="number"
-                                min="1"
-                                step="1"
-                                value="1"
-                                style="
-                                    width:100%;
-                                    padding:12px;
-                                    border:none;
-                                    border-radius:10px;
-                                    background:#162742;
-                                    color:#fff;
-                                    outline:none;
-                                "
-                            >
-                        </div>
-
-                        <div>
-                            <label style="display:block;color:#dbe7ff;font-size:12px;font-weight:700;margin-bottom:6px;">Fator Conversão</label>
-                            <input
-                                id="fatorConversaoPedido"
-                                type="text"
-                                readonly
-                                style="
-                                    width:100%;
-                                    padding:12px;
-                                    border:none;
-                                    border-radius:10px;
-                                    background:#162742;
-                                    color:#7fb0ff;
-                                    outline:none;
-                                "
-                            >
-                        </div>
-                    </div>
-
-                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px;">
-                        <div style="background:#162742;padding:12px;border-radius:10px;">
-                            <div style="color:#cbd5e1;font-size:12px;font-weight:700;">Caixas Fechadas</div>
-                            <div id="caixasFechadasPedido" style="color:#fff;font-size:20px;font-weight:800;">0</div>
-                        </div>
-
-                        <div style="background:#162742;padding:12px;border-radius:10px;">
-                            <div style="color:#cbd5e1;font-size:12px;font-weight:700;">Unidades Avulsas</div>
-                            <div id="unidadesAvulsasPedido" style="color:#fff;font-size:20px;font-weight:800;">0</div>
-                        </div>
-                    </div>
-                </div>
+                <div id="listaBuscaProdutosPedido" style="display:flex;flex-direction:column;gap:8px;"></div>
 
                 <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:14px;">
                     <button id="btnCancelarProdutoPedido" style="
@@ -725,8 +641,6 @@ setTimeout(criarPedidosLayout,3000);
         document.getElementById("pesquisaProdutoPedido").addEventListener("input", function(){
             renderListaBuscaProdutos(this.value);
         });
-
-        document.getElementById("quantidadeTotalPedido").addEventListener("input", atualizarPreviewQuantidadePedido);
     }
 
     function abrirModalProdutoPedido(){
@@ -734,67 +648,17 @@ setTimeout(criarPedidosLayout,3000);
         if(!modal) return;
         pedidoProdutoSelecionado = null;
         modal.style.display = "flex";
-
         const input = document.getElementById("pesquisaProdutoPedido");
-        const qtd = document.getElementById("quantidadeTotalPedido");
-        const fator = document.getElementById("fatorConversaoPedido");
-        const box = document.getElementById("boxQuantidadePedido");
-        const titulo = document.getElementById("tituloProdutoSelecionadoPedido");
-        const cx = document.getElementById("caixasFechadasPedido");
-        const av = document.getElementById("unidadesAvulsasPedido");
-
         if(input){
             input.value = "";
             input.focus();
         }
-        if(qtd) qtd.value = "1";
-        if(fator) fator.value = "";
-        if(box) box.style.display = "none";
-        if(titulo) titulo.textContent = "Produto";
-        if(cx) cx.textContent = "0";
-        if(av) av.textContent = "0";
-
         renderListaBuscaProdutos("");
     }
 
     function fecharModalProdutoPedido(){
         const modal = document.getElementById("modalProdutoPedido");
         if(modal) modal.style.display = "none";
-    }
-
-    function atualizarPreviewQuantidadePedido(){
-        if(!pedidoProdutoSelecionado) return;
-
-        const qtdInput = document.getElementById("quantidadeTotalPedido");
-        const fatorInput = document.getElementById("fatorConversaoPedido");
-        const cxEl = document.getElementById("caixasFechadasPedido");
-        const avEl = document.getElementById("unidadesAvulsasPedido");
-
-        const fator = getFator(pedidoProdutoSelecionado);
-        const quantidade = Math.max(1, Math.floor(num(qtdInput ? qtdInput.value : 1)));
-        const calc = calcularDetalhes(quantidade, fator);
-
-        if(qtdInput) qtdInput.value = String(calc.quantidadeTotal);
-        if(fatorInput) fatorInput.value = `${calc.fator} un/cx`;
-        if(cxEl) cxEl.textContent = String(calc.caixasFechadas);
-        if(avEl) avEl.textContent = String(calc.unidadesAvulsas);
-    }
-
-    function selecionarProdutoPedido(produto, busca){
-        pedidoProdutoSelecionado = produto;
-
-        const box = document.getElementById("boxQuantidadePedido");
-        const titulo = document.getElementById("tituloProdutoSelecionadoPedido");
-        const fatorInput = document.getElementById("fatorConversaoPedido");
-        const qtdInput = document.getElementById("quantidadeTotalPedido");
-
-        if(box) box.style.display = "block";
-        if(titulo) titulo.textContent = `${getCodigo(produto)} - ${getNome(produto)}`;
-        if(fatorInput) fatorInput.value = `${getFator(produto)} un/cx`;
-        if(qtdInput) qtdInput.value = "1";
-
-        atualizarPreviewQuantidadePedido();
-        renderListaBuscaProdutos(busca);
     }
 
     function renderListaBuscaProdutos(busca){
@@ -818,8 +682,6 @@ setTimeout(criarPedidosLayout,3000);
             const nome = getNome(p);
             const fator = getFator(p);
             const img = getImagem(p);
-            const selected = pedidoProdutoSelecionado && getCodigo(pedidoProdutoSelecionado) === codigo;
-
             const thumb = img
                 ? `<img src="${img}" style="width:52px;height:52px;object-fit:cover;border-radius:10px;">`
                 : `<div style="width:52px;height:52px;border-radius:10px;background:#0b1730;display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:700;">IMG</div>`;
@@ -832,11 +694,10 @@ setTimeout(criarPedidosLayout,3000);
                         grid-template-columns:52px 1fr;
                         gap:10px;
                         align-items:center;
-                        background:${selected ? "#2f6df6" : "#0b1730"};
+                        background:${pedidoProdutoSelecionado && getCodigo(pedidoProdutoSelecionado) === codigo ? "#2f6df6" : "#0b1730"};
                         border-radius:12px;
                         padding:10px;
                         cursor:pointer;
-                        border:${selected ? "1px solid rgba(255,255,255,.35)" : "1px solid transparent"};
                     "
                 >
                     ${thumb}
@@ -851,12 +712,13 @@ setTimeout(criarPedidosLayout,3000);
 
         Array.from(lista.querySelectorAll("[data-prod-idx]")).forEach((el, idx) => {
             el.onclick = function(){
-                selecionarProdutoPedido(filtrados[idx], busca);
+                pedidoProdutoSelecionado = filtrados[idx];
+                renderListaBuscaProdutos(busca);
             };
         });
     }
 
-    function garantirAreaItensPedido(){
+    function garantirListaItensPedido(){
         const titulo = Array.from(document.querySelectorAll("*"))
             .find(el => txt(el.innerText) === "Itens do Pedido");
 
@@ -866,164 +728,61 @@ setTimeout(criarPedidosLayout,3000);
         if(!card) return null;
 
         let lista = document.getElementById("listaItensPedidoReal");
-        if(!lista){
-            const antigo = Array.from(card.querySelectorAll("div"))
-                .find(el => txt(el.innerText) === "Nenhum item adicionado.");
-            if(antigo) antigo.remove();
+        if(lista) return lista;
 
-            lista = document.createElement("div");
-            lista.id = "listaItensPedidoReal";
-            lista.style.display = "flex";
-            lista.style.flexDirection = "column";
-            lista.style.gap = "12px";
-            card.appendChild(lista);
+        const antigo = Array.from(card.querySelectorAll("div"))
+            .find(el => txt(el.innerText) === "Nenhum item adicionado.");
+
+        if(antigo){
+            antigo.remove();
         }
 
-        let resumo = document.getElementById("resumoItensPedidoReal");
-        if(!resumo){
-            resumo = document.createElement("div");
-            resumo.id = "resumoItensPedidoReal";
-            resumo.style.marginTop = "14px";
-            resumo.style.background = "#162742";
-            resumo.style.padding = "14px";
-            resumo.style.borderRadius = "12px";
-            resumo.style.color = "#fff";
-            resumo.style.fontWeight = "700";
-            card.appendChild(resumo);
-        }
+        lista = document.createElement("div");
+        lista.id = "listaItensPedidoReal";
+        lista.style.display = "flex";
+        lista.style.flexDirection = "column";
+        lista.style.gap = "12px";
+        card.appendChild(lista);
 
-        return { card, lista, resumo };
-    }
-
-    function renderResumoPedido(){
-        const area = garantirAreaItensPedido();
-        if(!area || !area.resumo) return;
-
-        const totalItens = pedidoItens.length;
-        const totalUN = pedidoItens.reduce((acc, it) => acc + num(it.quantidadeTotal), 0);
-        const totalCX = pedidoItens.reduce((acc, it) => acc + num(it.caixasFechadas), 0);
-        const totalAv = pedidoItens.reduce((acc, it) => acc + num(it.unidadesAvulsas), 0);
-
-        area.resumo.innerHTML = `
-            <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;">
-                <div>
-                    <div style="font-size:12px;color:#cbd5e1;">Total de Itens</div>
-                    <div style="font-size:20px;">${totalItens}</div>
-                </div>
-                <div>
-                    <div style="font-size:12px;color:#cbd5e1;">Total UN</div>
-                    <div style="font-size:20px;">${totalUN}</div>
-                </div>
-                <div>
-                    <div style="font-size:12px;color:#cbd5e1;">Total CX Fechadas</div>
-                    <div style="font-size:20px;">${totalCX}</div>
-                </div>
-                <div>
-                    <div style="font-size:12px;color:#cbd5e1;">UN Avulsas</div>
-                    <div style="font-size:20px;">${totalAv}</div>
-                </div>
-            </div>
-        `;
-    }
-
-    function renderItensPedido(){
-        const area = garantirAreaItensPedido();
-        if(!area || !area.lista) return;
-
-        if(!pedidoItens.length){
-            area.lista.innerHTML = `<div style="color:#cbd5e1;">Nenhum item adicionado.</div>`;
-            renderResumoPedido();
-            return;
-        }
-
-        area.lista.innerHTML = pedidoItens.map((item, index) => {
-            const thumb = item.imagem
-                ? `<img src="${item.imagem}" style="width:56px;height:56px;object-fit:cover;border-radius:10px;">`
-                : `<div style="width:56px;height:56px;border-radius:10px;background:#2f6df6;display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:800;">IMG</div>`;
-
-            return `
-                <div style="
-                    display:grid;
-                    grid-template-columns:56px 1fr auto;
-                    gap:12px;
-                    align-items:center;
-                    background:#162742;
-                    padding:14px;
-                    border-radius:12px;
-                ">
-                    ${thumb}
-
-                    <div style="display:flex;flex-direction:column;gap:4px;color:#fff;">
-                        <div style="font-weight:800;">${item.codigo} - ${item.nome}</div>
-                        <div style="color:#7fb0ff;font-size:12px;">Fator Conversão: ${item.fator} un/cx</div>
-                        <div style="color:#dbe7ff;font-size:13px;">Quantidade Total: ${item.quantidadeTotal} un</div>
-                        <div style="color:#dbe7ff;font-size:13px;">Caixas Fechadas: ${item.caixasFechadas}</div>
-                        <div style="color:#dbe7ff;font-size:13px;">Unidades Avulsas: ${item.unidadesAvulsas}</div>
-                    </div>
-
-                    <div style="display:flex;flex-direction:column;gap:8px;align-items:center;">
-                        <div style="font-size:20px;">✅</div>
-                        <button
-                            data-remove-item="${index}"
-                            style="
-                                border:none;
-                                border-radius:10px;
-                                background:#ef4444;
-                                color:#fff;
-                                padding:8px 10px;
-                                cursor:pointer;
-                                font-weight:700;
-                            "
-                        >Remover</button>
-                    </div>
-                </div>
-            `;
-        }).join("");
-
-        Array.from(area.lista.querySelectorAll("[data-remove-item]")).forEach(btn => {
-            btn.onclick = function(){
-                const idx = Number(this.getAttribute("data-remove-item"));
-                pedidoItens.splice(idx, 1);
-                renderItensPedido();
-            };
-        });
-
-        renderResumoPedido();
+        return lista;
     }
 
     function confirmarProdutoPedido(){
         if(!pedidoProdutoSelecionado) return;
 
-        const qtdInput = document.getElementById("quantidadeTotalPedido");
-        const quantidade = Math.max(1, Math.floor(num(qtdInput ? qtdInput.value : 1)));
+        const lista = garantirListaItensPedido();
+        if(!lista) return;
 
         const codigo = getCodigo(pedidoProdutoSelecionado);
         const nome = getNome(pedidoProdutoSelecionado);
         const fator = getFator(pedidoProdutoSelecionado);
         const imagem = getImagem(pedidoProdutoSelecionado);
 
-        const existente = pedidoItens.find(it => it.codigo === codigo);
+        const item = document.createElement("div");
+        item.className = "pedido-item-card-real";
+        item.style.display = "grid";
+        item.style.gridTemplateColumns = "56px 1fr 40px";
+        item.style.gap = "12px";
+        item.style.alignItems = "center";
+        item.style.background = "#162742";
+        item.style.padding = "14px";
+        item.style.borderRadius = "12px";
 
-        if(existente){
-            const novaQuantidade = num(existente.quantidadeTotal) + quantidade;
-            const calc = calcularDetalhes(novaQuantidade, fator);
-            existente.quantidadeTotal = calc.quantidadeTotal;
-            existente.caixasFechadas = calc.caixasFechadas;
-            existente.unidadesAvulsas = calc.unidadesAvulsas;
-        }else{
-            const calc = calcularDetalhes(quantidade, fator);
-            pedidoItens.push({
-                codigo,
-                nome,
-                imagem,
-                fator: calc.fator,
-                quantidadeTotal: calc.quantidadeTotal,
-                caixasFechadas: calc.caixasFechadas,
-                unidadesAvulsas: calc.unidadesAvulsas
-            });
-        }
+        const thumb = imagem
+            ? `<img src="${imagem}" style="width:56px;height:56px;object-fit:cover;border-radius:10px;">`
+            : `<div style="width:56px;height:56px;border-radius:10px;background:#2f6df6;display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:800;">IMG</div>`;
 
-        renderItensPedido();
+        item.innerHTML = `
+            ${thumb}
+            <div style="display:flex;flex-direction:column;gap:4px;color:#fff;">
+                <div style="font-weight:800;">${codigo}</div>
+                <div style="color:#dbe7ff;">${nome}</div>
+                <div style="color:#7fb0ff;font-size:12px;">Fator: ${fator} | Qtd: 1 | Caixas: ${(1/fator).toFixed(2).replace(/\.00$/, "")}</div>
+            </div>
+            <div style="font-size:20px;">✅</div>
+        `;
+
+        lista.appendChild(item);
         fecharModalProdutoPedido();
     }
 
@@ -1044,7 +803,6 @@ setTimeout(criarPedidosLayout,3000);
         await carregarProdutosPedido();
         criarModalAdicionarProduto();
         bindBotaoAdicionarProduto();
-        renderItensPedido();
     }
 
     if(document.readyState === "loading"){
