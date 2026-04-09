@@ -611,5 +611,70 @@
 })();
 </script>
 <!-- FIM FIX PAGINACAO LINHA UNICA -->
+
+<!-- INICIO FIX PAGINACAO LINHA UNICA FINAL -->
+<script>
+(function(){
+    function reconstruirPaginacaoLinhaUnica(){
+        document.querySelectorAll('.paginacao-obs-wrap').forEach(function(wrap){
+            const select = wrap.querySelector('select');
+            const btnAnt = wrap.querySelector('.btn-ant, .btn-anterior');
+            const btnProx = wrap.querySelector('.btn-prox, .btn-proximo');
+            const badge = wrap.querySelector('.paginacao-obs-badge');
+            const info = wrap.querySelector('.paginacao-obs-info');
+
+            if(!select || !btnAnt || !btnProx || !badge || !info) return;
+
+            const valorBadge = badge.textContent.trim();
+            const valorInfo = info.textContent.trim();
+
+            wrap.innerHTML = '';
+
+            const linha = document.createElement('div');
+            linha.className = 'paginacao-obs-inline-fix';
+
+            const label = document.createElement('span');
+            label.className = 'paginacao-obs-label';
+            label.textContent = 'Mostrar';
+
+            const novoBadge = document.createElement('div');
+            novoBadge.className = 'paginacao-obs-badge';
+            novoBadge.textContent = valorBadge;
+
+            const novoInfo = document.createElement('span');
+            novoInfo.className = 'paginacao-obs-info';
+            novoInfo.textContent = valorInfo;
+
+            linha.appendChild(label);
+            linha.appendChild(select);
+            linha.appendChild(btnAnt);
+            linha.appendChild(novoBadge);
+            linha.appendChild(btnProx);
+            linha.appendChild(novoInfo);
+
+            wrap.appendChild(linha);
+        });
+    }
+
+    if(document.readyState === 'loading'){
+        document.addEventListener('DOMContentLoaded', reconstruirPaginacaoLinhaUnica);
+    } else {
+        reconstruirPaginacaoLinhaUnica();
+    }
+
+    setTimeout(reconstruirPaginacaoLinhaUnica, 400);
+    setTimeout(reconstruirPaginacaoLinhaUnica, 1200);
+    setTimeout(reconstruirPaginacaoLinhaUnica, 2500);
+
+    const obs = new MutationObserver(function(){
+        reconstruirPaginacaoLinhaUnica();
+    });
+
+    window.addEventListener('load', function(){
+        obs.observe(document.body, { childList:true, subtree:true });
+    });
+})();
+</script>
+<!-- FIM FIX PAGINACAO LINHA UNICA FINAL -->
 </body>
 </html>

@@ -456,3 +456,93 @@ background:#475569;
     white-space:nowrap !important;
 }
 /* FIM CSS PAGINACAO LINHA UNICA */
+
+
+/* INICIO CSS PAGINACAO LINHA UNICA FINAL */
+.paginacao-obs-wrap{
+    margin-top:18px;
+    padding-top:14px;
+    border-top:1px solid rgba(255,255,255,.06);
+    width:100% !important;
+    overflow-x:auto !important;
+    overflow-y:hidden !important;
+    -webkit-overflow-scrolling:touch;
+}
+
+.paginacao-obs-wrap::-webkit-scrollbar{
+    height:6px;
+}
+
+.paginacao-obs-inline-fix{
+    display:flex !important;
+    flex-direction:row !important;
+    align-items:center !important;
+    justify-content:flex-start !important;
+    flex-wrap:nowrap !important;
+    gap:10px !important;
+    white-space:nowrap !important;
+    min-width:max-content !important;
+    width:max-content !important;
+}
+
+.paginacao-obs-inline-fix > *{
+    flex:0 0 auto !important;
+    white-space:nowrap !important;
+}
+
+.paginacao-obs-label,
+.paginacao-obs-info,
+.paginacao-obs-badge{
+    display:inline-flex !important;
+    align-items:center !important;
+    white-space:nowrap !important;
+    color:#dbe7ff;
+    font-size:14px;
+    font-weight:600;
+}
+
+.paginacao-obs-select{
+    display:inline-flex !important;
+    align-items:center !important;
+    background:#09142b;
+    color:#fff;
+    border:none;
+    border-radius:10px;
+    padding:10px 14px;
+    font-weight:700;
+    min-width:78px;
+    height:44px;
+}
+
+.paginacao-obs-btn{
+    display:inline-flex !important;
+    align-items:center !important;
+    justify-content:center !important;
+    border:none;
+    border-radius:10px;
+    padding:10px 16px;
+    height:44px;
+    font-size:14px;
+    font-weight:700;
+    cursor:pointer;
+    background:linear-gradient(90deg,#2f80ed,#2563eb);
+    color:#fff;
+    white-space:nowrap !important;
+}
+
+.paginacao-obs-btn[disabled]{
+    opacity:.45;
+    cursor:not-allowed;
+}
+
+.paginacao-obs-badge{
+    height:44px;
+    padding:0 14px;
+    border-radius:10px;
+    background:rgba(255,255,255,.06);
+    color:#fff;
+    font-weight:700;
+    min-width:100px;
+    justify-content:center !important;
+}
+/* FIM CSS PAGINACAO LINHA UNICA FINAL */
