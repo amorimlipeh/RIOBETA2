@@ -5,6 +5,7 @@ let produtos = [];
 let produtoEditandoId = null;
 let estoque = [];
 let movimentacoes = [];
+let movimentacaoEditandoId = null;
 
 async function carregarProdutos() {
   try {
@@ -56,7 +57,6 @@ function showModal(message, type = 'success') {
   const modal = document.createElement('div');
   modal.id = 'systemModal';
   modal.className = 'system-modal-backdrop';
-
   modal.innerHTML = `
     <div class="system-modal-card ${type}">
       <div class="system-modal-title">${type === 'error' ? 'Atenção' : 'Sucesso'}</div>
@@ -67,8 +67,10 @@ function showModal(message, type = 'success') {
 
   document.body.appendChild(modal);
 
+  const btn = document.getElementById('systemModalBtn');
   const close = () => modal.remove();
-  document.getElementById('systemModalBtn')?.addEventListener('click', close);
+
+  btn?.addEventListener('click', close);
   modal.addEventListener('click', (e) => {
     if (e.target === modal) close();
   });
@@ -215,7 +217,7 @@ function estoqueView() {
 
     <div class="produto-layout fade-in">
       <div class="produto-form-card">
-        <h3>Nova Movimentação</h3>
+        <h3>${movimentacaoEditandoId ? 'Editar Movimentação' : 'Nova Movimentação'}</h3>
 
         <input id="movProdutoBusca" list="produtosLista" placeholder="Digite código ou nome do produto">
         <select id="movTipo">
@@ -227,7 +229,10 @@ function estoqueView() {
         <input id="movEndereco" placeholder="Endereço WMS (ex: 01-010-1-1)">
         <input id="movQuantidade" type="number" placeholder="Quantidade">
 
-        <button onclick="movimentarEstoque()">Salvar Movimentação</button>
+        <button onclick="${movimentacaoEditandoId ? 'salvarEdicaoMovimentacao()' : 'movimentarEstoque()'}">
+          ${movimentacaoEditandoId ? 'Salvar Edição' : 'Salvar Movimentação'}
+        </button>
+        ${movimentacaoEditandoId ? `<button onclick="cancelarEdicaoMovimentacao()" style="background:#475569">Cancelar Edição</button>` : ''}
       </div>
 
       <div class="produto-form-card">
@@ -378,8 +383,9 @@ function renderTabelaMovimentacoes() {
         <td>${item.tipo === 'transferencia' ? `${item.origem} → ${item.destino}` : (item.endereco || '-')}</td>
         <td>${item.quantidade}</td>
         <td><span class="badge ${status === 'ativo' ? 'status-ok' : 'status-zero'}">${status}</span></td>
-        <td>
-          ${status === 'ativo' ? `<button onclick="cancelarMovimentacao('${item.id}')">Cancelar</button>` : '-'}
+        <td style="display:flex;gap:6px;flex-wrap:wrap;">
+          ${status === 'ativo' ? `<button onclick="editarMovimentacao('${item.id}')">Editar</button>` : '-'}
+          ${status === 'ativo' ? `<button onclick="cancelarMovimentacao('${item.id}')">Cancelar</button>` : ''}
         </td>
       </tr>
     `;
@@ -562,6 +568,76 @@ window.cancelarMovimentacao = async function (id) {
   await renderView('estoque', { skipLoad: true });
 };
 
+window.editarMovimentacao = function (id) {
+  const mov = movimentacoes.find(m => String(m.id) === String(id));
+  if (!mov) return;
+
+  movimentacaoEditandoId = id;
+  renderView('estoque', { skipLoad: true }).then(() => {
+    const produto = produtos.find(p => String(p.id) === String(mov.produtoId));
+    const busca = document.getElementById('movProdutoBusca');
+    const tipo = document.getElementById('movTipo');
+    const endereco = document.getElementById('movEndereco');
+    const quantidade = document.getElementById('movQuantidade');
+
+    if (busca && produto) busca.value = produtoOptionLabel(produto);
+    if (tipo) tipo.value = mov.tipo === 'transferencia' ? 'ajuste' : mov.tipo;
+    if (endereco) endereco.value = mov.endereco || mov.destino || '';
+    if (quantidade) quantidade.value = mov.quantidade || '';
+  });
+};
+
+window.salvarEdicaoMovimentacao = async function () {
+  if (!movimentacaoEditandoId) return;
+
+  const movOriginal = movimentacoes.find(m => String(m.id) === String(movimentacaoEditandoId));
+  if (!movOriginal) {
+    showModal('Movimentação original não encontrada.', 'error');
+    return;
+  }
+
+  await fetch('/api/movimentacoes/' + movimentacaoEditandoId + '/cancelar', {
+    method: 'PUT'
+  });
+
+  const produtoBusca = document.getElementById('movProdutoBusca')?.value;
+  const produto = encontrarProdutoPorBusca(produtoBusca);
+  const tipo = document.getElementById('movTipo').value;
+  const endereco = document.getElementById('movEndereco').value.trim();
+  const quantidade = Number(document.getElementById('movQuantidade').value || 0);
+
+  if (!produto) {
+    showModal('Selecione um produto válido para a edição.', 'error');
+    return;
+  }
+
+  const response = await fetch('/api/estoque/movimentar', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ produtoId: produto.id, tipo, endereco, quantidade })
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    showModal(data.message || 'Erro ao salvar edição.', 'error');
+    return;
+  }
+
+  movimentacaoEditandoId = null;
+  showModal('Movimentação editada com sucesso.', 'success');
+
+  await carregarProdutos();
+  await carregarEstoque();
+  await carregarMovimentacoes();
+  await renderView('estoque', { skipLoad: true });
+};
+
+window.cancelarEdicaoMovimentacao = async function () {
+  movimentacaoEditandoId = null;
+  await renderView('estoque', { skipLoad: true });
+};
+
 function bindProdutoFormBehavior() {
   const codigo = document.getElementById('codigo');
   const sku = document.getElementById('sku');
@@ -614,6 +690,7 @@ buttons.forEach(button => {
     buttons.forEach(btn => btn.classList.remove('active'));
     button.classList.add('active');
     produtoEditandoId = null;
+    movimentacaoEditandoId = null;
     await renderView(button.dataset.view);
   });
 });
