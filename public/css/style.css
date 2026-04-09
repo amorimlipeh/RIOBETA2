@@ -48,3 +48,75 @@ color:white;
 .modal-escolha-box button.cancelar{
 background:#475569;
 }
+
+
+/* ===== MODAL ESCOLHA DE EDIÇÃO ===== */
+.modal-overlay{
+    position:fixed;
+    inset:0;
+    width:100%;
+    height:100%;
+    background:rgba(0,0,0,0.65);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    z-index:99999;
+    padding:16px;
+}
+.modal-overlay.hidden{
+    display:none !important;
+}
+.modal-box{
+    background:#1e1e2f;
+    padding:25px;
+    border-radius:14px;
+    width:100%;
+    max-width:420px;
+    box-shadow:0 0 25px rgba(0,0,0,0.4);
+    text-align:center;
+    animation:fadeInScale .25s ease;
+}
+.modal-box h3{
+    margin:0 0 10px 0;
+    color:#fff;
+}
+.modal-box p{
+    margin:0 0 20px 0;
+    color:#ccc;
+}
+.modal-buttons{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+}
+.btn-azul,
+.btn-verde,
+.btn-vermelho{
+    border:none;
+    padding:12px;
+    border-radius:8px;
+    cursor:pointer;
+    font-weight:bold;
+}
+.btn-azul{background:#2196f3;color:#fff;}
+.btn-verde{background:#4caf50;color:#fff;}
+.btn-vermelho{background:#f44336;color:#fff;}
+
+@keyframes fadeInScale{
+    from{opacity:0;transform:scale(.8);}
+    to{opacity:1;transform:scale(1);}
+}
+
+/* ===== ROLAGEM DOS BLOCOS ===== */
+.bloco-enderecos,
+.bloco-movimentacoes,
+#blocoEnderecos,
+#blocoMovimentacoes,
+.card-enderecos,
+.card-movimentacoes,
+.estoque-enderecos,
+.ultimas-movimentacoes{
+    max-height:400px;
+    overflow-y:auto;
+    padding-right:5px;
+}

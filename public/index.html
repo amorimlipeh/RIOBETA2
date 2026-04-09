@@ -51,5 +51,27 @@
 <script src="/js/core/layout.js"></script>
 <script src="/js/core/router.js"></script>
 <script src="/js/core/mobile-menu.js"></script>
+
+<!-- MODAL ESCOLHA DE EDIÇÃO -->
+<div id="modalEscolhaEdicao" class="modal-overlay hidden">
+    <div class="modal-box">
+        <h3>Selecionar Tipo de Edição</h3>
+        <p>O que deseja editar?</p>
+
+        <div class="modal-buttons">
+            <button onclick="editarMovimentacaoSelecionada()" class="btn-azul">
+                Editar Movimentação
+            </button>
+
+            <button onclick="editarTransferenciaSelecionada()" class="btn-verde">
+                Editar Transferência
+            </button>
+
+            <button onclick="fecharModalEscolhaEdicao()" class="btn-vermelho">
+                Cancelar
+            </button>
+        </div>
+    </div>
+</div>
 </body>
 </html>

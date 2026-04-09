@@ -17,3 +17,63 @@ router.post("/", (req, res) => {
 });
 
 module.exports = router;
+
+
+/* ===== MODAL ESCOLHA DE EDIÇÃO ===== */
+let itemSelecionadoEdicao = null;
+
+function abrirModalEscolhaEdicao(item){
+    itemSelecionadoEdicao = item;
+    const modal = document.getElementById("modalEscolhaEdicao");
+    if(modal) modal.classList.remove("hidden");
+}
+
+function fecharModalEscolhaEdicao(){
+    const modal = document.getElementById("modalEscolhaEdicao");
+    if(modal) modal.classList.add("hidden");
+}
+
+function editarMovimentacaoSelecionada(){
+    const item = itemSelecionadoEdicao;
+    fecharModalEscolhaEdicao();
+
+    if(!item) return;
+
+    if(typeof abrirFormularioEditarMovimentacao === "function"){
+        return abrirFormularioEditarMovimentacao(item);
+    }
+    if(typeof editarMovimentacao === "function"){
+        return editarMovimentacao(item);
+    }
+    if(typeof editarItem === "function"){
+        return editarItem(item);
+    }
+
+    console.warn("Nenhuma função de edição de movimentação encontrada.");
+}
+
+function editarTransferenciaSelecionada(){
+    const item = itemSelecionadoEdicao;
+    fecharModalEscolhaEdicao();
+
+    if(!item) return;
+
+    if(typeof abrirFormularioEditarTransferencia === "function"){
+        return abrirFormularioEditarTransferencia(item);
+    }
+    if(typeof editarTransferencia === "function"){
+        return editarTransferencia(item);
+    }
+    if(typeof editarItem === "function"){
+        return editarItem(item);
+    }
+
+    console.warn("Nenhuma função de edição de transferência encontrada.");
+}
+
+document.addEventListener("click", function(e){
+    const modal = document.getElementById("modalEscolhaEdicao");
+    if(e.target === modal){
+        fecharModalEscolhaEdicao();
+    }
+});

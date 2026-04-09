@@ -1,6 +1,8 @@
-node_modules
-logs
-temp
-auto
-.env
+
 *.log
+.backup-chatgpt/
+.env
+auto
+logs
+node_modules
+temp
