@@ -881,7 +881,7 @@ margin-bottom:15px;
 "
 >
 
-<div style="
+<div id="listaProdutosPedidoBusca"></div><div style="
 display:flex;
 justify-content:flex-end;
 gap:10px;
@@ -908,6 +908,74 @@ if(e.target.id==="btnAdicionarProdutoPedido"){
 abrirModalProdutoPedido();
 }
 });
+</script>
+
+
+
+
+<script>
+
+const produtosMockPedidos = [
+{codigo:"TST001",nome:"Caixa Organizadora Média",fator:1},
+{codigo:"TST002",nome:"Plástico Bolha Premium",fator:1},
+{codigo:"TST003",nome:"Etiqueta Logística",fator:1},
+{codigo:"TST004",nome:"Papel Kraft Bobina",fator:1},
+{codigo:"TST005",nome:"Fita Adesiva Transparente",fator:1}
+];
+
+function renderProdutosPedidoBusca(){
+
+const area=document.getElementById("listaProdutosPedidoBusca");
+if(!area)return;
+
+area.innerHTML="";
+
+produtosMockPedidos.forEach(prod=>{
+
+area.innerHTML+=`
+<div style="
+background:#0b1d3b;
+padding:12px;
+border-radius:12px;
+margin-top:10px;
+display:flex;
+gap:12px;
+align-items:center;
+">
+
+<div style="
+width:55px;
+height:55px;
+background:#09152c;
+border-radius:10px;
+display:flex;
+align-items:center;
+justify-content:center;
+color:white;
+font-size:12px;
+">IMG</div>
+
+<div>
+<b style="color:white;">${prod.codigo}</b><br>
+<span style="color:#ddd;">${prod.nome}</span><br>
+<small style="color:#8fb3ff;">Fator: ${prod.fator}</small>
+</div>
+
+</div>
+`;
+
+});
+
+}
+
+document.addEventListener("click",function(e){
+
+if(e.target.id==="btnAdicionarProdutoPedido"){
+setTimeout(renderProdutosPedidoBusca,200);
+}
+
+});
+
 </script>
 
 
