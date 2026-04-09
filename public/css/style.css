@@ -300,82 +300,103 @@ background:#475569;
 }
 /* FIM CSS MODAL ESCOLHA EDICAO LIMPO */
 
+
 /* INICIO CSS PAGINACAO OBS */
+
 .paginacao-obs-wrap{
-    margin-top:16px;
+    margin-top:18px;
     padding-top:14px;
     border-top:1px solid rgba(255,255,255,.06);
+
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+}
+
+.paginacao-obs-top{
     display:flex;
     flex-wrap:wrap;
-    align-items:center;
     justify-content:space-between;
+    align-items:center;
     gap:12px;
 }
+
 .paginacao-obs-left,
-.paginacao-obs-center,
-.paginacao-obs-right{
+.paginacao-obs-center{
     display:flex;
     align-items:center;
     gap:10px;
     flex-wrap:wrap;
 }
+
 .paginacao-obs-label,
 .paginacao-obs-info{
     color:#dbe7ff;
     font-size:14px;
     font-weight:600;
 }
+
 .paginacao-obs-select{
-    background:#0a1530;
+    background:#09142b;
     color:#fff;
-    border:1px solid rgba(255,255,255,.08);
-    border-radius:10px;
-    padding:8px 12px;
-    min-width:78px;
-    font-size:14px;
-    font-weight:700;
-    outline:none;
-}
-.paginacao-obs-btn{
     border:none;
     border-radius:10px;
     padding:10px 14px;
+    font-weight:700;
+    min-width:75px;
+}
+
+.paginacao-obs-btn{
+    border:none;
+    border-radius:10px;
+    padding:10px 16px;
     font-size:14px;
     font-weight:700;
     cursor:pointer;
     background:linear-gradient(90deg,#2f80ed,#2563eb);
     color:#fff;
 }
+
 .paginacao-obs-btn[disabled]{
     opacity:.45;
     cursor:not-allowed;
 }
+
 .paginacao-obs-badge{
-    min-width:108px;
-    text-align:center;
-    padding:10px 12px;
+    padding:10px 14px;
     border-radius:10px;
     background:rgba(255,255,255,.06);
     color:#fff;
     font-weight:700;
-    font-size:14px;
+    min-width:100px;
+    text-align:center;
 }
-@media (max-width: 768px){
-    .paginacao-obs-wrap{
+
+.paginacao-obs-right{
+    width:100%;
+}
+
+@media(max-width:768px){
+
+    .paginacao-obs-top{
         flex-direction:column;
-        align-items:stretch;
+        align-items:flex-start;
     }
-    .paginacao-obs-left,
-    .paginacao-obs-center,
-    .paginacao-obs-right{
-        justify-content:center;
-    }
-    .paginacao-obs-btn{
-        flex:1 1 auto;
-    }
-    .paginacao-obs-badge{
+
+    .paginacao-obs-center{
         width:100%;
-        min-width:unset;
+        justify-content:space-between;
     }
+
+    .paginacao-obs-btn{
+        flex:1;
+    }
+
+    .paginacao-obs-badge{
+        flex:1;
+    }
+
 }
+
 /* FIM CSS PAGINACAO OBS */
+
