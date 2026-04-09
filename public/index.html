@@ -490,5 +490,288 @@ setTimeout(criarPedidosLayout,3000);
 </script>
 <!-- FIM PEDIDOS V2 BASE -->
 
+
+<!-- INICIO PEDIDOS V2 FUNCIONAL -->
+<script>
+(function(){
+
+let itensPedido=[];
+
+function renderItens(){
+
+const lista=document.getElementById("listaItensPedido");
+if(!lista) return;
+
+if(!itensPedido.length){
+lista.innerHTML="Nenhum item adicionado.";
+atualizarResumo();
+return;
+}
+
+lista.innerHTML=itensPedido.map((item,index)=>`
+<div style="
+background:#1b2940;
+padding:15px;
+border-radius:14px;
+margin-bottom:15px;
+">
+
+<div style="
+display:flex;
+gap:15px;
+align-items:center;
+">
+
+<div style="
+width:60px;
+height:60px;
+background:#23344d;
+border-radius:12px;
+display:flex;
+align-items:center;
+justify-content:center;
+font-size:24px;
+">
+📦
+</div>
+
+<div style="flex:1;">
+<div style="font-weight:bold;color:#fff;">${item.codigo}</div>
+<div style="color:#cbd5e1;">${item.nome}</div>
+<div style="color:#60a5fa;">Fator: ${item.fator}</div>
+</div>
+
+<button onclick="removerItemPedido(${index})" style="
+background:#ef4444;
+border:none;
+padding:10px;
+border-radius:10px;
+color:#fff;
+">
+🗑
+</button>
+
+</div>
+
+<div style="
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:10px;
+margin-top:15px;
+">
+
+<input
+type="number"
+value="${item.un}"
+placeholder="Qtd UN"
+oninput="alterarUN(${index},this.value)"
+class="form-control"
+>
+
+<input
+type="number"
+value="${item.cx}"
+placeholder="Qtd CX"
+oninput="alterarCX(${index},this.value)"
+class="form-control"
+>
+
+</div>
+
+</div>
+`).join("");
+
+atualizarResumo();
+
+}
+
+window.removerItemPedido=function(i){
+itensPedido.splice(i,1);
+renderItens();
+}
+
+window.alterarUN=function(i,val){
+val=parseFloat(val)||0;
+itensPedido[i].un=val;
+itensPedido[i].cx=(val/itensPedido[i].fator).toFixed(2);
+renderItens();
+}
+
+window.alterarCX=function(i,val){
+val=parseFloat(val)||0;
+itensPedido[i].cx=val;
+itensPedido[i].un=(val*itensPedido[i].fator).toFixed(2);
+renderItens();
+}
+
+function atualizarResumo(){
+
+const resumo=document.getElementById("resumoPedido");
+
+if(!resumo) return;
+
+let totalItens=itensPedido.length;
+
+let totalUN=itensPedido.reduce((a,b)=>a+parseFloat(b.un||0),0);
+
+let totalCX=itensPedido.reduce((a,b)=>a+parseFloat(b.cx||0),0);
+
+resumo.innerHTML=`
+Itens: ${totalItens} |
+UN: ${totalUN} |
+CX: ${totalCX}
+`;
+
+}
+
+window.abrirCatalogoPedido=function(){
+
+const produtos=[
+{codigo:"TST001",nome:"Caixa Organizadora Média",fator:12},
+{codigo:"TST002",nome:"Plástico Bolha Premium",fator:10},
+{codigo:"TST003",nome:"Etiqueta Logística",fator:20},
+{codigo:"TST004",nome:"Papel Kraft Bobina",fator:15}
+];
+
+let modal=document.createElement("div");
+
+modal.innerHTML=`
+<div style="
+position:fixed;
+inset:0;
+background:rgba(0,0,0,.8);
+display:flex;
+align-items:center;
+justify-content:center;
+z-index:9999;
+padding:20px;
+">
+
+<div style="
+background:#1b2940;
+padding:20px;
+border-radius:18px;
+width:100%;
+max-width:500px;
+max-height:80vh;
+overflow:auto;
+">
+
+<h2 style="color:#fff;">Selecionar Produto</h2>
+
+${produtos.map(p=>`
+<div style="
+background:#23344d;
+padding:15px;
+border-radius:12px;
+margin-top:10px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+">
+<div>
+<div style="color:#fff;">${p.codigo}</div>
+<div style="color:#cbd5e1;">${p.nome}</div>
+<div style="color:#60a5fa;">Fator ${p.fator}</div>
+</div>
+
+<button onclick="
+adicionarProdutoPedido('${p.codigo}','${p.nome}',${p.fator});
+this.closest('.pedidoModalGlobal').remove();
+"
+style="
+background:#2563eb;
+border:none;
+padding:10px 15px;
+border-radius:10px;
+color:#fff;
+">
++
+</button>
+
+</div>
+`).join("")}
+
+<button onclick="this.closest('.pedidoModalGlobal').remove()" style="
+margin-top:15px;
+width:100%;
+padding:12px;
+border:none;
+background:#ef4444;
+color:#fff;
+border-radius:12px;
+">
+Fechar
+</button>
+
+</div>
+</div>
+`;
+
+modal.classList.add("pedidoModalGlobal");
+
+document.body.appendChild(modal);
+
+}
+
+window.adicionarProdutoPedido=function(codigo,nome,fator){
+
+itensPedido.push({
+codigo,
+nome,
+fator,
+un:0,
+cx:0
+});
+
+renderItens();
+
+}
+
+document.addEventListener("click",function(e){
+
+if(e.target.id==="abrirCatalogoPedido"){
+abrirCatalogoPedido();
+}
+
+});
+
+setTimeout(()=>{
+
+const lista=document.getElementById("listaItensPedido");
+
+if(lista && !document.getElementById("resumoPedido")){
+
+lista.insertAdjacentHTML("afterend",`
+<div style="
+margin-top:20px;
+color:#fff;
+font-weight:bold;
+" id="resumoPedido">
+Itens: 0 | UN: 0 | CX: 0
+</div>
+
+<button style="
+margin-top:15px;
+width:100%;
+padding:14px;
+background:#22c55e;
+border:none;
+border-radius:12px;
+font-weight:bold;
+color:#fff;
+">
+Salvar Pedido
+</button>
+`);
+
+}
+
+},1000);
+
+})();
+</script>
+<!-- FIM PEDIDOS V2 FUNCIONAL -->
+
 </body>
 </html>
