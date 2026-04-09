@@ -324,35 +324,39 @@ function estoqueView() {
     <div class="dashboard-row fade-in">
       <div class="big-card">
         <h3>Estoque por Endereço</h3>
-        <table>
-          <thead>
-            <tr>
-              <th>Produto</th>
-              <th>Endereço</th>
-              <th>Qtd</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody id="enderecosTabela"></tbody>
-        </table>
+        <div class="table-scroll">
+          <table class="table-wide">
+            <thead>
+              <tr>
+                <th>Produto</th>
+                <th>Endereço</th>
+                <th>Qtd</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="enderecosTabela"></tbody>
+          </table>
+        </div>
       </div>
 
       <div class="big-card">
         <h3>Últimas Movimentações</h3>
-        <table>
-          <thead>
-            <tr>
-              <th>Tipo</th>
-              <th>Produto</th>
-              <th>Endereço</th>
-              <th>Qtd</th>
-              <th>Data/Hora</th>
-              <th>Status</th>
-              <th>Ação</th>
-            </tr>
-          </thead>
-          <tbody id="movTabela"></tbody>
-        </table>
+        <div class="table-scroll">
+          <table class="table-wide mov-table">
+            <thead>
+              <tr>
+                <th>Tipo</th>
+                <th>Produto</th>
+                <th>Endereço</th>
+                <th>Qtd</th>
+                <th>Data/Hora</th>
+                <th>Status</th>
+                <th>Ação</th>
+              </tr>
+            </thead>
+            <tbody id="movTabela"></tbody>
+          </table>
+        </div>
       </div>
     </div>
   `;
@@ -677,6 +681,34 @@ window.editarMovimentacao = function (id) {
     if (tipo) tipo.value = mov.tipo === 'transferencia' ? 'ajuste' : mov.tipo;
     if (endereco) endereco.value = mov.endereco || mov.destino || '';
     if (quantidade) quantidade.value = mov.quantidade || '';
+
+    if (mov.tipo === 'transferencia') {
+      const blocoTransferencia = document.querySelector('.produto-layout .produto-form-card:nth-child(2)');
+      if (blocoTransferencia) {
+        const titulo = blocoTransferencia.querySelector('h3');
+        if (titulo) titulo.textContent = 'Editar Transferência';
+
+        blocoTransferencia.innerHTML = `
+          <h3>Editar Transferência</h3>
+          <input id="editTransfProdutoBusca" list="produtosLista" placeholder="Digite código ou nome do produto">
+          <input id="editTransfOrigem" placeholder="Endereço de origem">
+          <input id="editTransfDestino" placeholder="Endereço de destino">
+          <input id="editTransfQuantidade" type="number" placeholder="Quantidade">
+          <button id="btnSalvarEdicaoTransferencia" onclick="salvarEdicaoTransferencia()">Salvar Edição da Transferência</button>
+          <button onclick="cancelarEdicaoMovimentacao()" style="background:#475569">Cancelar Edição</button>
+        `;
+
+        const buscaEdit = document.getElementById('editTransfProdutoBusca');
+        const origemEdit = document.getElementById('editTransfOrigem');
+        const destinoEdit = document.getElementById('editTransfDestino');
+        const quantidadeEdit = document.getElementById('editTransfQuantidade');
+
+        if (buscaEdit && produto) buscaEdit.value = produtoOptionLabel(produto);
+        if (origemEdit) origemEdit.value = mov.origem || '';
+        if (destinoEdit) destinoEdit.value = mov.destino || '';
+        if (quantidadeEdit) quantidadeEdit.value = mov.quantidade || '';
+      }
+    }
   });
 };
 
@@ -736,6 +768,65 @@ window.salvarEdicaoMovimentacao = async function () {
 
     movimentacaoEditandoId = null;
     showModal('Movimentação editada com sucesso.', 'success');
+
+    await carregarProdutos();
+    await carregarEstoque();
+    await carregarMovimentacoes();
+    await renderView('estoque', { skipLoad: true });
+  } finally {
+    resetBtn();
+  }
+};
+
+window.salvarEdicaoTransferencia = async function () {
+  if (!movimentacaoEditandoId) return;
+
+  const btn = document.getElementById('btnSalvarEdicaoTransferencia');
+  const resetBtn = setButtonLoading(btn, 'Salvando...');
+
+  try {
+    const movOriginal = movimentacoes.find(m => String(m.id) === String(movimentacaoEditandoId));
+    if (!movOriginal) {
+      showModal('Movimentação original não encontrada.', 'error');
+      return;
+    }
+
+    const produtoBusca = document.getElementById('editTransfProdutoBusca')?.value;
+    const produto = encontrarProdutoPorBusca(produtoBusca);
+    const origem = document.getElementById('editTransfOrigem')?.value.trim();
+    const destino = document.getElementById('editTransfDestino')?.value.trim();
+    const quantidade = Number(document.getElementById('editTransfQuantidade')?.value || 0);
+
+    if (!produto) {
+      showModal('Selecione um produto válido para a transferência.', 'error');
+      return;
+    }
+
+    if (!origem || !destino || !quantidade) {
+      showModal('Origem, destino e quantidade são obrigatórios.', 'error');
+      return;
+    }
+
+    const response = await fetch('/api/movimentacoes/' + movimentacaoEditandoId, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        produtoId: produto.id,
+        origem,
+        destino,
+        quantidade
+      })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      showModal(data.message || 'Erro ao salvar edição da transferência.', 'error');
+      return;
+    }
+
+    movimentacaoEditandoId = null;
+    showModal('Transferência editada com sucesso.', 'success');
 
     await carregarProdutos();
     await carregarEstoque();
