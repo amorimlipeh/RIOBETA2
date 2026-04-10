@@ -702,121 +702,129 @@ setTimeout(criarPedidosLayout,3000);
             return;
         }
 
+        
         lista.innerHTML = filtrados.map((p, i) => {
             const codigo = getCodigo(p);
             const nome = getNome(p);
             const fator = getFator(p);
             const img = getImagem(p);
+
             const thumb = img
                 ? `<img src="${img}" style="width:52px;height:52px;object-fit:cover;border-radius:10px;">`
                 : `<div style="width:52px;height:52px;border-radius:10px;background:#0b1730;display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:700;">IMG</div>`;
 
             return `
-                <div
-                    data-prod-idx="${i}"
-                    style="
+                <div style="
+                    background:#0b1730;
+                    border-radius:12px;
+                    padding:12px;
+                    display:flex;
+                    flex-direction:column;
+                    gap:10px;
+                ">
+
+                    <div style="
                         display:grid;
-                        grid-template-columns:52px 1fr;
+                        grid-template-columns:30px 52px 1fr;
                         gap:10px;
                         align-items:center;
-                        background:${pedidoProdutoSelecionado && getCodigo(pedidoProdutoSelecionado) === codigo ? "#2f6df6" : "#0b1730"};
-                        border-radius:12px;
-                        padding:10px;
-                        cursor:pointer;
-                    "
-                >
-                    ${thumb}
-                    <div>
-                        <div style="color:#fff;font-weight:800;font-size:13px;">${codigo}</div>
-                        <div style="color:#dbe7ff;font-size:14px;">${nome}</div>
-                        <div style="color:#7fb0ff;font-size:12px;">Fator: ${fator}</div>
+                    ">
+                        <input type="checkbox" class="pedidoSelectProduto" data-idx="${i}" style="width:20px;height:20px;">
+
+                        ${thumb}
+
+                        <div>
+                            <div style="color:#fff;font-weight:800;font-size:13px;">${codigo}</div>
+                            <div style="color:#dbe7ff;font-size:14px;">${nome}</div>
+                            <div style="color:#7fb0ff;font-size:12px;">Fator: ${fator}</div>
+                        </div>
                     </div>
+
+                    <div style="display:flex;gap:10px;">
+                        <input
+                            type="number"
+                            min="1"
+                            value="1"
+                            class="pedidoQtdProduto"
+                            data-idx="${i}"
+                            style="
+                                flex:1;
+                                padding:10px;
+                                border:none;
+                                border-radius:8px;
+                                background:#162742;
+                                color:#fff;
+                            "
+                        >
+
+                        <select
+                            class="pedidoTipoProduto"
+                            data-idx="${i}"
+                            style="
+                                width:90px;
+                                padding:10px;
+                                border:none;
+                                border-radius:8px;
+                                background:#162742;
+                                color:#fff;
+                            "
+                        >
+                            <option value="cx">CX</option>
+                            <option value="und">UND</option>
+                        </select>
+                    </div>
+
                 </div>
             `;
         }).join("");
 
-        Array.from(lista.querySelectorAll("[data-prod-idx]")).forEach((el, idx) => {
-            el.onclick = function(){
+        lista.innerHTML += `
+            <button id="btnAdicionarSelecionadosPedido"
+                style="
+                    width:100%;
+                    margin-top:15px;
+                    padding:14px;
+                    border:none;
+                    border-radius:10px;
+                    background:#2f6df6;
+                    color:#fff;
+                    font-weight:800;
+                    cursor:pointer;
+                ">
+                Adicionar Selecionados
+            </button>
+        `;
+
+        document.getElementById("btnAdicionarSelecionadosPedido").onclick = function(){
+
+            const checks = document.querySelectorAll(".pedidoSelectProduto:checked");
+
+            if(!checks.length){
+                alert("Selecione ao menos um produto.");
+                return;
+            }
+
+            checks.forEach(check=>{
+
+                const idx = Number(check.dataset.idx);
+
                 pedidoProdutoSelecionado = filtrados[idx];
-                renderListaBuscaProdutos(busca);
 
-                const lista = document.getElementById("listaBuscaProdutosPedido");
-                const fator = getFator(pedidoProdutoSelecionado);
+                document.getElementById("pedidoQtdInput")?.remove();
+                document.getElementById("pedidoTipoInput")?.remove();
 
-                lista.innerHTML += `
-                    <div id="checkoutProdutoPedido" style="
-                        margin-top:15px;
-                        padding:15px;
-                        background:#10213d;
-                        border-radius:12px;
-                    ">
-                        <div style="color:#fff;font-weight:700;margin-bottom:10px;">
-                            Checkout do Produto
-                        </div>
+                const qtd = document.querySelector('.pedidoQtdProduto[data-idx="'+idx+'"]').value;
+                const tipo = document.querySelector('.pedidoTipoProduto[data-idx="'+idx+'"]').value;
 
-                        <div style="display:flex;gap:10px;margin-bottom:10px;">
-                            <input id="pedidoQtdInput" type="number" value="1" min="1"
-                                style="
-                                    flex:1;
-                                    padding:12px;
-                                    border:none;
-                                    border-radius:8px;
-                                    background:#0b1730;
-                                    color:#fff;
-                                ">
-                            <select id="pedidoTipoInput"
-                                style="
-                                    width:90px;
-                                    padding:12px;
-                                    border:none;
-                                    border-radius:8px;
-                                    background:#0b1730;
-                                    color:#fff;
-                                ">
-                                <option value="cx">CX</option>
-                                <option value="und">UND</option>
-                            </select>
-                        </div>
+                window.tempQtdPedido=qtd;
+                window.tempTipoPedido=tipo;
 
-                        <div id="pedidoResumoCalc" style="
-                            color:#7fb0ff;
-                            font-size:13px;
-                            line-height:1.7;
-                        ">
-                            Fator: ${fator}<br>
-                            Total UND: ${fator}<br>
-                            Caixas: 1<br>
-                            Avulsas: 0
-                        </div>
-                    </div>
-                `;
+                confirmarProdutoPedido();
+            });
 
-                const qtdInput = document.getElementById("pedidoQtdInput");
-                const tipoInput = document.getElementById("pedidoTipoInput");
-
-                function recalcularResumo(){
-                    const qtd = Number(qtdInput.value||1);
-                    const tipo = tipoInput.value;
-
-                    let totalUnd = tipo==="cx" ? qtd*fator : qtd;
-                    let caixas = Math.floor(totalUnd/fator);
-                    let avulsas = totalUnd%fator;
-
-                    document.getElementById("pedidoResumoCalc").innerHTML = `
-                        Fator: ${fator}<br>
-                        Total UND: ${totalUnd}<br>
-                        Caixas: ${caixas}<br>
-                        Avulsas: ${avulsas}
-                    `;
-                }
-
-                qtdInput.oninput = recalcularResumo;
-                tipoInput.onchange = recalcularResumo;
-            };
-        });
-    }
-
-    function garantirListaItensPedido(){
+            fecharModalProdutoPedido();
+        };
+function garantirListaItensPedido(){
         const titulo = Array.from(document.querySelectorAll("*"))
             .find(el => txt(el.innerText) === "Itens do Pedido");
 
@@ -856,8 +864,8 @@ setTimeout(criarPedidosLayout,3000);
         const fator = getFator(pedidoProdutoSelecionado);
         const imagem = getImagem(pedidoProdutoSelecionado);
 
-        const qtdDigitada = Number(document.getElementById("pedidoQtdInput")?.value || 1);
-        const tipoDigitado = document.getElementById("pedidoTipoInput")?.value || "cx";
+        const qtdDigitada = Number(window.tempQtdPedido || 1);
+        const tipoDigitado = window.tempTipoPedido || "cx";
 
         const totalUnd = tipoDigitado === "cx" ? qtdDigitada * fator : qtdDigitada;
         const caixas = Math.floor(totalUnd / fator);
