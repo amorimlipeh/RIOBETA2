@@ -554,7 +554,11 @@ function preencherOrigemAutomaticaTransferencia() {
     }
 
     const itemEstoque = (estoque || []).find(item =>
-      String(item.produtoId) === String(produto.id) &&
+      (
+        String(item.produtoId || '') === String(produto.id || '') ||
+        String(item.produto || '').toLowerCase() === String(produto.nome || '').toLowerCase() ||
+        String(item.codigo || '').toLowerCase() === String(produto.codigo || '').toLowerCase()
+      ) &&
       Number(item.quantidade || 0) > 0
     );
 
