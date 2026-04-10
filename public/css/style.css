@@ -1055,3 +1055,32 @@ max-width:100% !important;
 flex:none !important;
 }
 
+
+/* ===== TABELA PRODUTOS ENTERPRISE ===== */
+
+.produto-table-card{
+max-height:650px;
+overflow-y:auto;
+overflow-x:auto;
+}
+
+.produto-table-card table{
+width:100%;
+border-collapse:collapse;
+}
+
+.produto-table-card thead th{
+position:sticky;
+top:0;
+z-index:5;
+background:#1e293b;
+}
+
+.produto-table-card tbody tr{
+transition:.2s;
+}
+
+.produto-table-card tbody tr:hover{
+background:rgba(37,99,235,.12);
+}
+
