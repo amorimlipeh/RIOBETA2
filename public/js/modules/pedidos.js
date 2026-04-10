@@ -191,3 +191,25 @@ window.finalizarPedido=window.salvarPedidoAtualizado;
 renderPedidosSalvos();
 
 })();
+
+window.editarPedidoDireto=function(index){
+   try{
+      window.editandoPedidoIndex = index;
+
+      if(typeof window.abrirPedidoSalvo==='function'){
+         window.abrirPedidoSalvo(index);
+      }
+
+      const btn=document.getElementById('btnSalvarPedidoFinal');
+      if(btn){
+         btn.innerText='Atualizar Pedido';
+      }
+
+      const modal=document.getElementById('modalPedidoVisualizacao');
+      if(modal) modal.remove();
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+   }catch(e){
+      console.error(e);
+   }
+};
