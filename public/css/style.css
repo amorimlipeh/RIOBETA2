@@ -1036,3 +1036,22 @@ width:100% !important;
 max-width:100% !important;
 }
 
+
+/* ===== PRODUTOS UM EMBAIXO DO OUTRO ===== */
+
+.produto-layout{
+display:flex !important;
+flex-direction:column !important;
+grid-template-columns:none !important;
+align-items:stretch !important;
+width:100% !important;
+gap:20px !important;
+}
+
+.produto-form-card,
+.produto-table-card{
+width:100% !important;
+max-width:100% !important;
+flex:none !important;
+}
+
