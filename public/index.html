@@ -1713,6 +1713,44 @@ function adicionarPedidoNaLista(){
 })();
 </script>
 
+
+<script>
+(function organizarPedidosDentroDoModulo(){
+
+    function aplicar(){
+
+        const moduloTitulo=[...document.querySelectorAll("*")]
+            .find(el=>el.innerText?.trim()==="Módulo Pedidos");
+
+        const pedidosSalvosTitulo=[...document.querySelectorAll("*")]
+            .find(el=>el.innerText?.trim()==="📋 Pedidos Salvos");
+
+        const itensTitulo=[...document.querySelectorAll("*")]
+            .find(el=>el.innerText?.trim()==="Itens do Pedido");
+
+        if(!moduloTitulo||!pedidosSalvosTitulo||!itensTitulo)return;
+
+        const moduloCard=moduloTitulo.closest("div");
+        const pedidosCard=pedidosSalvosTitulo.closest("div");
+        const itensCard=itensTitulo.closest("div");
+
+        if(!moduloCard||!pedidosCard||!itensCard)return;
+
+        if(pedidosCard.dataset.movido)return;
+
+        itensCard.parentNode.insertBefore(pedidosCard,itensCard);
+
+        pedidosCard.dataset.movido="1";
+
+    }
+
+    setTimeout(aplicar,300);
+    setTimeout(aplicar,1000);
+    setTimeout(aplicar,2000);
+
+})();
+</script>
+
 </body>
 
 </html>
