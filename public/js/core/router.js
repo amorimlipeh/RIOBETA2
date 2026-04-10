@@ -1432,3 +1432,37 @@ window.abrirAjusteSaldo = function(produtoId){
 
 };
 
+function renderSaldoConsolidado() {
+  const tabela = document.getElementById('saldoConsolidadoTabela');
+  const busca = document.getElementById('saldoConsolidadoBusca');
+
+  if (!tabela) return;
+
+  const termo = String(busca?.value || '').toLowerCase();
+
+  tabela.innerHTML = '';
+
+  produtos
+    .filter(produto =>
+      String(produto.codigo || '').toLowerCase().includes(termo) ||
+      String(produto.nome || '').toLowerCase().includes(termo)
+    )
+    .forEach(produto => {
+      tabela.innerHTML += `
+        <tr>
+          <td>${produto.codigo || '-'}</td>
+          <td>${produto.nome || '-'}</td>
+          <td>${produto.estoqueTotal || 0}</td>
+          <td>
+            <button
+              class="btn-action btn-edit"
+              onclick="abrirAjusteSaldo('${produto.id}')"
+            >
+              Ajuste
+            </button>
+          </td>
+        </tr>
+      `;
+    });
+}
+
