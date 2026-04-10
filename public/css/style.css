@@ -1000,3 +1000,18 @@ width:100% !important;
 
 }
 
+
+/* ===== PRODUTOS EMPILHADO: CADASTRO EM CIMA / LISTA EMBAIXO ===== */
+
+.produto-layout{
+display:flex !important;
+flex-direction:column !important;
+gap:18px !important;
+}
+
+.produto-form-card,
+.produto-table-card{
+width:100% !important;
+max-width:100% !important;
+}
+
