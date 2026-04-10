@@ -1,109 +1,8 @@
 
-.modal-escolha-bg{
-position:fixed;
-top:0;
-left:0;
-width:100%;
-height:100%;
-background:rgba(0,0,0,.75);
-display:flex;
-align-items:center;
-justify-content:center;
-z-index:99999;
-}
-
-.modal-escolha-box{
-background:#0f172a;
-padding:25px;
-border-radius:18px;
-width:90%;
-max-width:420px;
-box-shadow:0 0 25px rgba(0,0,0,.5);
-text-align:center;
-}
-
-.modal-escolha-box h2{
-margin-bottom:10px;
-font-size:24px;
-}
-
-.modal-escolha-box p{
-margin-bottom:20px;
-opacity:.8;
-}
-
-.modal-escolha-box button{
-width:100%;
-margin-top:10px;
-padding:14px;
-border:none;
-border-radius:12px;
-font-weight:bold;
-font-size:16px;
-cursor:pointer;
-background:#2563eb;
-color:white;
-}
-
-.modal-escolha-box button.cancelar{
-background:#475569;
-}
 
 
-/* ===== MODAL ESCOLHA DE EDIÇÃO ===== */
-.modal-overlay{
-    position:fixed;
-    inset:0;
-    width:100%;
-    height:100%;
-    background:rgba(0,0,0,0.65);
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    z-index:99999;
-    padding:16px;
-}
-.modal-overlay.hidden{
-    display:none !important;
-}
-.modal-box{
-    background:#1e1e2f;
-    padding:25px;
-    border-radius:14px;
-    width:100%;
-    max-width:420px;
-    box-shadow:0 0 25px rgba(0,0,0,0.4);
-    text-align:center;
-    animation:fadeInScale .25s ease;
-}
-.modal-box h3{
-    margin:0 0 10px 0;
-    color:#fff;
-}
-.modal-box p{
-    margin:0 0 20px 0;
-    color:#ccc;
-}
-.modal-buttons{
-    display:flex;
-    flex-direction:column;
-    gap:10px;
-}
-.btn-azul,
-.btn-verde,
-.btn-vermelho{
-    border:none;
-    padding:12px;
-    border-radius:8px;
-    cursor:pointer;
-    font-weight:bold;
-}
-.btn-azul{background:#2196f3;color:#fff;}
-.btn-verde{background:#4caf50;color:#fff;}
-.btn-vermelho{background:#f44336;color:#fff;}
 
-@keyframes fadeInScale{
-    from{opacity:0;transform:scale(.8);}
+
     to{opacity:1;transform:scale(1);}
 }
 
@@ -122,183 +21,10 @@ background:#475569;
 }
 
 
-/* INICIO CSS MODAL ESCOLHA EDICAO */
-#modalEscolhaEdicao {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,.68);
-    display: none;
-    align-items: center;
-    justify-content: center;
-    z-index: 999999;
-    padding: 16px;
-}
-
-#modalEscolhaEdicao.ativo {
-    display: flex !important;
-}
-
-#modalEscolhaEdicao .modal-box {
-    width: min(92vw, 420px);
-    background: linear-gradient(180deg, #1d2940 0%, #162133 100%);
-    border-radius: 16px;
-    padding: 22px;
-    text-align: center;
-    box-shadow: 0 18px 50px rgba(0,0,0,.45);
-    border: 1px solid rgba(255,255,255,.06);
-    animation: modalZoomIn .18s ease;
-}
-
-#modalEscolhaEdicao .modal-box h3 {
-    margin: 0 0 10px 0;
-    color: #fff;
-    font-size: 24px;
-    font-weight: 700;
-}
-
-#modalEscolhaEdicao .modal-box p {
-    margin: 0 0 18px 0;
-    color: #d7deea;
-    font-size: 16px;
-}
-
-#modalEscolhaEdicao .modal-buttons {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-#modalEscolhaEdicao .modal-buttons button {
-    border: 0;
-    border-radius: 12px;
-    padding: 14px 12px;
-    font-size: 16px;
-    font-weight: 700;
-    cursor: pointer;
-}
-
-#modalEscolhaEdicao .btn-azul {
-    background: linear-gradient(90deg, #2f80ed, #2563eb);
-    color: #fff;
-}
-
-#modalEscolhaEdicao .btn-verde {
-    background: linear-gradient(90deg, #22c55e, #16a34a);
-    color: #fff;
-}
-
-#modalEscolhaEdicao .btn-vermelho {
-    background: linear-gradient(90deg, #ef4444, #dc2626);
-    color: #fff;
-}
-
-@keyframes modalZoomIn {
-    from {
-        opacity: 0;
-        transform: scale(.94);
-    }
-    to {
-        opacity: 1;
-        transform: scale(1);
-    }
-}
-
-.bloco-enderecos,
-.bloco-movimentacoes,
-#blocoEnderecos,
-#blocoMovimentacoes,
-.card-enderecos,
-.card-movimentacoes,
-.estoque-enderecos,
-.ultimas-movimentacoes {
-    max-height: 400px;
-    overflow-y: auto;
-    padding-right: 5px;
-}
-/* FIM CSS MODAL ESCOLHA EDICAO */
 
 
-/* INICIO CSS MODAL ESCOLHA EDICAO LIMPO */
-#modalEscolhaEdicao {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,.72);
-    display: none;
-    align-items: center;
-    justify-content: center;
-    z-index: 999999;
-    padding: 16px;
-}
 
-#modalEscolhaEdicao.ativo {
-    display: flex !important;
-}
 
-#modalEscolhaEdicao .modal-box {
-    width: min(92vw, 420px);
-    background: linear-gradient(180deg, #1e2b42 0%, #152033 100%);
-    border-radius: 16px;
-    padding: 22px;
-    text-align: center;
-    box-shadow: 0 20px 55px rgba(0,0,0,.45);
-    border: 1px solid rgba(255,255,255,.06);
-    animation: modalZoomIn .18s ease;
-}
-
-#modalEscolhaEdicao .modal-box h3 {
-    margin: 0 0 10px 0;
-    color: #fff;
-    font-size: 24px;
-    font-weight: 700;
-}
-
-#modalEscolhaEdicao .modal-box p {
-    margin: 0 0 18px 0;
-    color: #d7deea;
-    font-size: 16px;
-}
-
-#modalEscolhaEdicao .modal-buttons {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-#modalEscolhaEdicao .modal-buttons button {
-    border: 0;
-    border-radius: 12px;
-    padding: 14px 12px;
-    font-size: 16px;
-    font-weight: 700;
-    cursor: pointer;
-}
-
-#modalEscolhaEdicao .btn-azul {
-    background: linear-gradient(90deg, #2f80ed, #2563eb);
-    color: #fff;
-}
-
-#modalEscolhaEdicao .btn-verde {
-    background: linear-gradient(90deg, #22c55e, #16a34a);
-    color: #fff;
-}
-
-#modalEscolhaEdicao .btn-vermelho {
-    background: linear-gradient(90deg, #ef4444, #dc2626);
-    color: #fff;
-}
-
-@keyframes modalZoomIn {
-    from {
-        opacity: 0;
-        transform: scale(.95);
-    }
-    to {
-        opacity: 1;
-        transform: scale(1);
-    }
-}
-/* FIM CSS MODAL ESCOLHA EDICAO LIMPO */
 
 /* INICIO CSS PEDIDOS V2 BASE */
 .pedidos-v2-wrap{
@@ -1082,5 +808,106 @@ transition:.2s;
 
 .produto-table-card tbody tr:hover{
 background:rgba(37,99,235,.12);
+}
+
+
+
+/* ===== MODAL ESCOLHA EDICAO OFICIAL ===== */
+#modalEscolhaEdicao{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.72);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    z-index:999999;
+    padding:16px;
+}
+
+#modalEscolhaEdicao .system-modal-card,
+#modalEscolhaEdicao .modal-box{
+    width:min(92vw, 420px);
+    background:linear-gradient(180deg,#1e2b42 0%, #152033 100%);
+    border-radius:16px;
+    padding:22px;
+    text-align:center;
+    box-shadow:0 20px 55px rgba(0,0,0,.45);
+    border:1px solid rgba(255,255,255,.06);
+    animation:modalZoomIn .18s ease;
+}
+
+#modalEscolhaEdicao .system-modal-title,
+#modalEscolhaEdicao .modal-box h3{
+    margin:0 0 10px 0;
+    color:#fff;
+    font-size:24px;
+    font-weight:700;
+}
+
+#modalEscolhaEdicao .system-modal-message,
+#modalEscolhaEdicao .modal-box p{
+    margin:0 0 18px 0;
+    color:#d7deea;
+    font-size:16px;
+}
+
+#modalEscolhaEdicao .system-modal-actions,
+#modalEscolhaEdicao .modal-buttons{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+}
+
+#modalEscolhaEdicao .system-modal-btn,
+#modalEscolhaEdicao .modal-buttons button{
+    border:0;
+    border-radius:12px;
+    padding:14px 12px;
+    font-size:16px;
+    font-weight:700;
+    cursor:pointer;
+}
+
+#modalEscolhaEdicao .btn-secondary,
+#modalEscolhaEdicao .btn-azul{
+    background:linear-gradient(90deg,#2f80ed,#2563eb);
+    color:#fff;
+}
+
+#modalEscolhaEdicao .btn-verde{
+    background:linear-gradient(90deg,#22c55e,#16a34a);
+    color:#fff;
+}
+
+#modalEscolhaEdicao .btn-vermelho{
+    background:linear-gradient(90deg,#ef4444,#dc2626);
+    color:#fff;
+}
+
+@keyframes modalZoomIn{
+    from{
+        opacity:0;
+        transform:scale(.95);
+    }
+    to{
+        opacity:1;
+        transform:scale(1);
+    }
+}
+
+/* ===== SCROLL OFICIAL ESTOQUE ===== */
+.bloco-enderecos,
+.bloco-movimentacoes,
+#blocoEnderecos,
+#blocoMovimentacoes,
+.card-enderecos,
+.card-movimentacoes,
+.estoque-enderecos,
+.ultimas-movimentacoes,
+.produto-table-card .table-scroll{
+    max-height:500px;
+    overflow-y:auto;
+    overflow-x:auto;
+    padding-right:5px;
 }
 
