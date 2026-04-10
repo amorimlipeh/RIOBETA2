@@ -535,44 +535,45 @@ tabela.innerHTML+=`<tr><td>${produto.codigo||"-"}</td><td>${produto.nome||"-"}</
 
 
 
+
 function preencherOrigemAutomaticaTransferencia() {
   const campoProduto = document.getElementById('transfProdutoBusca');
   const campoOrigem = document.getElementById('transfOrigem');
+
   if (!campoProduto || !campoOrigem) return;
 
   const aplicar = () => {
     const valor = String(campoProduto.value || '').trim();
+
     if (!valor) {
       campoOrigem.value = '';
       return;
     }
 
     const produto = encontrarProdutoPorBusca(valor);
+
     if (!produto) {
       campoOrigem.value = '';
       return;
     }
 
-    const itemEstoque = (estoque || []).find(item =>
-      (
-        String(item.produtoId || '') === String(produto.id || '') ||
-        String(item.produto || '').toLowerCase() === String(produto.nome || '').toLowerCase() ||
-        String(item.codigo || '').toLowerCase() === String(produto.codigo || '').toLowerCase()
-      ) &&
-      Number(item.quantidade || 0) > 0
+    const itemEstoque = estoque.find(item =>
+      String(item.produtoId) === String(produto.id)
     );
 
-    campoOrigem.value = itemEstoque ? String(itemEstoque.endereco || '') : '';
+    campoOrigem.value = itemEstoque?.endereco || '';
   };
 
   if (campoProduto.dataset.autoOrigemBind === '1') return;
   campoProduto.dataset.autoOrigemBind = '1';
 
+  campoProduto.addEventListener('input', () => {
+    setTimeout(aplicar, 300);
+  });
+
   campoProduto.addEventListener('change', aplicar);
   campoProduto.addEventListener('blur', aplicar);
-  campoProduto.addEventListener('input', () => setTimeout(aplicar, 250));
 }
-
 window.initAutocompleteEstoque = function () {
   normalizarBuscaProdutoInput('movProdutoBusca');
   normalizarBuscaProdutoInput('transfProdutoBusca');
