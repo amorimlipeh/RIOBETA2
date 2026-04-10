@@ -1916,6 +1916,94 @@ document.addEventListener("DOMContentLoaded",()=>{
 });
 </script>
 
+
+<script>
+/* FIX_PERSISTENCIA_PEDIDOS_VIEW */
+(function(){
+    function salvarViewAtiva(){
+        document.querySelectorAll('.menu-item').forEach(btn => {
+            if (btn.dataset.fixViewBind === '1') return;
+            btn.dataset.fixViewBind = '1';
+            btn.addEventListener('click', () => {
+                const view = btn.getAttribute('data-view');
+                if (view) localStorage.setItem('ultimaViewAtiva', view);
+            });
+        });
+    }
+
+    function rerenderPedidosComSeguranca(){
+        try {
+            if (typeof criarPedidosLayout === 'function') criarPedidosLayout();
+        } catch(e) {}
+
+        try {
+            if (typeof carregarPedidosSalvos === 'function') carregarPedidosSalvos();
+        } catch(e) {}
+
+        try {
+            if (typeof renderPedidosSalvos === 'function') renderPedidosSalvos();
+        } catch(e) {}
+
+        try {
+            if (typeof aplicarSubcardsPedidos === 'function') aplicarSubcardsPedidos();
+        } catch(e) {}
+
+        try {
+            if (typeof initPedidosAdicionarProduto === 'function') initPedidosAdicionarProduto();
+        } catch(e) {}
+    }
+
+    function abrirUltimaView(){
+        const ultima = localStorage.getItem('ultimaViewAtiva');
+        if (!ultima) return;
+
+        const tentar = () => {
+            const btn = document.querySelector('.menu-item[data-view="' + ultima + '"]');
+            if (btn) btn.click();
+
+            if (ultima === 'pedidos') {
+                setTimeout(rerenderPedidosComSeguranca, 150);
+                setTimeout(rerenderPedidosComSeguranca, 500);
+                setTimeout(rerenderPedidosComSeguranca, 1200);
+            }
+        };
+
+        setTimeout(tentar, 200);
+        setTimeout(tentar, 700);
+        setTimeout(tentar, 1600);
+    }
+
+    function bindPedidoReRender(){
+        const btnPedidos = document.querySelector('.menu-item[data-view="pedidos"]');
+        if (!btnPedidos || btnPedidos.dataset.fixPedidosBind === '1') return;
+        btnPedidos.dataset.fixPedidosBind = '1';
+
+        btnPedidos.addEventListener('click', () => {
+            setTimeout(rerenderPedidosComSeguranca, 100);
+            setTimeout(rerenderPedidosComSeguranca, 400);
+            setTimeout(rerenderPedidosComSeguranca, 1000);
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        salvarViewAtiva();
+        bindPedidoReRender();
+        abrirUltimaView();
+    });
+
+    window.addEventListener('load', () => {
+        salvarViewAtiva();
+        bindPedidoReRender();
+        abrirUltimaView();
+    });
+
+    setTimeout(() => {
+        salvarViewAtiva();
+        bindPedidoReRender();
+    }, 1200);
+})();
+</script>
+
 </body>
 
 </html>
