@@ -7,6 +7,10 @@ JSON.parse(localStorage.getItem(PEDIDOS_STORAGE_KEY)||'[]');
 
 let editandoPedidoIndex=null;
 
+
+/* =========================
+   STORAGE
+========================= */
 function persistirPedidos(){
 localStorage.setItem(
 PEDIDOS_STORAGE_KEY,
@@ -14,9 +18,33 @@ JSON.stringify(pedidosSalvosMemoria)
 );
 }
 
+
+/* =========================
+   BOTÃO DINÂMICO
+========================= */
+function atualizarTextoBotao(){
+
+const btn=
+document.querySelector('#btnSalvarPedido') ||
+document.querySelector('#btnSalvarPedidoFinal');
+
+if(!btn) return;
+
+btn.innerText=
+editandoPedidoIndex!==null
+? 'Salvar Alterações'
+: 'Salvar Pedido';
+
+}
+
+
+/* =========================
+   PEDIDOS SALVOS
+========================= */
 function renderPedidosSalvos(){
 
-const area=document.querySelector('#pedidosSalvosLista') ||
+const area=
+document.querySelector('#pedidosSalvosLista') ||
 document.querySelector('.pedidos-salvos') ||
 document.querySelector('#listaPedidosSalvos');
 
@@ -26,9 +54,20 @@ area.innerHTML='';
 
 pedidosSalvosMemoria.forEach((pedido,index)=>{
 
+const emEdicao=
+editandoPedidoIndex===index;
+
 area.innerHTML+=`
-<div class="pedido-card">
-<div><strong>${pedido.id}</strong></div>
+<div class="pedido-card"
+style="
+${emEdicao?'border:2px solid #f59e0b;background:#3b2a10;':''}
+">
+
+<div>
+<strong>${pedido.id}</strong>
+${emEdicao?'<span style="color:#fbbf24;"> ✏️ Editando agora</span>':''}
+</div>
+
 <div>${pedido.cliente||'Sem cliente'}</div>
 <div>🟡 ${pedido.status||'Aguardando Separação'}</div>
 
@@ -56,69 +95,102 @@ Cancelar
 
 }
 
+
+/* =========================
+   VISUALIZAÇÃO
+========================= */
 window.abrirPedidoVisualizacao=function(index){
 
 const pedido=pedidosSalvosMemoria[index];
-
 if(!pedido) return;
 
-alert(
-pedido.itens.map(i=>
-`${i.codigo} - ${i.nome}
-${i.caixas||0} CX / ${i.unidades||0} UND`
-).join('\n\n')
-);
+let texto=`
+Pedido: ${pedido.id}
+
+Cliente: ${pedido.cliente||'-'}
+Status: ${pedido.status||'-'}
+
+Itens:
+`;
+
+pedido.itens.forEach(item=>{
+texto+=`
+
+${item.codigo} - ${item.nome}
+${item.caixas||0} CX / ${item.unidades||0} UND
+`;
+});
+
+alert(texto);
 
 }
 
+
+/* =========================
+   EDITAR
+========================= */
 window.editarPedido=function(index){
 
 const pedido=pedidosSalvosMemoria[index];
-
 if(!pedido) return;
 
 editandoPedidoIndex=index;
 
 window.itensPedidoAtual=[...pedido.itens];
 
-if(typeof abrirModalProdutoPedido==='function'){
-abrirModalProdutoPedido();
-}
+document.getElementById('pedidoCliente').value=
+pedido.cliente||'';
+
+document.getElementById('pedidoRepresentante').value=
+pedido.representante||'';
+
+document.getElementById('pedidoNumero').value=
+pedido.numero||'';
+
+document.getElementById('pedidoData').value=
+pedido.data||'';
 
 renderItensPedido();
+renderPedidosSalvos();
+atualizarTextoBotao();
+
+window.scrollTo({
+top:0,
+behavior:'smooth'
+});
 
 }
 
+
+/* =========================
+   CANCELAR
+========================= */
 window.cancelarPedido=function(index){
 
 if(!confirm('Deseja cancelar este pedido?')) return;
 
 pedidosSalvosMemoria.splice(index,1);
 
-persistirPedidos();
+if(editandoPedidoIndex===index){
+editandoPedidoIndex=null;
+}
 
+persistirPedidos();
 renderPedidosSalvos();
+atualizarTextoBotao();
 
 }
 
+
+/* =========================
+   SALVAR
+========================= */
 window.salvarPedidoAtualizado=function(){
 
 if(!window.itensPedidoAtual?.length){
 alert('Nenhum item no pedido.');
 return;
 }
-
-const cliente=
-document.getElementById('pedidoCliente')?.value||'';
-
-const representante=
-document.getElementById('pedidoRepresentante')?.value||'';
-
-const numero=
-document.getElementById('pedidoNumero')?.value||'';
-
-const data=
-document.getElementById('pedidoData')?.value||'';
 
 const pedido={
 
@@ -127,10 +199,17 @@ editandoPedidoIndex!==null
 ? pedidosSalvosMemoria[editandoPedidoIndex].id
 : 'PED-'+Date.now(),
 
-cliente,
-representante,
-numero,
-data,
+cliente:
+document.getElementById('pedidoCliente')?.value||'',
+
+representante:
+document.getElementById('pedidoRepresentante')?.value||'',
+
+numero:
+document.getElementById('pedidoNumero')?.value||'',
+
+data:
+document.getElementById('pedidoData')?.value||'',
 
 status:'Aguardando Separação',
 
@@ -142,26 +221,30 @@ if(editandoPedidoIndex!==null){
 
 pedidosSalvosMemoria[editandoPedidoIndex]=pedido;
 
-editandoPedidoIndex=null;
-
 }else{
 
 pedidosSalvosMemoria.unshift(pedido);
 
 }
 
-persistirPedidos();
+editandoPedidoIndex=null;
 
-renderPedidosSalvos();
+persistirPedidos();
 
 window.itensPedidoAtual=[];
 
 renderItensPedido();
+renderPedidosSalvos();
+atualizarTextoBotao();
 
 alert('Pedido salvo com sucesso.');
 
 }
 
+
+/* =========================
+   RENDER ITENS
+========================= */
 function renderItensPedido(){
 
 const area=
@@ -186,8 +269,11 @@ ${item.caixas||0} CX | ${item.unidades||0} UND
 
 }
 
+
 window.finalizarPedido=window.salvarPedidoAtualizado;
 
+
 renderPedidosSalvos();
+atualizarTextoBotao();
 
 })();
