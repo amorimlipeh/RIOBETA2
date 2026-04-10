@@ -290,42 +290,40 @@ function produtosView() {
       </div>
     </div>
 
-    <div class="produto-layout fade-in">
-      <div class="produto-form-card">
-        <h3>${produtoEditandoId ? 'Editar Produto' : 'Novo Produto'}</h3>
+    <div class="produto-form-card fade-in" style="margin-bottom:20px;">
+      <h3>${produtoEditandoId ? 'Editar Produto' : 'Novo Produto'}</h3>
 
-        <input id="codigo" placeholder="Código">
-        <input id="nome" placeholder="Nome">
-        <input id="categoria" placeholder="Categoria">
-        <input id="quantidade" type="number" placeholder="Quantidade Inicial">
-        <input id="fator" type="number" placeholder="Fator">
-        <input id="sku" placeholder="SKU (Opcional)">
-        <input id="imagem" placeholder="URL da Imagem">
+      <input id="codigo" placeholder="Código">
+      <input id="nome" placeholder="Nome">
+      <input id="categoria" placeholder="Categoria">
+      <input id="quantidade" type="number" placeholder="Quantidade Inicial">
+      <input id="fator" type="number" placeholder="Fator">
+      <input id="sku" placeholder="SKU (Opcional)">
+      <input id="imagem" placeholder="URL da Imagem">
 
-        <button id="btnSalvarProduto" onclick="salvarProduto()">
-          ${produtoEditandoId ? 'Salvar Alterações' : 'Salvar Produto'}
-        </button>
+      <button id="btnSalvarProduto" onclick="salvarProduto()">
+        ${produtoEditandoId ? 'Salvar Alterações' : 'Salvar Produto'}
+      </button>
 
-        ${produtoEditandoId ? `<button onclick="cancelarEdicao()" style="background:#475569">Cancelar</button>` : ''}
-      </div>
+      ${produtoEditandoId ? `<button onclick="cancelarEdicao()" style="background:#475569">Cancelar</button>` : ''}
+    </div>
 
-      <div class="produto-table-card">
-        <h3>Lista de Produtos</h3>
-        <input id="pesquisaProduto" onkeyup="filtrarProdutos()" placeholder="Pesquisar produto">
+    <div class="produto-table-card fade-in">
+      <h3>Lista de Produtos</h3>
+      <input id="pesquisaProduto" onkeyup="filtrarProdutos()" placeholder="Pesquisar produto">
 
-        <table>
-          <thead>
-            <tr>
-              <th>Nome</th>
-              <th>Categoria</th>
-              <th>Qtd</th>
-              <th>SKU</th>
-              <th>Ações</th>
-            </tr>
-          </thead>
-          <tbody id="produtosTabela"></tbody>
-        </table>
-      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Nome</th>
+            <th>Categoria</th>
+            <th>Qtd</th>
+            <th>SKU</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody id="produtosTabela"></tbody>
+      </table>
     </div>
   `;
 }
