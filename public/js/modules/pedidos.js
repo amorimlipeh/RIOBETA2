@@ -428,6 +428,14 @@
   function criarCardItemPedido({ codigo, nome, totalUnd, caixas, avulsas, fator, imagem }) {
     const item = document.createElement('div');
     item.className = 'pedido-item-card-real';
+    item.dataset.codigo = codigo || '';
+    item.dataset.nome = nome || '';
+    item.dataset.totalUnd = String(totalUnd || 0);
+    item.dataset.caixas = String(caixas || 0);
+    item.dataset.avulsas = String(avulsas || 0);
+    item.dataset.fator = String(fator || 1);
+    item.dataset.imagem = imagem || '';
+
     item.style.display = 'grid';
     item.style.gridTemplateColumns = '56px 1fr 40px';
     item.style.gap = '10px';
@@ -443,13 +451,13 @@
     item.innerHTML = `
       ${thumb}
       <div style="display:flex;flex-direction:column;gap:4px;color:#fff;">
-        <div style="font-weight:800;">${codigo}</div>
-        <div style="color:#dbe7ff;">${nome}</div>
-        <div style="color:#7fb0ff;font-size:12px;">
-          <span class="pedido-qtd">${caixas} CX</span> | ${totalUnd} UND
+        <div class="pedido-card-codigo" style="font-weight:800;">${codigo}</div>
+        <div class="pedido-card-nome" style="color:#dbe7ff;">${nome}</div>
+        <div class="pedido-card-resumo" style="color:#7fb0ff;font-size:12px;">
+          <span class="pedido-qtd">${caixas} CX</span> | <span class="pedido-und">${totalUnd} UND</span>
         </div>
-        <div style="color:#7fb0ff;font-size:12px;">
-          Fator: ${fator} | Avulsas: ${avulsas}
+        <div class="pedido-card-detalhe" style="color:#7fb0ff;font-size:12px;">
+          Fator: <span class="pedido-fator">${fator}</span> | Avulsas: <span class="pedido-avulsas">${avulsas}</span>
         </div>
       </div>
       <div style="
@@ -461,9 +469,23 @@
         flex-wrap:wrap;
       ">
         <button onclick="
-          const novo=prompt('Nova quantidade:', '${caixas}');
+          const card=this.closest('.pedido-item-card-real');
+          const atual=Number(card.dataset.caixas||0);
+          const novo=prompt('Nova quantidade em caixas:', String(atual));
           if(novo!==null && novo!=='' && !isNaN(Number(novo))){
-            this.closest('.pedido-item-card-real').querySelector('.pedido-qtd').innerText=novo+' CX';
+            const caixasNovo=Math.max(0, Number(novo));
+            const fator=Number(card.dataset.fator||1)||1;
+            const totalNovo=caixasNovo*fator;
+            const avulsasNovo=0;
+            card.dataset.caixas=String(caixasNovo);
+            card.dataset.totalUnd=String(totalNovo);
+            card.dataset.avulsas=String(avulsasNovo);
+            const qtdEl=card.querySelector('.pedido-qtd');
+            const undEl=card.querySelector('.pedido-und');
+            const avEl=card.querySelector('.pedido-avulsas');
+            if(qtdEl) qtdEl.innerText=caixasNovo+' CX';
+            if(undEl) undEl.innerText=totalNovo+' UND';
+            if(avEl) avEl.innerText=String(avulsasNovo);
           }
         "
         style="
@@ -484,6 +506,11 @@
           const footer=document.getElementById('pedidoFooterAcoes');
           if(lista && footer && !lista.querySelector('.pedido-item-card-real')){
             footer.style.display='none';
+            lista.innerHTML='';
+            const vazio=document.createElement('p');
+            vazio.style.color='#cbd5e1';
+            vazio.innerText='Nenhum item adicionado.';
+            lista.appendChild(vazio);
           }
         "
         style="
@@ -544,12 +571,24 @@
   function coletarItensPedidoAtual() {
     const itens = [];
     document.querySelectorAll('.pedido-item-card-real').forEach(card => {
-      const linhas = card.querySelectorAll('div');
+      const codigo = card.dataset.codigo || '';
+      const nome = card.dataset.nome || '';
+      const totalUnd = Number(card.dataset.totalUnd || 0);
+      const caixas = Number(card.dataset.caixas || 0);
+      const avulsas = Number(card.dataset.avulsas || 0);
+      const fator = Number(card.dataset.fator || 1);
+      const imagem = card.dataset.imagem || '';
+
       itens.push({
-        codigo: linhas[0]?.innerText || '',
-        nome: linhas[1]?.innerText || '',
-        resumo: linhas[2]?.innerText || '',
-        detalhe: linhas[3]?.innerText || ''
+        codigo,
+        nome,
+        totalUnd,
+        caixas,
+        avulsas,
+        fator,
+        imagem,
+        resumo: `${caixas} CX | ${totalUnd} UND`,
+        detalhe: `Fator: ${fator} | Avulsas: ${avulsas}`
       });
     });
     return itens;
@@ -677,13 +716,28 @@
   }
 
   function limparFormularioPedido() {
-    ['pedidoCliente', 'pedidoRepresentante', 'pedidoData', 'pedidoNumero'].forEach(id => {
+    ['pedidoCliente', 'pedidoRepresentante', 'pedidoNumero'].forEach(id => {
       const el = document.getElementById(id);
       if (el) el.value = '';
     });
 
+    const data = document.getElementById('pedidoData');
+    if (data) {
+      const hoje = new Date();
+      const yyyy = hoje.getFullYear();
+      const mm = String(hoje.getMonth() + 1).padStart(2, '0');
+      const dd = String(hoje.getDate()).padStart(2, '0');
+      data.value = `${yyyy}-${mm}-${dd}`;
+    }
+
     const lista = document.getElementById('listaItensPedidoReal');
-    if (lista) lista.innerHTML = '<p style="color:#cbd5e1;">Nenhum item adicionado.</p>';
+    if (lista) {
+      lista.innerHTML = '';
+      const vazio = document.createElement('p');
+      vazio.style.color = '#cbd5e1';
+      vazio.innerText = 'Nenhum item adicionado.';
+      lista.appendChild(vazio);
+    }
 
     const footer = document.getElementById('pedidoFooterAcoes');
     if (footer) footer.style.display = 'none';
