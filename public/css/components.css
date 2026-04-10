@@ -801,3 +801,39 @@ font-size:15px;
 border-radius:14px;
 }
 
+
+/* ===== KPI HORIZONTAL PREMIUM ===== */
+.stat-card{
+display:flex !important;
+align-items:center;
+justify-content:space-between;
+gap:16px;
+}
+
+.stat-card h3{
+margin:0 !important;
+font-size:16px !important;
+font-weight:700;
+}
+
+.stat-card p{
+margin:0 !important;
+font-size:30px !important;
+font-weight:800;
+line-height:1;
+}
+
+@media (max-width: 768px){
+  .stat-card{
+    padding:18px !important;
+  }
+
+  .stat-card h3{
+    font-size:15px !important;
+  }
+
+  .stat-card p{
+    font-size:26px !important;
+  }
+}
+
