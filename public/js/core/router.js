@@ -900,3 +900,60 @@ buttons.forEach(button => {
 });
 
 renderView('dashboard');
+
+
+function abrirView(view){
+  const renderer = views[view] || views.dashboard;
+  workspace.innerHTML = renderer();
+
+  buttons.forEach(btn => {
+    btn.classList.toggle('active', btn.getAttribute('data-view') === view);
+  });
+
+  localStorage.setItem('ultimaViewAtiva', view);
+
+  if(view === 'pedidos' && typeof window.renderPedidos === 'function'){
+    setTimeout(() => window.renderPedidos(), 50);
+    setTimeout(() => window.renderPedidos(), 250);
+  }
+
+  if(view === 'produtos'){
+    renderTabela();
+  }
+
+  if(view === 'estoque'){
+    renderTabelaEstoque();
+    renderTabelaEnderecos();
+    renderTabelaMovimentacoes();
+  }
+}
+
+buttons.forEach(btn => {
+  btn.addEventListener('click', async () => {
+    const view = btn.getAttribute('data-view');
+
+    if(view === 'produtos' || view === 'dashboard'){
+      await carregarProdutos();
+    }
+
+    if(view === 'estoque'){
+      await carregarProdutos();
+      await carregarEstoque();
+      await carregarMovimentacoes();
+    }
+
+    abrirView(view);
+  });
+});
+
+document.addEventListener('DOMContentLoaded', async () => {
+  await carregarProdutos();
+  const ultima = localStorage.getItem('ultimaViewAtiva') || 'dashboard';
+
+  if(ultima === 'estoque'){
+    await carregarEstoque();
+    await carregarMovimentacoes();
+  }
+
+  abrirView(ultima);
+});
