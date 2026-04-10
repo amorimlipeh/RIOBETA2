@@ -72,17 +72,14 @@
     localStorage.setItem(PEDIDOS_STORAGE_KEY, JSON.stringify(pedidosSalvosMemoria));
   }
 
-  function getModuloPedidosTitulo() {
-    return [...document.querySelectorAll('*')].find(
-      el => el.innerText && el.innerText.trim() === 'Módulo Pedidos'
-    );
+  function getPedidosRoot() {
+    return document.getElementById('pedidos-root');
   }
 
   function criarPedidosLayout() {
+    const root = getPedidosRoot();
+    if (!root) return;
     if (document.getElementById('pedidosV2Base')) return;
-
-    const titulo = getModuloPedidosTitulo();
-    if (!titulo) return;
 
     const bloco = document.createElement('div');
     bloco.id = 'pedidosV2Base';
@@ -155,7 +152,8 @@
       </div>
     `;
 
-    titulo.parentNode.insertBefore(bloco, titulo.nextSibling);
+    root.innerHTML = '';
+    root.appendChild(bloco);
 
     const dataInput = document.getElementById('pedidoData');
     if (dataInput && !dataInput.value) {
