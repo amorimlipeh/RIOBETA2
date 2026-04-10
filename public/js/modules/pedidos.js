@@ -847,6 +847,7 @@
   window.renderPedidos = renderPedidos;
   window.abrirPedidoSalvo = abrirPedidoSalvo;
   window.cancelarPedidoSalvo = cancelarPedidoSalvo;
+  window.abrirModalProdutoPedido = abrirModalProdutoPedido;
   window.abrirModalFinalizacaoPedido = abrirModalFinalizacaoPedido;
 })();
 
@@ -979,8 +980,8 @@ window.editarPedidoDoModal=function(index){
          window.abrirPedidoSalvo(index);
       }
 
-      if(typeof abrirModalProdutoPedido==='function'){
-         abrirModalProdutoPedido();
+      if(typeof window.abrirModalProdutoPedido==='function'){
+         window.abrirModalProdutoPedido();
       }
 
       const modal=document.getElementById('modalPedidoVisualizacao');
@@ -990,4 +991,5 @@ window.editarPedidoDoModal=function(index){
       console.error(e);
    }
 };
+
 
