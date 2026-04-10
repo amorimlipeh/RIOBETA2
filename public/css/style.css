@@ -779,3 +779,74 @@ background:#475569;
     }
 
 }
+
+/* ===== PRODUTOS TABELA PREMIUM FINAL ===== */
+
+.produto-table-card{
+overflow-x:auto;
+}
+
+.produto-table-card table{
+min-width:100%;
+border-collapse:separate;
+border-spacing:0 12px;
+}
+
+.produto-table-card thead tr{
+background:transparent;
+}
+
+.produto-table-card th{
+font-size:14px;
+font-weight:700;
+color:#94a3b8;
+padding:12px 10px;
+text-transform:uppercase;
+letter-spacing:.5px;
+}
+
+.produto-table-card tbody tr{
+background:rgba(8,20,44,.55);
+border-radius:14px;
+overflow:hidden;
+transition:.2s;
+}
+
+.produto-table-card tbody tr:hover{
+transform:scale(1.01);
+background:rgba(37,99,235,.15);
+}
+
+.produto-table-card td{
+padding:18px 12px;
+font-size:14px;
+font-weight:500;
+vertical-align:middle;
+}
+
+.produto-table-card td:first-child{
+border-top-left-radius:14px;
+border-bottom-left-radius:14px;
+font-weight:700;
+color:#fff;
+}
+
+.produto-table-card td:last-child{
+border-top-right-radius:14px;
+border-bottom-right-radius:14px;
+}
+
+.produto-table-card button{
+min-width:90px;
+padding:10px 14px;
+border-radius:12px;
+font-size:13px;
+font-weight:700;
+}
+
+@media(max-width:768px){
+  .produto-table-card table{
+    min-width:760px;
+  }
+}
+
