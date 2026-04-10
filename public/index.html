@@ -1615,6 +1615,153 @@ function abrirModalFinalizacaoPedido(){
 
 
 <script>
+let pedidosSalvosMemoria = [];
+
+function carregarPedidosSalvos(){
+    try{
+        pedidosSalvosMemoria = JSON.parse(localStorage.getItem("pedidosSalvosMemoria") || "[]");
+    }catch(e){
+        pedidosSalvosMemoria = [];
+    }
+}
+
+function persistirPedidosSalvos(){
+    localStorage.setItem("pedidosSalvosMemoria", JSON.stringify(pedidosSalvosMemoria));
+}
+
+function coletarItensPedidoAtual(){
+    const itens = [];
+    document.querySelectorAll(".pedido-item-card-real").forEach(card=>{
+        const linhas = card.querySelectorAll("div");
+        itens.push({
+            codigo: linhas[0]?.innerText || "",
+            nome: linhas[1]?.innerText || "",
+            resumo: linhas[2]?.innerText || "",
+            detalhe: linhas[3]?.innerText || ""
+        });
+    });
+    return itens;
+}
+
+function renderPedidosSalvos(){
+    const lista=document.getElementById("listaPedidosSalvos");
+    if(!lista) return;
+
+    lista.innerHTML = "";
+
+    if(!pedidosSalvosMemoria.length){
+        lista.innerHTML = '<p style="color:#cbd5e1;">Nenhum pedido salvo ainda.</p>';
+        return;
+    }
+
+    pedidosSalvosMemoria.forEach((pedido, index)=>{
+        const item=document.createElement("div");
+
+        item.style.background="#162742";
+        item.style.padding="14px";
+        item.style.borderRadius="12px";
+        item.style.display="flex";
+        item.style.flexDirection="column";
+        item.style.gap="8px";
+
+        item.innerHTML=`
+            <div style="color:#fff;font-weight:700;">${pedido.id}</div>
+            <div style="color:#dbe7ff;font-size:13px;">${pedido.cliente || "Sem cliente"}${pedido.numero ? " • Nº " + pedido.numero : ""}</div>
+            <div style="color:#facc15;font-size:13px;">🟡 ${pedido.status}</div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                <button onclick="abrirPedidoSalvo(${index})" style="
+                    flex:1;border:none;background:#2f6df6;color:#fff;
+                    padding:10px;border-radius:8px;font-weight:700;
+                ">Abrir</button>
+
+                <button onclick="cancelarPedidoSalvo(${index})" style="
+                    flex:1;border:none;background:#ef4444;color:#fff;
+                    padding:10px;border-radius:8px;font-weight:700;
+                ">Cancelar</button>
+            </div>
+        `;
+
+        lista.appendChild(item);
+    });
+}
+
+function adicionarPedidoNaLista(){
+    const cliente = document.getElementById("pedidoCliente")?.value || "";
+    const representante = document.getElementById("pedidoRepresentante")?.value || "";
+    const numero = document.getElementById("pedidoNumero")?.value || "";
+    const itens = coletarItensPedidoAtual();
+
+    const pedido = {
+        id: "PED-" + Date.now(),
+        cliente,
+        representante,
+        numero,
+        status: "Aguardando Separação",
+        itens
+    };
+
+    pedidosSalvosMemoria.unshift(pedido);
+    persistirPedidosSalvos();
+    renderPedidosSalvos();
+}
+
+function abrirPedidoSalvo(index){
+    const pedido = pedidosSalvosMemoria[index];
+    if(!pedido) return;
+
+    const cliente = document.getElementById("pedidoCliente");
+    const representante = document.getElementById("pedidoRepresentante");
+    const numero = document.getElementById("pedidoNumero");
+    const lista = document.getElementById("listaItensPedidoReal");
+    const footer = document.getElementById("pedidoFooterAcoes");
+
+    if(cliente) cliente.value = pedido.cliente || "";
+    if(representante) representante.value = pedido.representante || "";
+    if(numero) numero.value = pedido.numero || "";
+
+    if(lista){
+        lista.innerHTML = "";
+        (pedido.itens || []).forEach(item=>{
+            const card = document.createElement("div");
+            card.className = "pedido-item-card-real";
+            card.style.display = "grid";
+            card.style.gridTemplateColumns = "56px 1fr 40px";
+            card.style.gap = "10px";
+            card.style.alignItems = "center";
+            card.style.background = "#162742";
+            card.style.padding = "10px";
+            card.style.borderRadius = "12px";
+            card.style.marginBottom = "10px";
+
+            card.innerHTML = `
+                <div style="width:56px;height:56px;border-radius:10px;background:#2f6df6;display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:800;">IMG</div>
+                <div style="display:flex;flex-direction:column;gap:4px;color:#fff;">
+                    <div style="font-weight:800;">${item.codigo || ""}</div>
+                    <div style="color:#dbe7ff;">${item.nome || ""}</div>
+                    <div style="color:#7fb0ff;font-size:12px;">${item.resumo || ""}</div>
+                    <div style="color:#7fb0ff;font-size:12px;">${item.detalhe || ""}</div>
+                </div>
+                <div></div>
+            `;
+            lista.appendChild(card);
+        });
+    }
+
+    if(footer) footer.style.display = "block";
+    window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function cancelarPedidoSalvo(index){
+    pedidosSalvosMemoria.splice(index, 1);
+    persistirPedidosSalvos();
+    renderPedidosSalvos();
+}
+
+document.addEventListener("DOMContentLoaded", function(){
+    carregarPedidosSalvos();
+    renderPedidosSalvos();
+});
+
 function adicionarPedidoNaLista(){
     const lista=document.getElementById("listaPedidosSalvos");
     if(!lista) return;
