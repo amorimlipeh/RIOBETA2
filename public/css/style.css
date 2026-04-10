@@ -1015,3 +1015,24 @@ width:100% !important;
 max-width:100% !important;
 }
 
+
+/* ===== FORÇA EMPILHAR PRODUTOS DESKTOP ===== */
+
+.produtos-grid,
+.produto-grid,
+.produtos-container-grid,
+.produtos-wrapper{
+display:flex !important;
+flex-direction:column !important;
+gap:20px !important;
+width:100% !important;
+}
+
+.produtos-grid > *,
+.produto-grid > *,
+.produtos-container-grid > *,
+.produtos-wrapper > *{
+width:100% !important;
+max-width:100% !important;
+}
+
