@@ -119,6 +119,7 @@ function abrirModalFinalizacaoPedido(){
 
         document.getElementById("btnContinuarPedido").onclick=function(){
             adicionarPedidoNaLista();
+            adicionarPedidoNaLista();
             modal.remove();
         };
 
@@ -136,6 +137,7 @@ function abrirModalFinalizacaoPedido(){
                 footer.style.display="none";
             }
 
+            adicionarPedidoNaLista();
             modal.remove();
         };
     }
@@ -212,6 +214,7 @@ function abrirModalFinalizacaoPedido(){
         document.body.appendChild(modal);
 
         document.getElementById("btnContinuarPedido").onclick=function(){
+            adicionarPedidoNaLista();
             modal.remove();
         };
 
@@ -229,6 +232,7 @@ function abrirModalFinalizacaoPedido(){
                 footer.style.display="none";
             }
 
+            adicionarPedidoNaLista();
             modal.remove();
         };
     }
@@ -305,6 +309,7 @@ function abrirModalFinalizacaoPedido(){
         document.body.appendChild(modal);
 
         document.getElementById("btnContinuarPedido").onclick=function(){
+            adicionarPedidoNaLista();
             modal.remove();
         };
 
@@ -322,6 +327,7 @@ function abrirModalFinalizacaoPedido(){
                 footer.style.display="none";
             }
 
+            adicionarPedidoNaLista();
             modal.remove();
         };
     }
@@ -575,12 +581,16 @@ function abrirModalFinalizacaoPedido(){
         document.body.appendChild(modal);
 
         modal.addEventListener("click", function(e){
-            if(e.target === modal) modal.remove();
+            if(e.target === modal) adicionarPedidoNaLista();
+            modal.remove();
         });
 
-        modal.querySelector("#btnFecharEscolha").onclick = ()=> modal.remove();
-        modal.querySelector("#btnEscolhaMov").onclick = ()=> { modal.remove(); preencherFormularioMovimentacao(); };
-        modal.querySelector("#btnEscolhaTransf").onclick = ()=> { modal.remove(); preencherFormularioTransferencia(); };
+        modal.querySelector("#btnFecharEscolha").onclick = ()=> adicionarPedidoNaLista();
+            modal.remove();
+        modal.querySelector("#btnEscolhaMov").onclick = ()=> { adicionarPedidoNaLista();
+            modal.remove(); preencherFormularioMovimentacao(); };
+        modal.querySelector("#btnEscolhaTransf").onclick = ()=> { adicionarPedidoNaLista();
+            modal.remove(); preencherFormularioTransferencia(); };
 
         return modal;
     }
@@ -721,6 +731,7 @@ function abrirModalFinalizacaoPedido(){
         document.body.appendChild(modal);
 
         document.getElementById("btnContinuarPedido").onclick=function(){
+            adicionarPedidoNaLista();
             modal.remove();
         };
 
@@ -738,6 +749,7 @@ function abrirModalFinalizacaoPedido(){
                 footer.style.display="none";
             }
 
+            adicionarPedidoNaLista();
             modal.remove();
         };
     }
@@ -949,6 +961,7 @@ function abrirModalFinalizacaoPedido(){
         document.body.appendChild(modal);
 
         document.getElementById("btnContinuarPedido").onclick=function(){
+            adicionarPedidoNaLista();
             modal.remove();
         };
 
@@ -966,6 +979,7 @@ function abrirModalFinalizacaoPedido(){
                 footer.style.display="none";
             }
 
+            adicionarPedidoNaLista();
             modal.remove();
         };
     }
@@ -1550,6 +1564,7 @@ function abrirModalFinalizacaoPedido(){
         document.body.appendChild(modal);
 
         document.getElementById("btnContinuarPedido").onclick=function(){
+            adicionarPedidoNaLista();
             modal.remove();
         };
 
@@ -1567,6 +1582,7 @@ function abrirModalFinalizacaoPedido(){
                 footer.style.display="none";
             }
 
+            adicionarPedidoNaLista();
             modal.remove();
         };
     }
