@@ -1220,3 +1220,69 @@ setInterval(() => {
 
 }, 1000);
 
+
+
+// AUTO_ENDERECO_ULTRA_V4
+setInterval(() => {
+
+  const inputs = [...document.querySelectorAll('input')];
+
+  const produtoInput = inputs.find(i =>
+    i.placeholder?.toLowerCase().includes('código ou nome do produto')
+  );
+
+  const origemInput = inputs.find(i =>
+    i.placeholder?.toLowerCase().includes('endereço de origem')
+  );
+
+  if (!produtoInput || !origemInput) return;
+
+  if (produtoInput.dataset.ultraBound) return;
+  produtoInput.dataset.ultraBound = "1";
+
+  async function preencherEnderecoUltra(){
+
+    const valor = produtoInput.value.toLowerCase();
+    if(!valor) return;
+
+    try{
+
+      const res = await fetch('/api/estoque');
+      const estoque = await res.json();
+
+      const item = estoque.find(e =>
+        String(e.produto || '').toLowerCase().includes(valor) ||
+        String(e.codigo || '').toLowerCase().includes(valor)
+      );
+
+      if(!item) return;
+
+      const endereco =
+        item.endereco ||
+        item.enderecoWms ||
+        item.endereco_origem ||
+        item.local ||
+        item.rua ||
+        item.posicao ||
+        item.wms ||
+        item.location ||
+        '';
+
+      if(endereco){
+        origemInput.value = endereco;
+        origemInput.dispatchEvent(new Event('input'));
+        origemInput.dispatchEvent(new Event('change'));
+      }
+
+    }catch(e){
+      console.log("ERRO AUTO ENDERECO:", e);
+    }
+
+  }
+
+  produtoInput.addEventListener('input', ()=>setTimeout(preencherEnderecoUltra,300));
+  produtoInput.addEventListener('change', preencherEnderecoUltra);
+  produtoInput.addEventListener('blur', preencherEnderecoUltra);
+
+},1000);
+
