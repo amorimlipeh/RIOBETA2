@@ -675,3 +675,107 @@ background:#475569;
     }
 }
 /* FIM CSS PEDIDOS V2 BASE */
+/* ===== PRODUTOS ENTERPRISE REFINADO ===== */
+
+.produto-layout{
+    gap:18px !important;
+}
+
+.produto-form-card,
+.produto-table-card{
+    background:linear-gradient(180deg,#24354d,#1b2940) !important;
+    border-radius:20px !important;
+    padding:20px !important;
+    border:1px solid rgba(255,255,255,.05);
+    box-shadow:0 10px 30px rgba(0,0,0,.18);
+}
+
+.produto-form-card h3,
+.produto-table-card h3{
+    font-size:30px;
+    font-weight:800;
+    margin-bottom:18px;
+    color:#fff;
+}
+
+.produto-form-card input,
+.produto-form-card select{
+    background:#08142c !important;
+    border:1px solid rgba(255,255,255,.05);
+    border-radius:14px;
+    padding:14px 16px;
+    min-height:52px;
+    font-size:15px;
+    margin-bottom:12px;
+    color:#fff;
+}
+
+.produto-form-card button{
+    min-height:54px;
+    border-radius:14px;
+    font-size:16px;
+    font-weight:800;
+    background:linear-gradient(90deg,#2f80ed,#2563eb);
+    box-shadow:0 6px 20px rgba(37,99,235,.25);
+}
+
+.produto-form-card button:hover{
+    transform:scale(1.01);
+    transition:.2s;
+}
+
+.produto-table-card table{
+    border-collapse:separate;
+    border-spacing:0 10px;
+    width:100%;
+}
+
+.produto-table-card tbody tr{
+    background:rgba(7,18,38,.45);
+    transition:.2s;
+}
+
+.produto-table-card tbody tr:hover{
+    background:rgba(37,99,235,.12);
+}
+
+.produto-table-card td,
+.produto-table-card th{
+    padding:18px 16px;
+    text-align:left;
+}
+
+.produto-table-card th{
+    color:#cbd5e1;
+    font-size:14px;
+    font-weight:700;
+}
+
+.produto-table-card td{
+    color:#fff;
+    font-size:14px;
+}
+
+#pesquisaProduto{
+    background:#08142c !important;
+    border-radius:14px;
+    min-height:52px;
+    padding:14px 16px;
+    margin-bottom:20px;
+    border:1px solid rgba(255,255,255,.05);
+}
+
+@media(max-width:768px){
+
+    .produto-form-card h3,
+    .produto-table-card h3{
+        font-size:24px;
+    }
+
+    .produto-table-card td,
+    .produto-table-card th{
+        padding:14px 10px;
+        font-size:13px;
+    }
+
+}
