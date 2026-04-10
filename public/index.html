@@ -894,13 +894,46 @@ setTimeout(criarPedidosLayout,3000);
                 <div style="font-weight:800;">${codigo}</div>
                 <div style="color:#dbe7ff;">${nome}</div>
                 <div style="color:#7fb0ff;font-size:12px;">
-                    ${caixas} CX | ${totalUnd} UND
+                    <span class="pedido-qtd">${caixas} CX</span> | ${totalUnd} UND
                 </div>
                 <div style="color:#7fb0ff;font-size:12px;">
                     Fator: ${fator} | Avulsas: ${avulsas}
                 </div>
             </div>
-            <div style="font-size:20px;">✅</div>
+            <div style="
+                display:flex;
+                flex-direction:column;
+                gap:8px;
+            ">
+                <button onclick="
+                    const novo=prompt('Nova quantidade:', '${caixas}');
+                    if(novo!==null){
+                        this.closest('.pedido-item-card-real').querySelector('.pedido-qtd').innerText=novo+' CX';
+                    }
+                "
+                style="
+                    border:none;
+                    background:#2f6df6;
+                    color:#fff;
+                    padding:6px 10px;
+                    border-radius:8px;
+                    cursor:pointer;
+                    font-size:12px;
+                ">✏️ Editar</button>
+
+                <button onclick="
+                    this.closest('.pedido-item-card-real').remove();
+                "
+                style="
+                    border:none;
+                    background:#ef4444;
+                    color:#fff;
+                    padding:6px 10px;
+                    border-radius:8px;
+                    cursor:pointer;
+                    font-size:12px;
+                ">🗑 Cancelar</button>
+            </div>
         `;
 
         lista.appendChild(item);
