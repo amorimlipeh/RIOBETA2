@@ -1670,6 +1670,49 @@ function adicionarPedidoNaLista(){
 }
 </script>
 
+
+<script>
+(function organizarLayoutPedidos(){
+    function aplicar(){
+        const titulos = Array.from(document.querySelectorAll("*"));
+
+        const novoPedidoTitulo = titulos.find(el => el.innerText?.trim() === "Novo Pedido");
+        const pedidosSalvosTitulo = titulos.find(el => el.innerText?.trim() === "📋 Pedidos Salvos");
+        const itensTitulo = titulos.find(el => el.innerText?.trim() === "Itens do Pedido");
+
+        if(!novoPedidoTitulo || !pedidosSalvosTitulo || !itensTitulo) return;
+
+        const cardNovo = novoPedidoTitulo.closest("div");
+        const cardSalvos = pedidosSalvosTitulo.closest("div");
+        const cardItens = itensTitulo.closest("div");
+
+        if(!cardNovo || !cardSalvos || !cardItens) return;
+
+        if(document.getElementById("pedidosGridTopo")) return;
+
+        const grid = document.createElement("div");
+        grid.id = "pedidosGridTopo";
+        grid.style.display = "grid";
+        grid.style.gridTemplateColumns = "repeat(auto-fit,minmax(320px,1fr))";
+        grid.style.gap = "16px";
+        grid.style.marginBottom = "18px";
+
+        cardNovo.parentNode.insertBefore(grid, cardNovo);
+
+        grid.appendChild(cardNovo);
+        grid.appendChild(cardSalvos);
+
+        cardNovo.style.margin = "0";
+        cardSalvos.style.margin = "0";
+        cardItens.style.marginTop = "0";
+    }
+
+    setTimeout(aplicar,300);
+    setTimeout(aplicar,1000);
+    setTimeout(aplicar,2000);
+})();
+</script>
+
 </body>
 
 </html>
