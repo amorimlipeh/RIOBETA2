@@ -664,6 +664,8 @@ setTimeout(criarPedidosLayout,3000);
         document.getElementById("pesquisaProdutoPedido").addEventListener("input", function(){
             renderListaBuscaProdutos(this.value);
         });
+
+        document.getElementById("btnConfirmarProdutoPedido").innerText = "Próximo";
     }
 
     function abrirModalProdutoPedido(){
@@ -737,6 +739,79 @@ setTimeout(criarPedidosLayout,3000);
             el.onclick = function(){
                 pedidoProdutoSelecionado = filtrados[idx];
                 renderListaBuscaProdutos(busca);
+
+                const lista = document.getElementById("listaBuscaProdutosPedido");
+                const fator = getFator(pedidoProdutoSelecionado);
+
+                lista.innerHTML += `
+                    <div id="checkoutProdutoPedido" style="
+                        margin-top:15px;
+                        padding:15px;
+                        background:#10213d;
+                        border-radius:12px;
+                    ">
+                        <div style="color:#fff;font-weight:700;margin-bottom:10px;">
+                            Checkout do Produto
+                        </div>
+
+                        <div style="display:flex;gap:10px;margin-bottom:10px;">
+                            <input id="pedidoQtdInput" type="number" value="1" min="1"
+                                style="
+                                    flex:1;
+                                    padding:12px;
+                                    border:none;
+                                    border-radius:8px;
+                                    background:#0b1730;
+                                    color:#fff;
+                                ">
+                            <select id="pedidoTipoInput"
+                                style="
+                                    width:90px;
+                                    padding:12px;
+                                    border:none;
+                                    border-radius:8px;
+                                    background:#0b1730;
+                                    color:#fff;
+                                ">
+                                <option value="cx">CX</option>
+                                <option value="und">UND</option>
+                            </select>
+                        </div>
+
+                        <div id="pedidoResumoCalc" style="
+                            color:#7fb0ff;
+                            font-size:13px;
+                            line-height:1.7;
+                        ">
+                            Fator: ${fator}<br>
+                            Total UND: ${fator}<br>
+                            Caixas: 1<br>
+                            Avulsas: 0
+                        </div>
+                    </div>
+                `;
+
+                const qtdInput = document.getElementById("pedidoQtdInput");
+                const tipoInput = document.getElementById("pedidoTipoInput");
+
+                function recalcularResumo(){
+                    const qtd = Number(qtdInput.value||1);
+                    const tipo = tipoInput.value;
+
+                    let totalUnd = tipo==="cx" ? qtd*fator : qtd;
+                    let caixas = Math.floor(totalUnd/fator);
+                    let avulsas = totalUnd%fator;
+
+                    document.getElementById("pedidoResumoCalc").innerHTML = `
+                        Fator: ${fator}<br>
+                        Total UND: ${totalUnd}<br>
+                        Caixas: ${caixas}<br>
+                        Avulsas: ${avulsas}
+                    `;
+                }
+
+                qtdInput.oninput = recalcularResumo;
+                tipoInput.onchange = recalcularResumo;
             };
         });
     }
@@ -781,6 +856,13 @@ setTimeout(criarPedidosLayout,3000);
         const fator = getFator(pedidoProdutoSelecionado);
         const imagem = getImagem(pedidoProdutoSelecionado);
 
+        const qtdDigitada = Number(document.getElementById("pedidoQtdInput")?.value || 1);
+        const tipoDigitado = document.getElementById("pedidoTipoInput")?.value || "cx";
+
+        const totalUnd = tipoDigitado === "cx" ? qtdDigitada * fator : qtdDigitada;
+        const caixas = Math.floor(totalUnd / fator);
+        const avulsas = totalUnd % fator;
+
         const item = document.createElement("div");
         item.className = "pedido-item-card-real";
         item.style.display = "grid";
@@ -800,7 +882,12 @@ setTimeout(criarPedidosLayout,3000);
             <div style="display:flex;flex-direction:column;gap:4px;color:#fff;">
                 <div style="font-weight:800;">${codigo}</div>
                 <div style="color:#dbe7ff;">${nome}</div>
-                <div style="color:#7fb0ff;font-size:12px;">Fator: ${fator} | Qtd: 1 | Caixas: ${(1/fator).toFixed(2).replace(/\.00$/, "")}</div>
+                <div style="color:#7fb0ff;font-size:12px;">
+                    ${caixas} CX | ${totalUnd} UND
+                </div>
+                <div style="color:#7fb0ff;font-size:12px;">
+                    Fator: ${fator} | Avulsas: ${avulsas}
+                </div>
             </div>
             <div style="font-size:20px;">✅</div>
         `;
