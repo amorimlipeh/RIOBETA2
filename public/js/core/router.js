@@ -903,6 +903,12 @@ renderView('dashboard');
 
 
 function abrirView(view){
+  try {
+    if (typeof window.destroyPedidosUI === 'function') {
+      window.destroyPedidosUI();
+    }
+  } catch(e) {}
+
   const renderer = views[view] || views.dashboard;
   workspace.innerHTML = renderer();
 

@@ -796,13 +796,15 @@
   window.abrirPedidoSalvo = abrirPedidoSalvo;
   window.cancelarPedidoSalvo = cancelarPedidoSalvo;
   window.abrirModalFinalizacaoPedido = abrirModalFinalizacaoPedido;
-
-  function tentarRenderPedidos() {
-    const titulo = getModuloPedidosTitulo();
-    if (titulo) renderPedidos();
-  }
-
-  document.addEventListener('DOMContentLoaded', tentarRenderPedidos);
-  setTimeout(tentarRenderPedidos, 300);
-  setTimeout(tentarRenderPedidos, 1000);
 })();
+
+
+window.destroyPedidosUI = function () {
+  try { document.getElementById('pedidosV2Base')?.remove(); } catch(e) {}
+  try { document.getElementById('modalProdutoPedido')?.remove(); } catch(e) {}
+  try { document.getElementById('modalFinalizarPedido')?.remove(); } catch(e) {}
+
+  try {
+    document.querySelectorAll('.pedido-item-card-real').forEach(el => el.remove());
+  } catch(e) {}
+};
