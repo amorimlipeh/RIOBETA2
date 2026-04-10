@@ -621,7 +621,7 @@ function renderTabelaMovimentacoes() {
         <td>${formatarDataHora(item.data)}</td>
         <td><span class="badge ${status === 'ativo' ? 'status-ok' : 'status-zero'}">${status}</span></td>
         <td style="display:flex;gap:6px;flex-wrap:wrap;">
-          ${status === 'ativo' ? `<button class="btn-action btn-edit" onclick="editarMovimentacao('${item.id}')">Editar</button>` : '-'}
+          ${status === 'ativo' ? `<button class="btn-action btn-edit" onclick="abrirModalEscolhaEdicao('${item.id}')">Editar</button>` : '-'}
           ${status === 'ativo' ? `<button class="btn-action btn-cancel" onclick="cancelarMovimentacao('${item.id}')">Cancelar</button>` : ''}
         </td>
       </tr>
@@ -834,6 +834,55 @@ window.cancelarMovimentacao = async function (id) {
   await renderView('estoque', { skipLoad: true });
   showModal('Movimentação cancelada com sucesso.', 'success');
 };
+
+
+window.abrirModalEscolhaEdicao = function (id) {
+  const mov = movimentacoes.find(m => String(m.id) === String(id));
+  if (!mov) return;
+
+  const existente = document.getElementById('modalEscolhaEdicao');
+  if (existente) existente.remove();
+
+  const modal = document.createElement('div');
+  modal.id = 'modalEscolhaEdicao';
+  modal.className = 'system-modal-backdrop';
+  modal.innerHTML = `
+    <div class="system-modal-card warning">
+      <div class="system-modal-title">O que deseja editar?</div>
+      <div class="system-modal-message">Escolha abaixo o tipo de edição para esta linha.</div>
+      <div class="system-modal-actions">
+        <button class="system-modal-btn btn-secondary" id="btnEscolhaMov">Movimentação</button>
+        <button class="system-modal-btn" id="btnEscolhaTransf">Transferência</button>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+
+  const fechar = () => {
+    const alvo = document.getElementById('modalEscolhaEdicao');
+    if (alvo) alvo.remove();
+  };
+
+  document.getElementById('btnEscolhaMov')?.addEventListener('click', () => {
+    fechar();
+    editarMovimentacao(id);
+  });
+
+  document.getElementById('btnEscolhaTransf')?.addEventListener('click', () => {
+    fechar();
+    if (mov.tipo !== 'transferencia') {
+      showModal('Esta linha não é uma transferência.', 'error');
+      return;
+    }
+    editarMovimentacao(id);
+  });
+
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) fechar();
+  });
+};
+
 
 window.editarMovimentacao = function (id) {
   const mov = movimentacoes.find(m => String(m.id) === String(id));
