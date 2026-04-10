@@ -6,3 +6,10 @@ auto
 logs
 node_modules
 temp
+*.bak
+*.bak.*
+*.old
+*.tmp
+*.backup
+*.orig
+*.rej
