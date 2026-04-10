@@ -824,7 +824,10 @@ setTimeout(criarPedidosLayout,3000);
 
             fecharModalProdutoPedido();
         };
-function garantirListaItensPedido(){
+
+    }
+
+    function garantirListaItensPedido(){
         const titulo = Array.from(document.querySelectorAll("*"))
             .find(el => txt(el.innerText) === "Itens do Pedido");
 
