@@ -939,3 +939,64 @@ color:#fff !important;
   }
 }
 
+
+/* ===== MOBILE CARD VIEW PRODUTOS ===== */
+
+@media(max-width:768px){
+
+.produto-table-card table,
+.produto-table-card thead,
+.produto-table-card tbody,
+.produto-table-card th,
+.produto-table-card td,
+.produto-table-card tr{
+display:block !important;
+width:100% !important;
+}
+
+.produto-table-card thead{
+display:none !important;
+}
+
+.produto-table-card tbody tr{
+background:rgba(8,20,44,.55) !important;
+margin-bottom:18px !important;
+padding:14px !important;
+border-radius:16px !important;
+border:1px solid rgba(255,255,255,.04);
+box-shadow:0 4px 14px rgba(0,0,0,.25);
+}
+
+.produto-table-card tbody td{
+display:flex !important;
+justify-content:space-between !important;
+align-items:center !important;
+padding:10px 0 !important;
+border:none !important;
+background:none !important;
+font-size:14px !important;
+}
+
+.produto-table-card tbody td::before{
+font-weight:700;
+color:#94a3b8;
+margin-right:10px;
+font-size:13px;
+}
+
+.produto-table-card tbody td:nth-child(1)::before{content:"Nome";}
+.produto-table-card tbody td:nth-child(2)::before{content:"Categoria";}
+.produto-table-card tbody td:nth-child(3)::before{content:"Qtd";}
+.produto-table-card tbody td:nth-child(4)::before{content:"SKU";}
+.produto-table-card tbody td:nth-child(5)::before{content:"Ações";}
+
+.produto-table-card tbody td:last-child{
+padding-top:14px !important;
+}
+
+.produto-table-card tbody td:last-child button{
+width:100% !important;
+}
+
+}
+
