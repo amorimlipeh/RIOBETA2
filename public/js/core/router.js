@@ -169,17 +169,103 @@ function encontrarProdutoPorBusca(valor) {
 }
 
 function dashboardView() {
+  const totalEstoque = produtos.reduce((a,b)=>a+Number(b.estoqueTotal||0),0);
+
   return `
     <div class="hero-card fade-in">
       <h1>Dashboard Executivo</h1>
-      <p>Painel central de gestão logística</p>
+      <p>Centro de comando operacional do sistema logístico</p>
     </div>
 
     <div class="grid-cards fade-in">
-      <div class="stat-card"><h3>Total Produtos</h3><p>${produtos.length}</p></div>
-      <div class="stat-card"><h3>Pedidos</h3><p>89</p></div>
-      <div class="stat-card"><h3>Estoque</h3><p>${produtos.reduce((a,b)=>a+Number(b.estoqueTotal||0),0)}</p></div>
-      <div class="stat-card"><h3>WMS</h3><p>97%</p></div>
+      <div class="stat-card">
+        <h3>📦 Total Produtos</h3>
+        <p>${produtos.length}</p>
+      </div>
+
+      <div class="stat-card">
+        <h3>🧾 Pedidos Pendentes</h3>
+        <p>89</p>
+      </div>
+
+      <div class="stat-card">
+        <h3>📊 Estoque Total</h3>
+        <p>${totalEstoque}</p>
+      </div>
+
+      <div class="stat-card">
+        <h3>🗺️ Performance WMS</h3>
+        <p>97%</p>
+      </div>
+    </div>
+
+    <div class="dashboard-row fade-in">
+
+      <div class="big-card">
+        <h3>📈 Performance Operacional</h3>
+
+        <div style="margin-top:20px;display:flex;flex-direction:column;gap:18px;">
+
+          <div>
+            <span>Separação</span>
+            <div style="background:#1e293b;height:12px;border-radius:20px;margin-top:5px;">
+              <div style="width:92%;height:100%;background:#22c55e;border-radius:20px;"></div>
+            </div>
+          </div>
+
+          <div>
+            <span>Armazenagem</span>
+            <div style="background:#1e293b;height:12px;border-radius:20px;margin-top:5px;">
+              <div style="width:84%;height:100%;background:#3b82f6;border-radius:20px;"></div>
+            </div>
+          </div>
+
+          <div>
+            <span>Conferência</span>
+            <div style="background:#1e293b;height:12px;border-radius:20px;margin-top:5px;">
+              <div style="width:76%;height:100%;background:#f59e0b;border-radius:20px;"></div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="big-card">
+        <h3>⚡ Atalhos Rápidos</h3>
+
+        <div style="
+          display:grid;
+          grid-template-columns:1fr 1fr;
+          gap:12px;
+          margin-top:20px;
+        ">
+
+          <button class="quick-btn">Novo Pedido</button>
+          <button class="quick-btn">Novo Produto</button>
+          <button class="quick-btn">Mov. Estoque</button>
+          <button class="quick-btn">Scanner</button>
+
+        </div>
+      </div>
+
+    </div>
+
+    <div class="big-card fade-in">
+      <h3>🕒 Últimas Atividades</h3>
+
+      <div style="
+        margin-top:20px;
+        display:flex;
+        flex-direction:column;
+        gap:12px;
+      ">
+
+        <div class="activity-item">📦 Produto adicionado ao estoque</div>
+        <div class="activity-item">🧾 Novo pedido criado</div>
+        <div class="activity-item">🚚 Transferência entre endereços</div>
+        <div class="activity-item">📍 Atualização WMS realizada</div>
+
+      </div>
     </div>
   `;
 }
