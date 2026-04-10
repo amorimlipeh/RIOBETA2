@@ -850,3 +850,92 @@ font-weight:700;
   }
 }
 
+
+/* ===== PRODUTOS TABELA PREMIUM FIX FORTE ===== */
+
+.produto-table-card{
+overflow-x:auto !important;
+}
+
+.produto-table-card table{
+width:100% !important;
+min-width:760px;
+border-collapse:separate !important;
+border-spacing:0 12px !important;
+}
+
+.produto-table-card thead th{
+font-size:13px !important;
+font-weight:800 !important;
+color:#94a3b8 !important;
+padding:10px 12px !important;
+text-transform:uppercase !important;
+letter-spacing:.4px !important;
+white-space:nowrap;
+}
+
+.produto-table-card tbody td{
+background:rgba(8,20,44,.60) !important;
+padding:18px 12px !important;
+font-size:14px !important;
+font-weight:500 !important;
+color:#e5eefc !important;
+vertical-align:middle !important;
+border-top:1px solid rgba(255,255,255,.03);
+border-bottom:1px solid rgba(255,255,255,.03);
+white-space:nowrap;
+}
+
+.produto-table-card tbody tr:hover td{
+background:rgba(37,99,235,.16) !important;
+}
+
+.produto-table-card tbody td:first-child{
+border-top-left-radius:14px !important;
+border-bottom-left-radius:14px !important;
+border-left:1px solid rgba(255,255,255,.03);
+font-weight:700 !important;
+color:#fff !important;
+}
+
+.produto-table-card tbody td:last-child{
+border-top-right-radius:14px !important;
+border-bottom-right-radius:14px !important;
+border-right:1px solid rgba(255,255,255,.03);
+}
+
+.produto-table-card tbody td:last-child button{
+display:inline-flex !important;
+align-items:center;
+justify-content:center;
+min-width:92px !important;
+padding:10px 14px !important;
+border-radius:12px !important;
+font-size:13px !important;
+font-weight:700 !important;
+white-space:nowrap;
+}
+
+#pesquisaProduto{
+width:100% !important;
+max-width:320px;
+background:#08142c !important;
+border:1px solid rgba(255,255,255,.05) !important;
+border-radius:14px !important;
+min-height:52px !important;
+padding:14px 16px !important;
+margin-bottom:18px !important;
+color:#fff !important;
+}
+
+@media(max-width:768px){
+  .produto-table-card{
+    overflow-x:auto !important;
+    -webkit-overflow-scrolling:touch;
+  }
+
+  .produto-table-card table{
+    min-width:820px !important;
+  }
+}
+
