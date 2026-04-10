@@ -1168,3 +1168,55 @@ setInterval(() => {
 
 },1000);
 
+
+
+// AUTO_ENDERECO_SMART_V3
+setInterval(() => {
+
+  const inputs = [...document.querySelectorAll('input')];
+
+  const produtoInput = inputs.find(i =>
+    i.placeholder?.toLowerCase().includes('código ou nome do produto')
+  );
+
+  const origemInput = inputs.find(i =>
+    i.placeholder?.toLowerCase().includes('endereço de origem')
+  );
+
+  if (!produtoInput || !origemInput) return;
+
+  if (produtoInput.dataset.autoBound) return;
+  produtoInput.dataset.autoBound = "1";
+
+  async function preencherEndereco(){
+    const valor = produtoInput.value.toLowerCase();
+
+    if(!valor) return;
+
+    try{
+      const res = await fetch('/api/estoque');
+      const estoque = await res.json();
+
+      const item = estoque.find(e =>
+        String(e.produto || '').toLowerCase().includes(valor) ||
+        String(e.codigo || '').toLowerCase().includes(valor)
+      );
+
+      if(item?.endereco){
+        origemInput.value = item.endereco;
+        origemInput.dispatchEvent(new Event('input'));
+      }
+
+    }catch(err){
+      console.log(err);
+    }
+  }
+
+  produtoInput.addEventListener('change', preencherEndereco);
+  produtoInput.addEventListener('blur', preencherEndereco);
+  produtoInput.addEventListener('input', () => {
+    setTimeout(preencherEndereco,300);
+  });
+
+}, 1000);
+
