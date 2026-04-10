@@ -911,3 +911,37 @@ background:rgba(37,99,235,.12);
     padding-right:5px;
 }
 
+
+
+.modal-pedido{
+display:none;
+position:fixed;
+inset:0;
+background:rgba(0,0,0,.75);
+align-items:center;
+justify-content:center;
+z-index:99999;
+}
+
+.modal-pedido-box{
+background:#13233d;
+padding:25px;
+border-radius:15px;
+width:90%;
+max-width:600px;
+}
+
+.modal-pedido-botoes{
+display:flex;
+gap:10px;
+margin-top:20px;
+}
+
+.modal-pedido-botoes button{
+flex:1;
+padding:12px;
+border:none;
+border-radius:10px;
+cursor:pointer;
+}
+

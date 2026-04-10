@@ -860,3 +860,54 @@ window.destroyPedidosUI = function () {
     document.querySelectorAll('.pedido-item-card-real').forEach(el => el.remove());
   } catch(e) {}
 };
+
+
+function abrirPedido(index){
+
+const pedido = pedidosSalvosMemoria[index];
+if(!pedido)return;
+
+window.pedidoIndexAtual=index;
+
+let modal=document.getElementById("modalPedidoVisualizacao");
+
+if(!modal){
+
+modal=document.createElement("div");
+modal.id="modalPedidoVisualizacao";
+modal.className="modal-pedido";
+
+modal.innerHTML=`
+<div class="modal-pedido-box">
+<h2>Pedido Salvo</h2>
+<div id="pedidoVisualizacaoConteudo"></div>
+<div class="modal-pedido-botoes">
+<button onclick="fecharPedidoModal()">Fechar</button>
+<button onclick="editarPedidoAtual()">Editar Pedido</button>
+</div>
+</div>
+`;
+
+document.body.appendChild(modal);
+
+}
+
+document.getElementById("pedidoVisualizacaoConteudo").innerHTML="Pedido carregado.";
+
+modal.style.display="flex";
+
+}
+
+function fecharPedidoModal(){
+document.getElementById("modalPedidoVisualizacao").style.display="none";
+}
+
+function editarPedidoAtual(){
+
+if(window.pedidoIndexAtual==null)return;
+
+abrirPedidoSalvo(window.pedidoIndexAtual);
+
+fecharPedidoModal();
+
+}
