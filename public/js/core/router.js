@@ -570,6 +570,7 @@ function preencherOrigemAutomaticaTransferencia() {
 
   campoProduto.addEventListener('change', aplicar);
   campoProduto.addEventListener('blur', aplicar);
+  campoProduto.addEventListener('input', () => setTimeout(aplicar, 250));
 }
 
 window.initAutocompleteEstoque = function () {
