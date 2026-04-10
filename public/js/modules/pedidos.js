@@ -1,3 +1,5 @@
+window.editandoPedidoIndex = null;
+
 (function () {
   const PEDIDOS_STORAGE_KEY = 'pedidosSalvosMemoria';
 
@@ -981,10 +983,10 @@ ${item.resumo||''}
 window.editarPedidoDoModal=function(index){
    try{
 
+      window.editandoPedidoIndex = index;
+
       const lista=document.getElementById("listaItensPedidoReal");
-      if(lista){
-         lista.innerHTML="";
-      }
+      if(lista) lista.innerHTML="";
 
       if(typeof window.abrirPedidoSalvo==='function'){
          window.abrirPedidoSalvo(index);
