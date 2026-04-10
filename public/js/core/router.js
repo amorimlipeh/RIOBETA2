@@ -168,6 +168,31 @@ function encontrarProdutoPorBusca(valor) {
   }) || null;
 }
 
+
+function normalizarBuscaProdutoInput(inputId) {
+  const el = document.getElementById(inputId);
+  if (!el) return;
+
+  const aplicar = () => {
+    const valor = String(el.value || '').trim();
+    if (!valor) return;
+
+    const produto = encontrarProdutoPorBusca(valor);
+    if (produto) {
+      el.value = produtoOptionLabel(produto);
+    } else {
+      el.value = '';
+    }
+  };
+
+  if (el.dataset.autocompleteBind === '1') return;
+  el.dataset.autocompleteBind = '1';
+
+  el.setAttribute('autocomplete', 'off');
+  el.addEventListener('change', aplicar);
+  el.addEventListener('blur', aplicar);
+}
+
 function dashboardView() {
   const totalEstoque = produtos.reduce((a,b)=>a+Number(b.estoqueTotal||0),0);
 
@@ -506,6 +531,12 @@ String(produto.nome||"").toLowerCase().includes(termo)
 ).forEach(produto=>{
 tabela.innerHTML+=`<tr><td>${produto.codigo||"-"}</td><td>${produto.nome||"-"}</td><td>${produto.estoqueTotal||0}</td></tr>`;
 });
+};
+
+
+window.initAutocompleteEstoque = function () {
+  normalizarBuscaProdutoInput('movProdutoBusca');
+  normalizarBuscaProdutoInput('transfProdutoBusca');
 };
 
 function renderTabelaEnderecos() {
