@@ -1133,3 +1133,38 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   abrirView(ultima);
 });
+
+
+// AUTO_ENDERECO_FIX_V2
+setInterval(() => {
+  const produtoTransfer = document.querySelector('#transferenciaProduto');
+  const origemInput = document.querySelector('#transferenciaOrigem');
+
+  if (!produtoTransfer || !origemInput) return;
+
+  if (produtoTransfer.dataset.autoEnderecoApplied) return;
+  produtoTransfer.dataset.autoEnderecoApplied = '1';
+
+  produtoTransfer.addEventListener('change', preencherEnderecoAuto);
+  produtoTransfer.addEventListener('input', preencherEnderecoAuto);
+
+  function preencherEnderecoAuto(){
+    const valorSelecionado = produtoTransfer.value.toLowerCase();
+
+    fetch('/api/estoque')
+      .then(r => r.json())
+      .then(estoque => {
+
+        const item = estoque.find(e =>
+          String(e.produto || '').toLowerCase().includes(valorSelecionado) ||
+          String(e.codigo || '').toLowerCase().includes(valorSelecionado)
+        );
+
+        if(item && item.endereco){
+          origemInput.value = item.endereco;
+        }
+      });
+  }
+
+},1000);
+
