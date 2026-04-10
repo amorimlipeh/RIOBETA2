@@ -627,6 +627,11 @@ window.editandoPedidoIndex = null;
             padding:10px;border-radius:8px;font-weight:700;
           ">Abrir</button>
 
+          <button onclick="window.editarPedidoDoModal(${index})" style="
+            flex:1;border:none;background:#f59e0b;color:#fff;
+            padding:10px;border-radius:8px;font-weight:700;
+          ">Editar</button>
+
           <button onclick="window.cancelarPedidoSalvo(${index})" style="
             flex:1;border:none;background:#ef4444;color:#fff;
             padding:10px;border-radius:8px;font-weight:700;
@@ -756,6 +761,13 @@ function abrirPedidoSalvo(index) {
 
     const footer = document.getElementById('pedidoFooterAcoes');
     if (footer) footer.style.display = 'none';
+
+    const btn=document.getElementById('btnSalvarPedidoFinal');
+    if(btn){
+      btn.innerText='Salvar Pedido';
+    }
+
+    window.editandoPedidoIndex=null;
   }
 
   function abrirModalFinalizacaoPedido() {
@@ -943,20 +955,7 @@ font-weight:700;
 Fechar
 </button>
 
-<button onclick="
-window.editarPedidoDoModal(${index});
-"
-style="
-flex:1;
-padding:12px;
-border:none;
-border-radius:10px;
-background:#2f6df6;
-color:#fff;
-font-weight:700;
-">
-Editar Pedido
-</button>
+
 
 </div>
 
@@ -998,19 +997,17 @@ window.editarPedidoDoModal=function(index){
 
       window.editandoPedidoIndex = index;
 
-      const lista=document.getElementById("listaItensPedidoReal");
-      if(lista) lista.innerHTML="";
-
       if(typeof window.abrirPedidoSalvo==='function'){
          window.abrirPedidoSalvo(index);
       }
 
-      if(typeof window.abrirModalProdutoPedido==='function'){
-         window.abrirModalProdutoPedido();
-      }
-
       const modal=document.getElementById('modalPedidoVisualizacao');
       if(modal) modal.remove();
+
+      const btn=document.getElementById('btnSalvarPedidoFinal');
+      if(btn){
+         btn.innerText='Atualizar Pedido';
+      }
 
    }catch(e){
       console.error(e);
