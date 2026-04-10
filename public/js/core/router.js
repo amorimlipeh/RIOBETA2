@@ -425,6 +425,7 @@ function estoqueView() {
             <th>Código</th>
             <th>Produto</th>
             <th>Total</th>
+<th>Ação</th>
           </tr>
         </thead>
         <tbody id="estoqueTabela"></tbody>
@@ -1336,4 +1337,98 @@ setInterval(() => {
   produtoInput.addEventListener('blur', preencherEnderecoUltra);
 
 },1000);
+
+
+
+window.abrirAjusteSaldo = function(produtoId){
+
+ const produto = produtos.find(p=>String(p.id)===String(produtoId));
+ if(!produto) return;
+
+ const existente = document.getElementById('modalEscolhaEdicao');
+ if(existente) existente.remove();
+
+ const modal = document.createElement('div');
+ modal.id='modalEscolhaEdicao';
+ modal.className='system-modal-backdrop';
+
+ modal.innerHTML=`
+   <div class="system-modal-card warning">
+      <div class="system-modal-title">O que deseja fazer?</div>
+      <div class="system-modal-message">
+         Escolha abaixo o tipo de ajuste.
+      </div>
+
+      <div class="system-modal-actions">
+         <button class="system-modal-btn btn-secondary" id="btnMov">
+            Movimentação
+         </button>
+
+         <button class="system-modal-btn" id="btnTransf">
+            Transferência
+         </button>
+      </div>
+   </div>
+ `;
+
+ document.body.appendChild(modal);
+
+ function fechar(){
+   document.getElementById('modalEscolhaEdicao')?.remove();
+ }
+
+ document.getElementById('btnMov').onclick=()=>{
+
+   fechar();
+
+   const campo=document.getElementById('movProdutoBusca');
+   if(campo){
+      campo.value=produto.codigo+' - '+produto.nome;
+      campo.dispatchEvent(new Event('input'));
+   }
+
+   window.scrollTo({
+      top:0,
+      behavior:'smooth'
+   });
+
+ };
+
+ document.getElementById('btnTransf').onclick=()=>{
+
+   fechar();
+
+   const campo=document.getElementById('transfProdutoBusca');
+
+   if(campo){
+      campo.value=produto.codigo+' - '+produto.nome;
+      campo.dispatchEvent(new Event('input'));
+   }
+
+   setTimeout(()=>{
+
+      const itemEstoque=estoque.find(e=>
+         String(e.produtoId)===String(produto.id)
+      );
+
+      const origem=document.getElementById('transfOrigem');
+
+      if(origem && itemEstoque){
+         origem.value=itemEstoque.endereco || '';
+      }
+
+   },300);
+
+   window.scrollTo({
+      top:0,
+      behavior:'smooth'
+   });
+
+ };
+
+ modal.onclick=(e)=>{
+   if(e.target===modal) fechar();
+ };
+
+};
 
