@@ -393,6 +393,7 @@ function estoqueView() {
 
     <div class="produto-table-card fade-in">
       <h3>Saldo Consolidado por Produto</h3>
+<input id="pesquisaSaldoEstoque" placeholder="Buscar código ou produto..." oninput="filtrarSaldoEstoque()" style="margin-bottom:18px;">
       <table>
         <thead>
           <tr>
@@ -493,6 +494,19 @@ function renderTabelaEstoque() {
     `;
   });
 }
+
+window.filtrarSaldoEstoque = function(){
+const termo=(document.getElementById("pesquisaSaldoEstoque")?.value||"").toLowerCase();
+const tabela=document.getElementById("estoqueTabela");
+if(!tabela)return;
+tabela.innerHTML="";
+produtos.filter(produto=>
+String(produto.codigo||"").toLowerCase().includes(termo)||
+String(produto.nome||"").toLowerCase().includes(termo)
+).forEach(produto=>{
+tabela.innerHTML+=`<tr><td>${produto.codigo||"-"}</td><td>${produto.nome||"-"}</td><td>${produto.estoqueTotal||0}</td></tr>`;
+});
+};
 
 function renderTabelaEnderecos() {
   const tabela = document.getElementById('enderecosTabela');
