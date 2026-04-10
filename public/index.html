@@ -1671,177 +1671,90 @@ function adicionarPedidoNaLista(){
 </script>
 
 
-<script>
-(function organizarLayoutPedidos(){
-    function aplicar(){
-        const titulos = Array.from(document.querySelectorAll("*"));
-
-        const novoPedidoTitulo = titulos.find(el => el.innerText?.trim() === "Novo Pedido");
-        const pedidosSalvosTitulo = titulos.find(el => el.innerText?.trim() === "📋 Pedidos Salvos");
-        const itensTitulo = titulos.find(el => el.innerText?.trim() === "Itens do Pedido");
-
-        if(!novoPedidoTitulo || !pedidosSalvosTitulo || !itensTitulo) return;
-
-        const cardNovo = novoPedidoTitulo.closest("div");
-        const cardSalvos = pedidosSalvosTitulo.closest("div");
-        const cardItens = itensTitulo.closest("div");
-
-        if(!cardNovo || !cardSalvos || !cardItens) return;
-
-        if(document.getElementById("pedidosGridTopo")) return;
-
-        const grid = document.createElement("div");
-        grid.id = "pedidosGridTopo";
-        grid.style.display = "grid";
-        grid.style.gridTemplateColumns = "repeat(auto-fit,minmax(320px,1fr))";
-        grid.style.gap = "16px";
-        grid.style.marginBottom = "18px";
-
-        cardNovo.parentNode.insertBefore(grid, cardNovo);
-
-        grid.appendChild(cardNovo);
-        grid.appendChild(cardSalvos);
-
-        cardNovo.style.margin = "0";
-        cardSalvos.style.margin = "0";
-        cardItens.style.marginTop = "0";
-    }
-
-    setTimeout(aplicar,300);
-    setTimeout(aplicar,1000);
-    setTimeout(aplicar,2000);
-})();
-</script>
 
 
-<script>
-(function organizarPedidosDentroDoModulo(){
 
-    function aplicar(){
 
-        const moduloTitulo=[...document.querySelectorAll("*")]
-            .find(el=>el.innerText?.trim()==="Módulo Pedidos");
 
-        const pedidosSalvosTitulo=[...document.querySelectorAll("*")]
-            .find(el=>el.innerText?.trim()==="📋 Pedidos Salvos");
 
-        const itensTitulo=[...document.querySelectorAll("*")]
-            .find(el=>el.innerText?.trim()==="Itens do Pedido");
 
-        if(!moduloTitulo||!pedidosSalvosTitulo||!itensTitulo)return;
 
-        const moduloCard=moduloTitulo.closest("div");
-        const pedidosCard=pedidosSalvosTitulo.closest("div");
-        const itensCard=itensTitulo.closest("div");
 
-        if(!moduloCard||!pedidosCard||!itensCard)return;
 
-        if(pedidosCard.dataset.movido)return;
-
-        itensCard.parentNode.insertBefore(pedidosCard,itensCard);
-
-        pedidosCard.dataset.movido="1";
-
-    }
-
-    setTimeout(aplicar,300);
-    setTimeout(aplicar,1000);
-    setTimeout(aplicar,2000);
-
-})();
-</script>
 
 
 <script>
 (function(){
+    function aplicarSubcardsPedidos(){
+        const modulo = [...document.querySelectorAll("div")]
+            .find(el => el.innerText?.trim() === "Módulo Pedidos");
+        const novo = [...document.querySelectorAll("div")]
+            .find(el => el.innerText?.trim() === "Novo Pedido");
+        const itens = [...document.querySelectorAll("div")]
+            .find(el => el.innerText?.trim() === "Itens do Pedido");
+        const salvos = document.getElementById("painelPedidosSalvos");
 
-function reorganizarPedidos(){
+        if(!modulo || !novo || !itens || !salvos) return;
 
-    const modulo = [...document.querySelectorAll("div")]
-        .find(el=>el.innerText?.trim()==="Módulo Pedidos");
+        const cardModulo = modulo.closest("div");
+        const cardNovo = novo.closest("div");
+        const cardItens = itens.closest("div");
 
-    const pedidosSalvos = [...document.querySelectorAll("div")]
-        .find(el=>el.innerText?.trim().includes("Pedidos Salvos"));
+        if(!cardModulo || !cardNovo || !cardItens) return;
 
-    const itensPedido = [...document.querySelectorAll("div")]
-        .find(el=>el.innerText?.trim()==="Itens do Pedido");
+        if(!document.getElementById("pedidosSubgridTopo")){
+            const topo = document.createElement("div");
+            topo.id = "pedidosSubgridTopo";
+            topo.style.display = "grid";
+            topo.style.gridTemplateColumns = "repeat(auto-fit,minmax(320px,1fr))";
+            topo.style.gap = "16px";
+            topo.style.marginTop = "18px";
+            topo.style.marginBottom = "16px";
 
-    if(!modulo || !pedidosSalvos || !itensPedido) return;
+            cardNovo.parentNode.insertBefore(topo, cardNovo);
+            topo.appendChild(cardNovo);
+        }
 
-    const cardModulo = modulo.parentElement;
-    const cardPedidos = pedidosSalvos.parentElement;
-    const cardItens = itensPedido.parentElement;
+        const topo = document.getElementById("pedidosSubgridTopo");
+        if(topo && !topo.contains(salvos)){
+            topo.appendChild(salvos);
+        }
 
-    if(!cardModulo || !cardPedidos || !cardItens) return;
+        // estilo subcard pedidos salvos
+        salvos.style.marginTop = "0";
+        salvos.style.background = "#1f3350";
+        salvos.style.padding = "18px";
+        salvos.style.borderRadius = "18px";
+        salvos.style.minHeight = "100%";
 
-    if(cardPedidos.dataset.reorganizado) return;
+        cardNovo.style.margin = "0";
+        cardNovo.style.minHeight = "100%";
 
-    cardItens.before(cardPedidos);
+        // itens fica abaixo ocupando largura toda
+        const depoisTopo = topo.nextElementSibling;
+        if(depoisTopo !== cardItens){
+            topo.parentNode.insertBefore(cardItens, topo.nextSibling);
+        }
 
-    cardPedidos.dataset.reorganizado = "1";
+        cardItens.style.marginTop = "0";
 
-}
+        // compacta cards salvos
+        const cards = salvos.querySelectorAll("#listaPedidosSalvos > div");
+        cards.forEach(card=>{
+            card.style.padding = "12px";
+            card.style.gap = "8px";
+        });
 
-setTimeout(reorganizarPedidos,500);
-setTimeout(reorganizarPedidos,1500);
-setTimeout(reorganizarPedidos,3000);
+        const botoes = salvos.querySelectorAll("button");
+        botoes.forEach(btn=>{
+            btn.style.padding = "9px";
+        });
+    }
 
+    setTimeout(aplicarSubcardsPedidos, 300);
+    setTimeout(aplicarSubcardsPedidos, 1000);
+    setTimeout(aplicarSubcardsPedidos, 2000);
 })();
-</script>
-
-
-<div id="painelPedidosSalvos" style="
-    margin-top:25px;
-    background:#223754;
-    padding:20px;
-    border-radius:18px;
-">
-    <h3 style="margin:0 0 15px 0;color:#fff;">📋 Pedidos Salvos</h3>
-
-    <div id="listaPedidosSalvos" style="
-        display:flex;
-        flex-direction:column;
-        gap:12px;
-    ">
-        <p style="color:#cbd5e1;">Nenhum pedido salvo ainda.</p>
-    </div>
-</div>
-
-<script>
-function adicionarPedidoNaLista(){
-    const lista=document.getElementById("listaPedidosSalvos");
-    if(!lista) return;
-
-    const vazio=lista.querySelector("p");
-    if(vazio) vazio.remove();
-
-    const numero=Math.floor(Math.random()*9000)+1000;
-
-    const item=document.createElement("div");
-    item.style.background="#162742";
-    item.style.padding="14px";
-    item.style.borderRadius="12px";
-    item.style.display="flex";
-    item.style.flexDirection="column";
-    item.style.gap="10px";
-
-    item.innerHTML=`
-        <div style="color:#fff;font-weight:700;">Pedido #${numero}</div>
-        <div style="color:#facc15;font-size:13px;">🟡 Aguardando Separação</div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap;">
-            <button style="
-                flex:1;border:none;background:#2f6df6;color:#fff;
-                padding:10px;border-radius:8px;font-weight:700;
-            ">Abrir</button>
-            <button onclick="this.closest('#listaPedidosSalvos > div').remove()"
-            style="
-                flex:1;border:none;background:#ef4444;color:#fff;
-                padding:10px;border-radius:8px;font-weight:700;
-            ">Cancelar</button>
-        </div>
-    `;
-    lista.prepend(item);
-}
 </script>
 
 </body>
