@@ -980,6 +980,12 @@ ${item.resumo||''}
 
 window.editarPedidoDoModal=function(index){
    try{
+
+      const lista=document.getElementById("listaItensPedidoReal");
+      if(lista){
+         lista.innerHTML="";
+      }
+
       if(typeof window.abrirPedidoSalvo==='function'){
          window.abrirPedidoSalvo(index);
       }
