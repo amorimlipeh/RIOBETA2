@@ -929,8 +929,7 @@ Fechar
 </button>
 
 <button onclick="
-window.abrirPedidoSalvo(${index});
-document.getElementById('modalPedidoVisualizacao').remove();
+window.editarPedidoDoModal(${index});
 "
 style="
 flex:1;
