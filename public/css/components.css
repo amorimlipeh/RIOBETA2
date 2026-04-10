@@ -731,3 +731,73 @@ color:#e2e8f0;
 font-weight:500;
 }
 
+
+/* ===== DASHBOARD PREMIUM COMPACT ===== */
+
+.hero-card{
+padding:22px !important;
+border-radius:18px;
+margin-bottom:20px;
+box-shadow:0 8px 25px rgba(0,0,0,.25);
+}
+
+.hero-card h1{
+font-size:34px;
+margin-bottom:4px;
+}
+
+.hero-card p{
+font-size:15px;
+opacity:.85;
+}
+
+.grid-cards{
+gap:16px !important;
+margin-bottom:20px;
+}
+
+.stat-card{
+padding:22px !important;
+min-height:auto !important;
+border-radius:18px;
+box-shadow:0 6px 20px rgba(0,0,0,.20);
+transition:.3s;
+}
+
+.stat-card:hover{
+transform:translateY(-3px);
+}
+
+.stat-card h3{
+font-size:17px;
+margin-bottom:8px;
+}
+
+.stat-card p{
+font-size:28px;
+font-weight:700;
+}
+
+.big-card{
+padding:22px !important;
+border-radius:20px;
+margin-bottom:20px;
+box-shadow:0 8px 25px rgba(0,0,0,.20);
+}
+
+.dashboard-row{
+gap:20px !important;
+margin-bottom:20px;
+}
+
+.activity-item{
+padding:16px !important;
+font-size:15px;
+}
+
+.quick-btn{
+padding:16px !important;
+font-size:15px;
+border-radius:14px;
+}
+
