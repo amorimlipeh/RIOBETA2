@@ -1683,77 +1683,88 @@ function adicionarPedidoNaLista(){
 
 
 
+
+
+
 <script>
 (function(){
-    function aplicarSubcardsPedidos(){
-        const modulo = [...document.querySelectorAll("div")]
-            .find(el => el.innerText?.trim() === "Módulo Pedidos");
-        const novo = [...document.querySelectorAll("div")]
-            .find(el => el.innerText?.trim() === "Novo Pedido");
-        const itens = [...document.querySelectorAll("div")]
-            .find(el => el.innerText?.trim() === "Itens do Pedido");
-        const salvos = document.getElementById("painelPedidosSalvos");
+function aplicarSubcardsPedidos(){
 
-        if(!modulo || !novo || !itens || !salvos) return;
+const painelPedidos=document.getElementById("painelPedidosSalvos");
+if(!painelPedidos)return;
 
-        const cardModulo = modulo.closest("div");
-        const cardNovo = novo.closest("div");
-        const cardItens = itens.closest("div");
+const itensTitulo=[...document.querySelectorAll("div,h1,h2,h3,h4")]
+.find(el=>el.innerText?.trim()==="Itens do Pedido");
 
-        if(!cardModulo || !cardNovo || !cardItens) return;
+if(!itensTitulo)return;
 
-        if(!document.getElementById("pedidosSubgridTopo")){
-            const topo = document.createElement("div");
-            topo.id = "pedidosSubgridTopo";
-            topo.style.display = "grid";
-            topo.style.gridTemplateColumns = "repeat(auto-fit,minmax(320px,1fr))";
-            topo.style.gap = "16px";
-            topo.style.marginTop = "18px";
-            topo.style.marginBottom = "16px";
+const cardItens=itensTitulo.closest("div");
+if(!cardItens)return;
 
-            cardNovo.parentNode.insertBefore(topo, cardNovo);
-            topo.appendChild(cardNovo);
+const moduloPai=cardItens.parentElement;
+if(!moduloPai)return;
+
+/* mover pedidos salvos para logo após itens */
+if(cardItens.nextElementSibling!==painelPedidos){
+    cardItens.insertAdjacentElement("afterend",painelPedidos);
+}
+
+/* estilo profissional */
+painelPedidos.style.marginTop="18px";
+painelPedidos.style.background="#223754";
+painelPedidos.style.borderRadius="18px";
+painelPedidos.style.padding="18px";
+
+/* desktop grid */
+if(window.innerWidth>1100){
+
+    const novoTitulo=[...document.querySelectorAll("div,h1,h2,h3,h4")]
+    .find(el=>el.innerText?.trim()==="Novo Pedido");
+
+    if(novoTitulo){
+
+        const cardNovo=novoTitulo.closest("div");
+
+        if(cardNovo){
+
+            let wrapper=document.getElementById("gridPedidosDesktop");
+
+            if(!wrapper){
+                wrapper=document.createElement("div");
+                wrapper.id="gridPedidosDesktop";
+                wrapper.style.display="grid";
+                wrapper.style.gridTemplateColumns="1fr 1fr";
+                wrapper.style.gap="20px";
+                wrapper.style.marginBottom="20px";
+
+                cardNovo.parentNode.insertBefore(wrapper,cardNovo);
+            }
+
+            if(!wrapper.contains(cardNovo))wrapper.appendChild(cardNovo);
+            if(!wrapper.contains(painelPedidos))wrapper.appendChild(painelPedidos);
+
+            wrapper.after(cardItens);
         }
-
-        const topo = document.getElementById("pedidosSubgridTopo");
-        if(topo && !topo.contains(salvos)){
-            topo.appendChild(salvos);
-        }
-
-        // estilo subcard pedidos salvos
-        salvos.style.marginTop = "0";
-        salvos.style.background = "#1f3350";
-        salvos.style.padding = "18px";
-        salvos.style.borderRadius = "18px";
-        salvos.style.minHeight = "100%";
-
-        cardNovo.style.margin = "0";
-        cardNovo.style.minHeight = "100%";
-
-        // itens fica abaixo ocupando largura toda
-        const depoisTopo = topo.nextElementSibling;
-        if(depoisTopo !== cardItens){
-            topo.parentNode.insertBefore(cardItens, topo.nextSibling);
-        }
-
-        cardItens.style.marginTop = "0";
-
-        // compacta cards salvos
-        const cards = salvos.querySelectorAll("#listaPedidosSalvos > div");
-        cards.forEach(card=>{
-            card.style.padding = "12px";
-            card.style.gap = "8px";
-        });
-
-        const botoes = salvos.querySelectorAll("button");
-        botoes.forEach(btn=>{
-            btn.style.padding = "9px";
-        });
     }
 
-    setTimeout(aplicarSubcardsPedidos, 300);
-    setTimeout(aplicarSubcardsPedidos, 1000);
-    setTimeout(aplicarSubcardsPedidos, 2000);
+}else{
+
+    const wrapper=document.getElementById("gridPedidosDesktop");
+
+    if(wrapper){
+        wrapper.parentNode.insertBefore(wrapper.firstChild,wrapper);
+        wrapper.parentNode.insertBefore(wrapper.lastChild,wrapper);
+        wrapper.remove();
+    }
+
+    cardItens.insertAdjacentElement("afterend",painelPedidos);
+}
+
+}
+
+setTimeout(aplicarSubcardsPedidos,300);
+setTimeout(aplicarSubcardsPedidos,1000);
+window.addEventListener("resize",aplicarSubcardsPedidos);
 })();
 </script>
 
