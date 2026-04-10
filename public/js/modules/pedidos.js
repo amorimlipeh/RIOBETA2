@@ -648,7 +648,9 @@ window.editandoPedidoIndex = null;
     if (!itens.length) return;
 
     const pedido = {
-      id: 'PED-' + Date.now(),
+      id: (window.editandoPedidoIndex !== null && pedidosSalvosMemoria[window.editandoPedidoIndex])
+        ? (pedidosSalvosMemoria[window.editandoPedidoIndex].id || ('PED-' + Date.now()))
+        : ('PED-' + Date.now()),
       cliente,
       representante,
       numero,
@@ -657,12 +659,23 @@ window.editandoPedidoIndex = null;
       itens
     };
 
-    pedidosSalvosMemoria.unshift(pedido);
-    persistirPedidosSalvos();
+    if (window.editandoPedidoIndex !== null && pedidosSalvosMemoria[window.editandoPedidoIndex]) {
+      pedidosSalvosMemoria[window.editandoPedidoIndex] = pedido;
+      window.editandoPedidoIndex = null;
+    } else {
+      pedidosSalvosMemoria.unshift(pedido);
+    }
+
+    persistirPedidoSalvos?.();
+    persistirPedidosSalvos?.();
     renderPedidosSalvos();
+
+    if (typeof limparFormularioPedido === 'function') {
+      limparFormularioPedido();
+    }
   }
 
-  function abrirPedidoSalvo(index) {
+function abrirPedidoSalvo(index) {
     const pedido = pedidosSalvosMemoria[index];
     if (!pedido) return;
 
