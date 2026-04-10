@@ -974,6 +974,11 @@ ${item.resumo||''}
 }
 
 
+
+
+
+
+
 window.editarPedidoDoModal=function(index){
    try{
       if(typeof window.abrirPedidoSalvo==='function'){
@@ -991,5 +996,3 @@ window.editarPedidoDoModal=function(index){
       console.error(e);
    }
 };
-
-
