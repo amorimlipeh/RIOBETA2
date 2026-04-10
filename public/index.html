@@ -48,9 +48,285 @@
   </main>
 </div>
 
-<script src="/js/core/layout.js"></script>
-<script src="/js/core/router.js"></script>
-<script src="/js/core/mobile-menu.js"></script>
+<script src="/js/core/layout.js">
+function abrirModalFinalizacaoPedido(){
+    let modal=document.getElementById("modalFinalizarPedido");
+
+    if(!modal){
+        modal=document.createElement("div");
+        modal.id="modalFinalizarPedido";
+
+        modal.style.position="fixed";
+        modal.style.inset="0";
+        modal.style.background="rgba(0,0,0,.7)";
+        modal.style.display="flex";
+        modal.style.alignItems="center";
+        modal.style.justifyContent="center";
+        modal.style.zIndex="999999";
+
+        modal.innerHTML=`
+            <div style="
+                width:90%;
+                max-width:420px;
+                background:#162742;
+                padding:25px;
+                border-radius:18px;
+                box-shadow:0 0 30px rgba(0,0,0,.45);
+            ">
+                <h3 style="margin:0;color:#fff;">✅ Pedido salvo com sucesso</h3>
+
+                <p style="
+                    color:#cbd5e1;
+                    margin-top:12px;
+                    margin-bottom:20px;
+                ">
+                    O que deseja fazer agora?
+                </p>
+
+                <div style="
+                    display:flex;
+                    gap:10px;
+                    flex-wrap:wrap;
+                ">
+                    <button id="btnContinuarPedido" style="
+                        flex:1;
+                        padding:12px;
+                        border:none;
+                        border-radius:10px;
+                        background:#475569;
+                        color:#fff;
+                        font-weight:700;
+                    ">
+                        Continuar Editando
+                    </button>
+
+                    <button id="btnFinalizarPedidoReal" style="
+                        flex:1;
+                        padding:12px;
+                        border:none;
+                        border-radius:10px;
+                        background:#22c55e;
+                        color:#fff;
+                        font-weight:700;
+                    ">
+                        Finalizar Pedido
+                    </button>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(modal);
+
+        document.getElementById("btnContinuarPedido").onclick=function(){
+            modal.remove();
+        };
+
+        document.getElementById("btnFinalizarPedidoReal").onclick=function(){
+
+            document.querySelectorAll("input").forEach(i=>i.value="");
+
+            const lista=document.getElementById("listaItensPedidoReal");
+            if(lista){
+                lista.innerHTML='<p style="color:#cbd5e1;">Nenhum item adicionado.</p>';
+            }
+
+            const footer=document.getElementById("pedidoFooterAcoes");
+            if(footer){
+                footer.style.display="none";
+            }
+
+            modal.remove();
+        };
+    }
+}
+
+</script>
+<script src="/js/core/router.js">
+function abrirModalFinalizacaoPedido(){
+    let modal=document.getElementById("modalFinalizarPedido");
+
+    if(!modal){
+        modal=document.createElement("div");
+        modal.id="modalFinalizarPedido";
+
+        modal.style.position="fixed";
+        modal.style.inset="0";
+        modal.style.background="rgba(0,0,0,.7)";
+        modal.style.display="flex";
+        modal.style.alignItems="center";
+        modal.style.justifyContent="center";
+        modal.style.zIndex="999999";
+
+        modal.innerHTML=`
+            <div style="
+                width:90%;
+                max-width:420px;
+                background:#162742;
+                padding:25px;
+                border-radius:18px;
+                box-shadow:0 0 30px rgba(0,0,0,.45);
+            ">
+                <h3 style="margin:0;color:#fff;">✅ Pedido salvo com sucesso</h3>
+
+                <p style="
+                    color:#cbd5e1;
+                    margin-top:12px;
+                    margin-bottom:20px;
+                ">
+                    O que deseja fazer agora?
+                </p>
+
+                <div style="
+                    display:flex;
+                    gap:10px;
+                    flex-wrap:wrap;
+                ">
+                    <button id="btnContinuarPedido" style="
+                        flex:1;
+                        padding:12px;
+                        border:none;
+                        border-radius:10px;
+                        background:#475569;
+                        color:#fff;
+                        font-weight:700;
+                    ">
+                        Continuar Editando
+                    </button>
+
+                    <button id="btnFinalizarPedidoReal" style="
+                        flex:1;
+                        padding:12px;
+                        border:none;
+                        border-radius:10px;
+                        background:#22c55e;
+                        color:#fff;
+                        font-weight:700;
+                    ">
+                        Finalizar Pedido
+                    </button>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(modal);
+
+        document.getElementById("btnContinuarPedido").onclick=function(){
+            modal.remove();
+        };
+
+        document.getElementById("btnFinalizarPedidoReal").onclick=function(){
+
+            document.querySelectorAll("input").forEach(i=>i.value="");
+
+            const lista=document.getElementById("listaItensPedidoReal");
+            if(lista){
+                lista.innerHTML='<p style="color:#cbd5e1;">Nenhum item adicionado.</p>';
+            }
+
+            const footer=document.getElementById("pedidoFooterAcoes");
+            if(footer){
+                footer.style.display="none";
+            }
+
+            modal.remove();
+        };
+    }
+}
+
+</script>
+<script src="/js/core/mobile-menu.js">
+function abrirModalFinalizacaoPedido(){
+    let modal=document.getElementById("modalFinalizarPedido");
+
+    if(!modal){
+        modal=document.createElement("div");
+        modal.id="modalFinalizarPedido";
+
+        modal.style.position="fixed";
+        modal.style.inset="0";
+        modal.style.background="rgba(0,0,0,.7)";
+        modal.style.display="flex";
+        modal.style.alignItems="center";
+        modal.style.justifyContent="center";
+        modal.style.zIndex="999999";
+
+        modal.innerHTML=`
+            <div style="
+                width:90%;
+                max-width:420px;
+                background:#162742;
+                padding:25px;
+                border-radius:18px;
+                box-shadow:0 0 30px rgba(0,0,0,.45);
+            ">
+                <h3 style="margin:0;color:#fff;">✅ Pedido salvo com sucesso</h3>
+
+                <p style="
+                    color:#cbd5e1;
+                    margin-top:12px;
+                    margin-bottom:20px;
+                ">
+                    O que deseja fazer agora?
+                </p>
+
+                <div style="
+                    display:flex;
+                    gap:10px;
+                    flex-wrap:wrap;
+                ">
+                    <button id="btnContinuarPedido" style="
+                        flex:1;
+                        padding:12px;
+                        border:none;
+                        border-radius:10px;
+                        background:#475569;
+                        color:#fff;
+                        font-weight:700;
+                    ">
+                        Continuar Editando
+                    </button>
+
+                    <button id="btnFinalizarPedidoReal" style="
+                        flex:1;
+                        padding:12px;
+                        border:none;
+                        border-radius:10px;
+                        background:#22c55e;
+                        color:#fff;
+                        font-weight:700;
+                    ">
+                        Finalizar Pedido
+                    </button>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(modal);
+
+        document.getElementById("btnContinuarPedido").onclick=function(){
+            modal.remove();
+        };
+
+        document.getElementById("btnFinalizarPedidoReal").onclick=function(){
+
+            document.querySelectorAll("input").forEach(i=>i.value="");
+
+            const lista=document.getElementById("listaItensPedidoReal");
+            if(lista){
+                lista.innerHTML='<p style="color:#cbd5e1;">Nenhum item adicionado.</p>';
+            }
+
+            const footer=document.getElementById("pedidoFooterAcoes");
+            if(footer){
+                footer.style.display="none";
+            }
+
+            modal.remove();
+        };
+    }
+}
+
+</script>
 
 </div>
 
@@ -374,6 +650,98 @@
     }, true);
 
 })();
+
+function abrirModalFinalizacaoPedido(){
+    let modal=document.getElementById("modalFinalizarPedido");
+
+    if(!modal){
+        modal=document.createElement("div");
+        modal.id="modalFinalizarPedido";
+
+        modal.style.position="fixed";
+        modal.style.inset="0";
+        modal.style.background="rgba(0,0,0,.7)";
+        modal.style.display="flex";
+        modal.style.alignItems="center";
+        modal.style.justifyContent="center";
+        modal.style.zIndex="999999";
+
+        modal.innerHTML=`
+            <div style="
+                width:90%;
+                max-width:420px;
+                background:#162742;
+                padding:25px;
+                border-radius:18px;
+                box-shadow:0 0 30px rgba(0,0,0,.45);
+            ">
+                <h3 style="margin:0;color:#fff;">✅ Pedido salvo com sucesso</h3>
+
+                <p style="
+                    color:#cbd5e1;
+                    margin-top:12px;
+                    margin-bottom:20px;
+                ">
+                    O que deseja fazer agora?
+                </p>
+
+                <div style="
+                    display:flex;
+                    gap:10px;
+                    flex-wrap:wrap;
+                ">
+                    <button id="btnContinuarPedido" style="
+                        flex:1;
+                        padding:12px;
+                        border:none;
+                        border-radius:10px;
+                        background:#475569;
+                        color:#fff;
+                        font-weight:700;
+                    ">
+                        Continuar Editando
+                    </button>
+
+                    <button id="btnFinalizarPedidoReal" style="
+                        flex:1;
+                        padding:12px;
+                        border:none;
+                        border-radius:10px;
+                        background:#22c55e;
+                        color:#fff;
+                        font-weight:700;
+                    ">
+                        Finalizar Pedido
+                    </button>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(modal);
+
+        document.getElementById("btnContinuarPedido").onclick=function(){
+            modal.remove();
+        };
+
+        document.getElementById("btnFinalizarPedidoReal").onclick=function(){
+
+            document.querySelectorAll("input").forEach(i=>i.value="");
+
+            const lista=document.getElementById("listaItensPedidoReal");
+            if(lista){
+                lista.innerHTML='<p style="color:#cbd5e1;">Nenhum item adicionado.</p>';
+            }
+
+            const footer=document.getElementById("pedidoFooterAcoes");
+            if(footer){
+                footer.style.display="none";
+            }
+
+            modal.remove();
+        };
+    }
+}
+
 </script>
 <!-- FIM INTERCEPT EDITAR ESTOQUE -->
 
@@ -510,6 +878,98 @@ setTimeout(criarPedidosLayout,1500);
 setTimeout(criarPedidosLayout,3000);
 
 })();
+
+function abrirModalFinalizacaoPedido(){
+    let modal=document.getElementById("modalFinalizarPedido");
+
+    if(!modal){
+        modal=document.createElement("div");
+        modal.id="modalFinalizarPedido";
+
+        modal.style.position="fixed";
+        modal.style.inset="0";
+        modal.style.background="rgba(0,0,0,.7)";
+        modal.style.display="flex";
+        modal.style.alignItems="center";
+        modal.style.justifyContent="center";
+        modal.style.zIndex="999999";
+
+        modal.innerHTML=`
+            <div style="
+                width:90%;
+                max-width:420px;
+                background:#162742;
+                padding:25px;
+                border-radius:18px;
+                box-shadow:0 0 30px rgba(0,0,0,.45);
+            ">
+                <h3 style="margin:0;color:#fff;">✅ Pedido salvo com sucesso</h3>
+
+                <p style="
+                    color:#cbd5e1;
+                    margin-top:12px;
+                    margin-bottom:20px;
+                ">
+                    O que deseja fazer agora?
+                </p>
+
+                <div style="
+                    display:flex;
+                    gap:10px;
+                    flex-wrap:wrap;
+                ">
+                    <button id="btnContinuarPedido" style="
+                        flex:1;
+                        padding:12px;
+                        border:none;
+                        border-radius:10px;
+                        background:#475569;
+                        color:#fff;
+                        font-weight:700;
+                    ">
+                        Continuar Editando
+                    </button>
+
+                    <button id="btnFinalizarPedidoReal" style="
+                        flex:1;
+                        padding:12px;
+                        border:none;
+                        border-radius:10px;
+                        background:#22c55e;
+                        color:#fff;
+                        font-weight:700;
+                    ">
+                        Finalizar Pedido
+                    </button>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(modal);
+
+        document.getElementById("btnContinuarPedido").onclick=function(){
+            modal.remove();
+        };
+
+        document.getElementById("btnFinalizarPedidoReal").onclick=function(){
+
+            document.querySelectorAll("input").forEach(i=>i.value="");
+
+            const lista=document.getElementById("listaItensPedidoReal");
+            if(lista){
+                lista.innerHTML='<p style="color:#cbd5e1;">Nenhum item adicionado.</p>';
+            }
+
+            const footer=document.getElementById("pedidoFooterAcoes");
+            if(footer){
+                footer.style.display="none";
+            }
+
+            modal.remove();
+        };
+    }
+}
+
 </script>
 <!-- FIM PEDIDOS V2 BASE -->
 
@@ -881,7 +1341,9 @@ setTimeout(criarPedidosLayout,3000);
             lista.parentElement.appendChild(footer);
 
             footer.querySelector("#btnSalvarPedidoFinal").onclick = function(){
-                alert("Pedido salvo com sucesso. Próxima etapa: status e envio para separação.");
+                
+abrirModalFinalizacaoPedido();
+
             };
         }
 
@@ -1017,6 +1479,98 @@ setTimeout(criarPedidosLayout,3000);
     setTimeout(initPedidosAdicionarProduto, 1500);
     setTimeout(initPedidosAdicionarProduto, 3000);
 })();
+
+function abrirModalFinalizacaoPedido(){
+    let modal=document.getElementById("modalFinalizarPedido");
+
+    if(!modal){
+        modal=document.createElement("div");
+        modal.id="modalFinalizarPedido";
+
+        modal.style.position="fixed";
+        modal.style.inset="0";
+        modal.style.background="rgba(0,0,0,.7)";
+        modal.style.display="flex";
+        modal.style.alignItems="center";
+        modal.style.justifyContent="center";
+        modal.style.zIndex="999999";
+
+        modal.innerHTML=`
+            <div style="
+                width:90%;
+                max-width:420px;
+                background:#162742;
+                padding:25px;
+                border-radius:18px;
+                box-shadow:0 0 30px rgba(0,0,0,.45);
+            ">
+                <h3 style="margin:0;color:#fff;">✅ Pedido salvo com sucesso</h3>
+
+                <p style="
+                    color:#cbd5e1;
+                    margin-top:12px;
+                    margin-bottom:20px;
+                ">
+                    O que deseja fazer agora?
+                </p>
+
+                <div style="
+                    display:flex;
+                    gap:10px;
+                    flex-wrap:wrap;
+                ">
+                    <button id="btnContinuarPedido" style="
+                        flex:1;
+                        padding:12px;
+                        border:none;
+                        border-radius:10px;
+                        background:#475569;
+                        color:#fff;
+                        font-weight:700;
+                    ">
+                        Continuar Editando
+                    </button>
+
+                    <button id="btnFinalizarPedidoReal" style="
+                        flex:1;
+                        padding:12px;
+                        border:none;
+                        border-radius:10px;
+                        background:#22c55e;
+                        color:#fff;
+                        font-weight:700;
+                    ">
+                        Finalizar Pedido
+                    </button>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(modal);
+
+        document.getElementById("btnContinuarPedido").onclick=function(){
+            modal.remove();
+        };
+
+        document.getElementById("btnFinalizarPedidoReal").onclick=function(){
+
+            document.querySelectorAll("input").forEach(i=>i.value="");
+
+            const lista=document.getElementById("listaItensPedidoReal");
+            if(lista){
+                lista.innerHTML='<p style="color:#cbd5e1;">Nenhum item adicionado.</p>';
+            }
+
+            const footer=document.getElementById("pedidoFooterAcoes");
+            if(footer){
+                footer.style.display="none";
+            }
+
+            modal.remove();
+        };
+    }
+}
+
 </script>
 <!-- FIM PEDIDOS ADD PRODUTO SAFE -->
 
