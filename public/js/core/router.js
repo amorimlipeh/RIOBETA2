@@ -534,9 +534,44 @@ tabela.innerHTML+=`<tr><td>${produto.codigo||"-"}</td><td>${produto.nome||"-"}</
 };
 
 
+
+function preencherOrigemAutomaticaTransferencia() {
+  const campoProduto = document.getElementById('transfProdutoBusca');
+  const campoOrigem = document.getElementById('transfOrigem');
+  if (!campoProduto || !campoOrigem) return;
+
+  const aplicar = () => {
+    const valor = String(campoProduto.value || '').trim();
+    if (!valor) {
+      campoOrigem.value = '';
+      return;
+    }
+
+    const produto = encontrarProdutoPorBusca(valor);
+    if (!produto) {
+      campoOrigem.value = '';
+      return;
+    }
+
+    const itemEstoque = (estoque || []).find(item =>
+      String(item.produtoId) === String(produto.id) &&
+      Number(item.quantidade || 0) > 0
+    );
+
+    campoOrigem.value = itemEstoque ? String(itemEstoque.endereco || '') : '';
+  };
+
+  if (campoProduto.dataset.autoOrigemBind === '1') return;
+  campoProduto.dataset.autoOrigemBind = '1';
+
+  campoProduto.addEventListener('change', aplicar);
+  campoProduto.addEventListener('blur', aplicar);
+}
+
 window.initAutocompleteEstoque = function () {
   normalizarBuscaProdutoInput('movProdutoBusca');
   normalizarBuscaProdutoInput('transfProdutoBusca');
+  preencherOrigemAutomaticaTransferencia();
 };
 
 function renderTabelaEnderecos() {
