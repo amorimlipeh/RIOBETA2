@@ -954,7 +954,9 @@ buttons.forEach(btn => {
 
 document.addEventListener('DOMContentLoaded', async () => {
   await carregarProdutos();
-  const ultima = 'dashboard';
+
+  const ultimaSalva = localStorage.getItem('ultimaViewAtiva');
+  const ultima = ultimaSalva && ultimaSalva.trim() ? ultimaSalva : 'dashboard';
 
   if(ultima === 'estoque'){
     await carregarEstoque();
