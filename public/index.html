@@ -1915,6 +1915,45 @@ window.addEventListener("resize",aplicarSubcardsPedidos);
 })();
 </script>
 
+
+<script>
+document.addEventListener("DOMContentLoaded",()=>{
+
+    const botoesMenu=document.querySelectorAll(".menu-item");
+
+    botoesMenu.forEach(btn=>{
+
+        btn.addEventListener("click",()=>{
+
+            const view=btn.getAttribute("data-view");
+
+            if(view){
+                localStorage.setItem("ultimaViewAtiva",view);
+            }
+
+        });
+
+    });
+
+    const ultimaView=localStorage.getItem("ultimaViewAtiva");
+
+    if(ultimaView){
+
+        setTimeout(()=>{
+
+            const btn=document.querySelector(`.menu-item[data-view="${ultimaView}"]`);
+
+            if(btn){
+                btn.click();
+            }
+
+        },300);
+
+    }
+
+});
+</script>
+
 </body>
 
 </html>
