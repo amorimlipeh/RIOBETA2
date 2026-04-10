@@ -971,3 +971,23 @@ ${item.resumo||''}
 });
 
 }
+
+
+window.editarPedidoDoModal=function(index){
+   try{
+      if(typeof window.abrirPedidoSalvo==='function'){
+         window.abrirPedidoSalvo(index);
+      }
+
+      if(typeof abrirModalProdutoPedido==='function'){
+         abrirModalProdutoPedido();
+      }
+
+      const modal=document.getElementById('modalPedidoVisualizacao');
+      if(modal) modal.remove();
+
+   }catch(e){
+      console.error(e);
+   }
+};
+
