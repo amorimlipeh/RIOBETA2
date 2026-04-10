@@ -366,7 +366,7 @@ const views = {
   dashboard: () => dashboardView(),
   produtos: () => produtosView(),
   estoque: () => estoqueView(),
-  pedidos: () => `<div class="hero-card"><h1>Módulo Pedidos</h1></div>`,
+  pedidos: () => `<div id="pedidos-root"></div>`,
   scanner: () => `<div class="hero-card"><h1>Módulo Scanner</h1></div>`,
   wms: () => `<div class="hero-card"><h1>Módulo WMS</h1></div>`
 };
