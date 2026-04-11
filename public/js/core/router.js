@@ -1315,7 +1315,7 @@ async function renderView(view, options = {}) {
 
   if (view === 'estoque') {
     renderTabelaEstoque();
-    renderTabelaEnderecos();
+    try { renderEstoqueEndereco(); } catch(e){ console.log(e); }
     renderUltimasMovimentacoes();
     renderTabelaMovimentacoes();
     try { renderUltimasMovimentacoes(); } catch {}
