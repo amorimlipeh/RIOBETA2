@@ -1509,3 +1509,102 @@ document.addEventListener('input', function(e){
   }
 });
 
+
+
+
+
+// =============================
+// NOVO ESTOQUE POR ENDEREÇO
+// =============================
+
+window.renderEstoqueEndereco = async function(){
+
+  const tbody = document.querySelector("#estoque-enderecos");
+  if(!tbody) return;
+
+  try{
+    const res = await fetch('/api/estoque');
+    const data = await res.json();
+
+    window._estoqueCache = data;
+
+    renderTabelaFiltrada("");
+
+  }catch(e){
+    console.error("Erro ao carregar estoque", e);
+  }
+}
+
+
+// =============================
+// FILTRO IGUAL AO CONSOLIDADO
+// =============================
+
+window.renderTabelaFiltrada = function(filtro){
+
+  const tbody = document.querySelector("#estoque-enderecos");
+  if(!tbody) return;
+
+  const lista = window._estoqueCache || [];
+
+  const termo = (filtro || "").toLowerCase();
+
+  const filtrado = lista.filter(item => {
+    return (
+      String(item.produto || "").toLowerCase().includes(termo) ||
+      String(item.codigo || "").toLowerCase().includes(termo) ||
+      String(item.endereco || "").toLowerCase().includes(termo)
+    );
+  });
+
+  tbody.innerHTML = "";
+
+  if(filtrado.length === 0){
+    tbody.innerHTML = "<tr><td colspan='4'>Sem dados</td></tr>";
+    return;
+  }
+
+  filtrado.forEach(item => {
+    tbody.innerHTML += `
+      <tr>
+        <td>${item.produto}</td>
+        <td>${item.endereco}</td>
+        <td>${item.quantidade}</td>
+        <td>
+          <button onclick="preencherAjuste(${JSON.stringify(item).replace(/"/g, '&quot;')})">Ajuste</button>
+          <button onclick="abrirTransferenciaEndereco('${item.produtoId}','${item.endereco}')">Transferir</button>
+        </td>
+      </tr>
+    `;
+  });
+
+};
+
+
+// =============================
+// EVENTO DO INPUT
+// =============================
+
+setTimeout(() => {
+
+  const input = document.querySelector("#filtro-estoque-endereco");
+
+  if(input){
+    input.addEventListener("input", (e)=>{
+      renderTabelaFiltrada(e.target.value);
+    });
+  }
+
+}, 1000);
+
+
+// =============================
+// CHAMADA AUTOMÁTICA
+// =============================
+
+setTimeout(() => {
+  if(typeof renderEstoqueEndereco === "function"){
+    renderEstoqueEndereco();
+  }
+}, 500);
+
