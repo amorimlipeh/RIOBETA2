@@ -468,7 +468,6 @@ function estoqueView() {
                 <th>Data/Hora</th>
                 <th>Status</th>
                 <th>Ações</th>
-                <th>Ação</th>
               </tr>
             </thead>
             <tbody id="movTabela"></tbody>
@@ -612,7 +611,9 @@ function renderTabelaEnderecos() {
 
   const filtroEl = document.getElementById('filtroEstoqueEnderecos');
   if (filtroEl && !filtroEl.dataset.bindFiltroEndereco) {
-    filtroEl.addEventListener('input', () => renderTabelaEnderecos());
+    filtroEl.addEventListener('input', () => {
+      renderTabelaEnderecos();
+    });
     filtroEl.dataset.bindFiltroEndereco = '1';
   }
 }
