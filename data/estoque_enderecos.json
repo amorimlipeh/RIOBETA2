@@ -1,1 +1,102 @@
-[]
+[
+  {
+    "produtoId": "p1",
+    "endereco": "0101011",
+    "quantidade": 500
+  },
+  {
+    "produtoId": "p2",
+    "endereco": "0101021",
+    "quantidade": 300
+  },
+  {
+    "produtoId": "p3",
+    "endereco": "SEM_ENDERECO",
+    "quantidade": 800
+  },
+  {
+    "produtoId": "p4",
+    "endereco": "0101031",
+    "quantidade": 200
+  },
+  {
+    "produtoId": "p5",
+    "endereco": "SEM_ENDERECO",
+    "quantidade": 1000
+  },
+  {
+    "produtoId": "p6",
+    "endereco": "0201011",
+    "quantidade": 120
+  },
+  {
+    "produtoId": "p7",
+    "endereco": "0201021",
+    "quantidade": 80
+  },
+  {
+    "produtoId": "p8",
+    "endereco": "SEM_ENDERECO",
+    "quantidade": 260
+  },
+  {
+    "produtoId": "p9",
+    "endereco": "0201031",
+    "quantidade": 90
+  },
+  {
+    "produtoId": "p10",
+    "endereco": "0201041",
+    "quantidade": 180
+  },
+  {
+    "produtoId": "p11",
+    "endereco": "0301011",
+    "quantidade": 15
+  },
+  {
+    "produtoId": "p12",
+    "endereco": "0301021",
+    "quantidade": 22
+  },
+  {
+    "produtoId": "p13",
+    "endereco": "0301031",
+    "quantidade": 12
+  },
+  {
+    "produtoId": "p14",
+    "endereco": "0301041",
+    "quantidade": 44
+  },
+  {
+    "produtoId": "p15",
+    "endereco": "0401011",
+    "quantidade": 160
+  },
+  {
+    "produtoId": "p16",
+    "endereco": "0401021",
+    "quantidade": 140
+  },
+  {
+    "produtoId": "p17",
+    "endereco": "0401031",
+    "quantidade": 75
+  },
+  {
+    "produtoId": "p18",
+    "endereco": "0401041",
+    "quantidade": 210
+  },
+  {
+    "produtoId": "p19",
+    "endereco": "SEM_ENDERECO",
+    "quantidade": 95
+  },
+  {
+    "produtoId": "p20",
+    "endereco": "0501011",
+    "quantidade": 130
+  }
+]

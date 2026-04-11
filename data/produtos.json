@@ -1,122 +1,182 @@
 [
   {
+    "id": "p1",
     "codigo": "TST001",
     "nome": "Caixa Organizadora Média",
-    "quantidade": 120,
-    "endereco": "0100101"
+    "categoria": "Caixas",
+    "fator": 12,
+    "sku": "CXM-001",
+    "estoqueTotal": 500
   },
   {
+    "id": "p2",
     "codigo": "TST002",
     "nome": "Plástico Bolha Premium",
-    "quantidade": 85,
-    "endereco": "0100102"
+    "categoria": "Proteção",
+    "fator": 10,
+    "sku": "PBP-002",
+    "estoqueTotal": 300
   },
   {
+    "id": "p3",
     "codigo": "TST003",
     "nome": "Etiqueta Logística",
-    "quantidade": 300,
-    "endereco": "0100103"
+    "categoria": "Etiquetas",
+    "fator": 20,
+    "sku": "ETQ-003",
+    "estoqueTotal": 800
   },
   {
+    "id": "p4",
     "codigo": "TST004",
     "nome": "Papel Kraft Bobina",
-    "quantidade": 70,
-    "endereco": "0100104"
+    "categoria": "Papéis",
+    "fator": 15,
+    "sku": "PKB-004",
+    "estoqueTotal": 200
   },
   {
+    "id": "p5",
     "codigo": "TST005",
     "nome": "Fita Adesiva Transparente",
-    "quantidade": 220,
-    "endereco": "0100105"
+    "categoria": "Fitas",
+    "fator": 6,
+    "sku": "FAT-005",
+    "estoqueTotal": 1000
   },
   {
+    "id": "p6",
     "codigo": "TST006",
     "nome": "Caixa Pequena Delivery",
-    "quantidade": 500,
-    "endereco": "0100106"
+    "categoria": "Caixas",
+    "fator": 8,
+    "sku": "CPD-006",
+    "estoqueTotal": 120
   },
   {
+    "id": "p7",
     "codigo": "TST007",
     "nome": "Caixa Grande Reforçada",
-    "quantidade": 140,
-    "endereco": "0100107"
+    "categoria": "Caixas",
+    "fator": 4,
+    "sku": "CGR-007",
+    "estoqueTotal": 80
   },
   {
+    "id": "p8",
     "codigo": "TST008",
     "nome": "Envelope Segurança",
-    "quantidade": 260,
-    "endereco": "0100108"
+    "categoria": "Envelopes",
+    "fator": 25,
+    "sku": "ENV-008",
+    "estoqueTotal": 260
   },
   {
+    "id": "p9",
     "codigo": "TST009",
     "nome": "Suporte Acrílico Display",
-    "quantidade": 90,
-    "endereco": "0100109"
+    "categoria": "Displays",
+    "fator": 2,
+    "sku": "SAD-009",
+    "estoqueTotal": 90
   },
   {
+    "id": "p10",
     "codigo": "TST010",
     "nome": "Bobina Térmica 80mm",
-    "quantidade": 180,
-    "endereco": "0100110"
+    "categoria": "Bobinas",
+    "fator": 30,
+    "sku": "BT8-010",
+    "estoqueTotal": 180
   },
   {
+    "id": "p11",
     "codigo": "TST011",
     "nome": "Impressora Etiquetas",
-    "quantidade": 15,
-    "endereco": "0100111"
+    "categoria": "Equipamentos",
+    "fator": 1,
+    "sku": "IMP-011",
+    "estoqueTotal": 15
   },
   {
+    "id": "p12",
     "codigo": "TST012",
     "nome": "Leitor Código Barras",
-    "quantidade": 22,
-    "endereco": "0100112"
+    "categoria": "Equipamentos",
+    "fator": 1,
+    "sku": "LCB-012",
+    "estoqueTotal": 22
   },
   {
+    "id": "p13",
     "codigo": "TST013",
     "nome": "Coletor Dados Mobile",
-    "quantidade": 12,
-    "endereco": "0100113"
+    "categoria": "Equipamentos",
+    "fator": 1,
+    "sku": "CDM-013",
+    "estoqueTotal": 12
   },
   {
+    "id": "p14",
     "codigo": "TST014",
     "nome": "Pallet Madeira PBR",
-    "quantidade": 44,
-    "endereco": "0100114"
+    "categoria": "Pallets",
+    "fator": 1,
+    "sku": "PAL-014",
+    "estoqueTotal": 44
   },
   {
+    "id": "p15",
     "codigo": "TST015",
     "nome": "Stretch Filme Preto",
-    "quantidade": 160,
-    "endereco": "0100115"
+    "categoria": "Filmes",
+    "fator": 18,
+    "sku": "SFP-015",
+    "estoqueTotal": 160
   },
   {
+    "id": "p16",
     "codigo": "TST016",
     "nome": "Stretch Filme Transparente",
-    "quantidade": 175,
-    "endereco": "0100116"
+    "categoria": "Filmes",
+    "fator": 18,
+    "sku": "SFT-016",
+    "estoqueTotal": 140
   },
   {
+    "id": "p17",
     "codigo": "TST017",
     "nome": "Lacre Numerado",
-    "quantidade": 600,
-    "endereco": "0100117"
+    "categoria": "Lacres",
+    "fator": 50,
+    "sku": "LAC-017",
+    "estoqueTotal": 75
   },
   {
+    "id": "p18",
     "codigo": "TST018",
     "nome": "Cinta de Amarração",
-    "quantidade": 55,
-    "endereco": "0100118"
+    "categoria": "Amarração",
+    "fator": 10,
+    "sku": "CIN-018",
+    "estoqueTotal": 210
   },
   {
+    "id": "p19",
     "codigo": "TST019",
     "nome": "Proteção Cantoneira",
-    "quantidade": 130,
-    "endereco": "0100119"
+    "categoria": "Proteção",
+    "fator": 12,
+    "sku": "CAN-019",
+    "estoqueTotal": 95
   },
   {
+    "id": "p20",
     "codigo": "TST020",
-    "nome": "Etiqueta Fragil",
-    "quantidade": 280,
-    "endereco": "0100120"
+    "nome": "Etiqueta Frágil",
+    "categoria": "Etiquetas",
+    "fator": 40,
+    "sku": "ETF-020",
+    "estoqueTotal": 130
   }
 ]

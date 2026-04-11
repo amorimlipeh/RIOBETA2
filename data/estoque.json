@@ -1,0 +1,7 @@
+[
+{"produtoId":"p1","endereco":"0101011","quantidade":500},
+{"produtoId":"p2","endereco":"0101021","quantidade":300},
+{"produtoId":"p3","endereco":"SEM_ENDERECO","quantidade":800},
+{"produtoId":"p4","endereco":"0101031","quantidade":200},
+{"produtoId":"p5","endereco":"SEM_ENDERECO","quantidade":1000}
+]

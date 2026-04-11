@@ -1,79 +1,71 @@
-const router = require("express").Router();
-const { read, write } = require("../services/fileDb");
-const { log } = require("../services/logger");
-const FILE = "estoque.json";
+const express = require('express');
+const fs = require('fs');
+const path = require('path');
 
-router.get("/", (req, res) => {
-  res.json(read(FILE, []));
+const router = express.Router();
+
+const estoqueFile = path.join(__dirname, '../../data/estoque.json');
+const movFile = path.join(__dirname, '../../data/movimentacoes.json');
+
+function read(file) {
+  if (!fs.existsSync(file)) return [];
+  return JSON.parse(fs.readFileSync(file));
+}
+
+function write(file, data) {
+  fs.writeFileSync(file, JSON.stringify(data, null, 2));
+}
+
+router.get('/', (req, res) => {
+  res.json(read(estoqueFile));
 });
 
-router.post("/", (req, res) => {
-  const items = read(FILE, []);
-  const novo = { id: Date.now(), ...req.body };
-  items.unshift(novo);
-  write(FILE, items);
-  log("estoque", "create", novo);
-  res.json({ ok: true, item: novo });
+router.get('/movimentacoes', (req, res) => {
+  res.json(read(movFile));
+});
+
+router.post('/movimentar', (req, res) => {
+  let estoque = read(estoqueFile);
+  let movs = read(movFile);
+
+  const { produtoId, tipo, endereco, quantidade } = req.body;
+
+  const idx = estoque.findIndex(e =>
+    e.produtoId === produtoId &&
+    e.endereco === endereco
+  );
+
+  let atual = idx >= 0 ? estoque[idx].quantidade : 0;
+
+  if (tipo === 'entrada') atual += quantidade;
+  if (tipo === 'saida') atual -= quantidade;
+
+  if (tipo === 'ajuste') {
+    atual = quantidade; // SALDO FINAL
+  }
+
+  if (idx >= 0) {
+    estoque[idx].quantidade = atual;
+  } else {
+    estoque.push({
+      produtoId,
+      endereco: endereco || 'SEM_ENDERECO',
+      quantidade: atual
+    });
+  }
+
+  movs.push({
+    produtoId,
+    tipo,
+    endereco: endereco || 'SEM_ENDERECO',
+    quantidade,
+    data: new Date().toISOString()
+  });
+
+  write(estoqueFile, estoque);
+  write(movFile, movs);
+
+  res.sendStatus(200);
 });
 
 module.exports = router;
-
-
-/* ===== MODAL ESCOLHA DE EDIÇÃO ===== */
-let itemSelecionadoEdicao = null;
-
-function abrirModalEscolhaEdicao(item){
-    itemSelecionadoEdicao = item;
-    const modal = document.getElementById("modalEscolhaEdicao");
-    if(modal) modal.classList.remove("hidden");
-}
-
-function fecharModalEscolhaEdicao(){
-    const modal = document.getElementById("modalEscolhaEdicao");
-    if(modal) modal.classList.add("hidden");
-}
-
-function editarMovimentacaoSelecionada(){
-    const item = itemSelecionadoEdicao;
-    fecharModalEscolhaEdicao();
-
-    if(!item) return;
-
-    if(typeof abrirFormularioEditarMovimentacao === "function"){
-        return abrirFormularioEditarMovimentacao(item);
-    }
-    if(typeof editarMovimentacao === "function"){
-        return editarMovimentacao(item);
-    }
-    if(typeof editarItem === "function"){
-        return editarItem(item);
-    }
-
-    console.warn("Nenhuma função de edição de movimentação encontrada.");
-}
-
-function editarTransferenciaSelecionada(){
-    const item = itemSelecionadoEdicao;
-    fecharModalEscolhaEdicao();
-
-    if(!item) return;
-
-    if(typeof abrirFormularioEditarTransferencia === "function"){
-        return abrirFormularioEditarTransferencia(item);
-    }
-    if(typeof editarTransferencia === "function"){
-        return editarTransferencia(item);
-    }
-    if(typeof editarItem === "function"){
-        return editarItem(item);
-    }
-
-    console.warn("Nenhuma função de edição de transferência encontrada.");
-}
-
-document.addEventListener("click", function(e){
-    const modal = document.getElementById("modalEscolhaEdicao");
-    if(e.target === modal){
-        fecharModalEscolhaEdicao();
-    }
-});

@@ -1,1 +1,22 @@
-[]
+[
+  {"id":"m1","produtoId":"p1","endereco":"0101011","quantidade":500,"tipo":"entrada","status":"ativo","data":"2026-04-11T11:00:00.000Z"},
+  {"id":"m2","produtoId":"p2","endereco":"0101021","quantidade":300,"tipo":"entrada","status":"ativo","data":"2026-04-11T11:00:01.000Z"},
+  {"id":"m3","produtoId":"p3","endereco":"SEM_ENDERECO","quantidade":800,"tipo":"entrada","status":"ativo","data":"2026-04-11T11:00:02.000Z"},
+  {"id":"m4","produtoId":"p4","endereco":"0101031","quantidade":200,"tipo":"entrada","status":"ativo","data":"2026-04-11T11:00:03.000Z"},
+  {"id":"m5","produtoId":"p5","endereco":"SEM_ENDERECO","quantidade":1000,"tipo":"entrada","status":"ativo","data":"2026-04-11T11:00:04.000Z"},
+  {"id":"m6","produtoId":"p6","endereco":"0201011","quantidade":120,"tipo":"entrada","status":"ativo","data":"2026-04-11T11:00:05.000Z"},
+  {"id":"m7","produtoId":"p7","endereco":"0201021","quantidade":80,"tipo":"entrada","status":"ativo","data":"2026-04-11T11:00:06.000Z"},
+  {"id":"m8","produtoId":"p8","endereco":"SEM_ENDERECO","quantidade":260,"tipo":"entrada","status":"ativo","data":"2026-04-11T11:00:07.000Z"},
+  {"id":"m9","produtoId":"p9","endereco":"0201031","quantidade":90,"tipo":"entrada","status":"ativo","data":"2026-04-11T11:00:08.000Z"},
+  {"id":"m10","produtoId":"p10","endereco":"0201041","quantidade":180,"tipo":"entrada","status":"ativo","data":"2026-04-11T11:00:09.000Z"},
+  {"id":"m11","produtoId":"p11","endereco":"0301011","quantidade":15,"tipo":"entrada","status":"ativo","data":"2026-04-11T11:00:10.000Z"},
+  {"id":"m12","produtoId":"p12","endereco":"0301021","quantidade":22,"tipo":"entrada","status":"ativo","data":"2026-04-11T11:00:11.000Z"},
+  {"id":"m13","produtoId":"p13","endereco":"0301031","quantidade":12,"tipo":"entrada","status":"ativo","data":"2026-04-11T11:00:12.000Z"},
+  {"id":"m14","produtoId":"p14","endereco":"0301041","quantidade":44,"tipo":"entrada","status":"ativo","data":"2026-04-11T11:00:13.000Z"},
+  {"id":"m15","produtoId":"p15","endereco":"0401011","quantidade":160,"tipo":"entrada","status":"ativo","data":"2026-04-11T11:00:14.000Z"},
+  {"id":"m16","produtoId":"p16","endereco":"0401021","quantidade":140,"tipo":"entrada","status":"ativo","data":"2026-04-11T11:00:15.000Z"},
+  {"id":"m17","produtoId":"p17","endereco":"0401031","quantidade":75,"tipo":"entrada","status":"ativo","data":"2026-04-11T11:00:16.000Z"},
+  {"id":"m18","produtoId":"p18","endereco":"0401041","quantidade":210,"tipo":"entrada","status":"ativo","data":"2026-04-11T11:00:17.000Z"},
+  {"id":"m19","produtoId":"p19","endereco":"SEM_ENDERECO","quantidade":95,"tipo":"entrada","status":"ativo","data":"2026-04-11T11:00:18.000Z"},
+  {"id":"m20","produtoId":"p20","endereco":"0501011","quantidade":130,"tipo":"entrada","status":"ativo","data":"2026-04-11T11:00:19.000Z"}
+]
