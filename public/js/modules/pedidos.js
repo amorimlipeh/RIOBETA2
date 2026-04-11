@@ -1061,14 +1061,37 @@ window.editarPedidoSalvo = function(index){
 
   window.editandoPedidoIndex = index;
 
-  abrirPedidoSalvo(index);
+  document.getElementById("pedidoCliente").value = pedido.cliente || "";
+  document.getElementById("pedidoRepresentante").value = pedido.representante || "";
+  document.getElementById("pedidoNumero").value = pedido.numero || "";
+  document.getElementById("pedidoData").value = pedido.data || "";
 
-  const footer = document.getElementById('pedidoFooterAcoes');
-  if (footer) footer.style.display = 'none';
+  const container = document.getElementById("itensPedidoLista");
+  if(container){
+    container.innerHTML = "";
+
+    (pedido.itens || []).forEach(item=>{
+      const div = document.createElement("div");
+      div.className = "item-pedido";
+      div.dataset.codigo = item.codigo || "";
+      div.innerHTML = `
+        <strong>${item.codigo || ""}</strong><br>
+        ${item.nome || ""}<br>
+        ${item.caixas || 0} CX | ${item.unidades || 0} UND
+      `;
+      container.appendChild(div);
+    });
+  }
 
   const btnAdd = document.querySelector("button[onclick*='abrirModalProdutoPedido'], #btnAdicionarProdutoPedido");
+
   if(btnAdd){
     btnAdd.innerText = "Salvar Alterações";
     btnAdd.style.background = "#f59e0b";
   }
+
+  window.scrollTo({
+    top:0,
+    behavior:"smooth"
+  });
 }
