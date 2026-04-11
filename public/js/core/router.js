@@ -520,8 +520,9 @@ function renderTabelaEstoque(lista = produtos) {
         <td>${produto.codigo || '-'}</td>
         <td>${produto.nome || '-'}</td>
         <td>${produto.estoqueTotal || 0}</td>
-        <td>
+        <td style="display:flex;gap:6px;flex-wrap:wrap;">
           <button class="btn-action btn-edit" onclick="abrirAjusteSaldo('${produto.id}')">Ajuste</button>
+          <button class="btn-action btn-delete" onclick="excluirProdutoComEstoque('${produto.id}')">Excluir</button>
         </td>
       </tr>
     `;
@@ -896,7 +897,7 @@ window.abrirModalEscolhaEdicao = function (id, origem = 'mov') {
 
     preencherMovimentacao(produto, {
       tipo: mov ? (mov.tipo === 'transferencia' ? 'ajuste' : mov.tipo) : 'ajuste',
-      endereco: mov ? (mov.endereco || mov.destino || '') : '',
+      endereco: mov ? (mov.endereco || mov.destino || '') : (encontrarEnderecoOrigemDoProduto(produto) || ''),
       quantidade: mov ? (mov.quantidade || '') : ''
     });
 
@@ -920,6 +921,69 @@ window.abrirModalEscolhaEdicao = function (id, origem = 'mov') {
   modal.addEventListener('click', (e) => {
     if (e.target === modal) fechar();
   });
+};
+
+window.excluirProdutoComEstoque = async function (produtoId) {
+  const produto = produtos.find(p => String(p.id) === String(produtoId));
+  if (!produto) {
+    showModal('Produto não encontrado para exclusão.', 'error');
+    return;
+  }
+
+  const confirmar = await showConfirmModal(`Tem certeza que deseja excluir o produto "${produto.nome || produto.codigo || produto.id}"? O estoque relacionado será zerado antes da exclusão.`);
+  if (!confirmar) return;
+
+  try {
+    const itensRelacionados = (estoque || []).filter(item => {
+      const matchId = String(item.produtoId || '') === String(produtoId);
+      const matchNome = String(item.produto || '').toLowerCase() === String(produto.nome || '').toLowerCase();
+      const matchCodigo = String(item.codigo || '').toLowerCase() === String(produto.codigo || '').toLowerCase();
+      return Number(item.quantidade || 0) > 0 && (matchId || matchNome || matchCodigo);
+    });
+
+    for (const item of itensRelacionados) {
+      const res = await fetch('/api/estoque/movimentar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          produtoId: produtoId,
+          tipo: 'saida',
+          endereco: item.endereco,
+          quantidade: Number(item.quantidade || 0)
+        })
+      });
+
+      let data = {};
+      try {
+        data = await res.json();
+      } catch {}
+
+      if (!res.ok) {
+        throw new Error(data.message || `Erro ao zerar estoque no endereço ${item.endereco}.`);
+      }
+    }
+
+    const del = await fetch('/api/produtos/' + produtoId, {
+      method: 'DELETE'
+    });
+
+    let delData = {};
+    try {
+      delData = await del.json();
+    } catch {}
+
+    if (!del.ok) {
+      throw new Error(delData.message || 'Erro ao excluir produto.');
+    }
+
+    await carregarProdutos();
+    await carregarEstoque();
+    await carregarMovimentacoes();
+    await renderView('estoque', { skipLoad: true });
+    showModal('Produto excluído com sucesso.', 'success');
+  } catch (error) {
+    showModal(error.message || 'Erro ao excluir produto.', 'error');
+  }
 };
 
 window.abrirAjusteSaldo = function (produtoId) {
