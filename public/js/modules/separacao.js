@@ -76,32 +76,56 @@ async function carregarEstoque(){
 }
 
 function encontrarProduto(itemPedido, produtos){
-  const codigoPedido = norm(itemPedido?.codigo);
-  const nomePedido = norm(itemPedido?.nome);
+  const produtoIdPedido = txt(itemPedido?.produtoId || itemPedido?.idProduto || itemPedido?.productId);
+  const codigoPedido = norm(itemPedido?.codigo || itemPedido?.sku || itemPedido?.code);
+  const nomePedido = norm(itemPedido?.nome || itemPedido?.produto || itemPedido?.name || itemPedido?.descricao);
 
   return produtos.find(prod => {
-    const codigo = norm(prod.codigo || prod.code || prod.sku || prod.id);
-    const nome = norm(prod.nome || prod.name || prod.descricao);
-    return (codigoPedido && codigo === codigoPedido) || (nomePedido && nome === nomePedido) || (codigoPedido && codigo.includes(codigoPedido)) || (nomePedido && nome.includes(nomePedido));
+    const produtoId = txt(prod.id || prod.produtoId);
+    const codigo = norm(prod.codigo || prod.code || prod.sku);
+    const nome = norm(prod.nome || prod.name || prod.descricao || prod.produto);
+
+    if (produtoIdPedido && produtoId && produtoIdPedido === produtoId) return true;
+    if (codigoPedido && codigo && codigo === codigoPedido) return true;
+    if (codigoPedido && codigo && codigo.includes(codigoPedido)) return true;
+    if (nomePedido && nome && nome === nomePedido) return true;
+    if (nomePedido && nome && nome.includes(nomePedido)) return true;
+
+    return false;
   }) || null;
 }
 
 function enderecosDoProduto(produto, itemPedido, estoque){
-  const produtoId = txt(produto?.id);
-  const codigo = norm(produto?.codigo || produto?.code || produto?.sku || produto?.id);
-  const nome = norm(produto?.nome || produto?.name || produto?.descricao);
-  const codigoPedido = norm(itemPedido?.codigo);
-  const nomePedido = norm(itemPedido?.nome);
+  const produtoId = txt(produto?.id || produto?.produtoId);
+  const codigoProduto = norm(produto?.codigo || produto?.code || produto?.sku);
+  const nomeProduto = norm(produto?.nome || produto?.name || produto?.descricao || produto?.produto);
+
+  const produtoIdPedido = txt(itemPedido?.produtoId || itemPedido?.idProduto || itemPedido?.productId);
+  const codigoPedido = norm(itemPedido?.codigo || itemPedido?.sku || itemPedido?.code);
+  const nomePedido = norm(itemPedido?.nome || itemPedido?.produto || itemPedido?.name || itemPedido?.descricao);
 
   return (estoque || [])
     .filter(e => Number(e.quantidade || 0) > 0)
     .filter(e => {
-      const matchId = produtoId && txt(e.produtoId) === produtoId;
-      const matchCodigo = codigo && norm(e.codigo) === codigo;
-      const matchNome = nome && norm(e.produto) === nome;
-      const matchCodigoPedido = codigoPedido && norm(e.codigo) === codigoPedido;
-      const matchNomePedido = nomePedido && norm(e.produto) === nomePedido;
-      return matchId || matchCodigo || matchNome || matchCodigoPedido || matchNomePedido;
+      const estoqueProdutoId = txt(e.produtoId || e.idProduto);
+      const estoqueCodigo = norm(e.codigo || e.code || e.sku);
+      const estoqueNome = norm(e.produto || e.nome || e.name || e.descricao);
+
+      const matchProdutoId = produtoId && estoqueProdutoId && estoqueProdutoId === produtoId;
+      const matchProdutoIdPedido = produtoIdPedido && estoqueProdutoId && estoqueProdutoId === produtoIdPedido;
+      const matchCodigoProduto = codigoProduto && estoqueCodigo && estoqueCodigo === codigoProduto;
+      const matchCodigoPedido = codigoPedido && estoqueCodigo && estoqueCodigo === codigoPedido;
+      const matchNomeProduto = nomeProduto && estoqueNome && estoqueNome === nomeProduto;
+      const matchNomePedido = nomePedido && estoqueNome && estoqueNome === nomePedido;
+
+      return (
+        matchProdutoId ||
+        matchProdutoIdPedido ||
+        matchCodigoProduto ||
+        matchCodigoPedido ||
+        matchNomeProduto ||
+        matchNomePedido
+      );
     })
     .sort((a, b) => Number(b.quantidade || 0) - Number(a.quantidade || 0));
 }
@@ -148,7 +172,7 @@ async function baixarEstoquePedido(pedido){
 
       if (retirar > 0) {
         plano.push({
-          produtoId: produto.id,
+          produtoId: produto.id || produto.produtoId,
           endereco: endereco.endereco,
           quantidade: retirar,
           itemLabel: txt(item.codigo || item.nome || produto.nome || produto.codigo || produto.id)
@@ -234,10 +258,15 @@ function renderCard(pedido, modo){
       color:#fff;
       border:1px solid ${visual.cor};
     ">
-      <div style="font-weight:800;">${pedido.id}</div>
-      <div style="font-size:13px;">${pedido.cliente || '-'}</div>
-      <div style="font-size:12px;color:#7fb0ff;">${(pedido.itens || []).length} itens</div>
-      <div style="font-size:13px;color:${visual.cor};margin-top:4px;">${visual.icone} ${pedido.status}</div>
+      <div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start;">
+        <div>
+          <div style="font-weight:800;">${pedido.id}</div>
+          <div style="font-size:13px;">${pedido.cliente || '-'}</div>
+          <div style="font-size:12px;color:#7fb0ff;">${(pedido.itens || []).length} itens</div>
+          <div style="font-size:13px;color:${visual.cor};margin-top:4px;">${visual.icone} ${pedido.status}</div>
+        </div>
+        <button onclick="window.visualizarPedidoSeparacao('${pedido.id}')" style="border:none;background:transparent;color:#fff;font-size:15px;cursor:pointer;">Visualizar</button>
+      </div>
 
       ${
         modo === 'pendente'
@@ -261,6 +290,52 @@ function renderCard(pedido, modo){
     </div>
   `;
 }
+
+function ensureModal(){
+  if (document.getElementById('modalVisualizarPedidoSeparacao')) return;
+
+  const modal = document.createElement('div');
+  modal.id = 'modalVisualizarPedidoSeparacao';
+  modal.style.cssText = 'display:none;position:fixed;inset:0;background:rgba(0,0,0,.78);z-index:999999;padding:20px;align-items:center;justify-content:center;';
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) modal.style.display = 'none';
+  });
+  document.body.appendChild(modal);
+}
+
+window.visualizarPedidoSeparacao = function(id){
+  ensureModal();
+
+  const pedidos = getPedidos();
+  const pedido = pedidos.find(p => p.id === id);
+  const modal = document.getElementById('modalVisualizarPedidoSeparacao');
+  if (!pedido || !modal) return;
+
+  modal.innerHTML = `
+    <div style="background:#13233d;padding:22px;border-radius:16px;width:92%;max-width:620px;max-height:85vh;overflow:auto;box-sizing:border-box;margin:auto;">
+      <div style="color:#fff;font-size:24px;font-weight:800;margin-bottom:12px;">Pedido ${pedido.id}</div>
+      <div style="color:#9ec5ff;font-size:13px;margin-bottom:16px;">Status: ${pedido.status || '-'}</div>
+
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        ${(pedido.itens || []).map(item => `
+          <div style="background:#0f2038;border-radius:12px;padding:14px;color:#fff;">
+            <div style="font-weight:800;">${txt(item.codigo || '-')}</div>
+            <div>${txt(item.nome || '-')}</div>
+            <div style="color:#9ec5ff;font-size:13px;margin-top:4px;">
+              ${(Number(item.caixas || 0) || 0)} CX | ${qtdItemEmUnidades(item)} UND | Fator ${Number(item.fator || 1) || 1}
+            </div>
+          </div>
+        `).join('')}
+      </div>
+
+      <div style="display:flex;justify-content:flex-end;margin-top:18px;">
+        <button onclick="document.getElementById('modalVisualizarPedidoSeparacao').style.display='none'" style="min-width:180px;padding:12px;border:none;border-radius:10px;background:#64748b;color:#fff;font-weight:700;">Fechar</button>
+      </div>
+    </div>
+  `;
+
+  modal.style.display = 'flex';
+};
 
 window.iniciarSeparacao = function(id){
   const pedidos = getPedidos();
