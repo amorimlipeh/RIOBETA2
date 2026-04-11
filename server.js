@@ -141,9 +141,17 @@ app.put('/api/produtos/:id', (req, res) => {
 });
 
 app.delete('/api/produtos/:id', (req, res) => {
+  const produtoId = String(req.params.id);
+
   let produtos = readJson(PRODUTOS_FILE);
-  produtos = produtos.filter(p => p.id != req.params.id);
+  produtos = produtos.filter(p => String(p.id) !== produtoId);
   saveJson(PRODUTOS_FILE, produtos);
+
+  let movs = readJson(MOVS_FILE);
+  movs = movs.filter(m => String(m.produtoId) !== produtoId);
+  saveJson(MOVS_FILE, movs);
+
+  recalcularEstoque();
   res.json({ ok: true });
 });
 
@@ -158,10 +166,18 @@ app.get('/api/movimentacoes', (req, res) => {
 
 app.post('/api/estoque/movimentar', (req, res) => {
   const { produtoId, endereco, quantidade, tipo } = req.body;
-  const qtd = Number(quantidade || 0);
+  const qtd = Number(quantidade);
 
-  if (!produtoId || !endereco || !qtd || !tipo) {
+  if (!produtoId || !endereco || !tipo || Number.isNaN(qtd)) {
     return res.status(400).json({ ok: false, message: 'Dados obrigatórios não informados.' });
+  }
+
+  if (tipo !== 'ajuste' && qtd <= 0) {
+    return res.status(400).json({ ok: false, message: 'Quantidade deve ser maior que zero.' });
+  }
+
+  if (tipo === 'ajuste' && qtd < 0) {
+    return res.status(400).json({ ok: false, message: 'Ajuste negativo não é permitido.' });
   }
 
   const movs = readJson(MOVS_FILE);
@@ -179,10 +195,6 @@ app.post('/api/estoque/movimentar', (req, res) => {
         message: `Saldo insuficiente no endereço. Saldo atual: ${saldoAtual}.`
       });
     }
-  }
-
-  if (tipo === 'ajuste' && qtd < 0) {
-    return res.status(400).json({ ok: false, message: 'Ajuste negativo não é permitido.' });
   }
 
   movs.unshift({
