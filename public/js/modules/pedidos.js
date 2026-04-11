@@ -1016,3 +1016,33 @@ window.editarPedidoDoModal=function(index){
       console.error(e);
    }
 };
+
+
+/* =========================
+   NOVA ENGINE PEDIDOS V2
+========================= */
+
+window.itensPedidoAtual = []
+window.editandoPedidoIndex = null
+
+function obterItensPedidoAtual(){
+  if(!Array.isArray(window.itensPedidoAtual)){
+    window.itensPedidoAtual=[]
+  }
+  return window.itensPedidoAtual
+}
+
+function limparEstadoPedido(){
+  window.itensPedidoAtual=[]
+  window.editandoPedidoIndex=null
+}
+
+function iniciarModoEdicaoPedido(index,pedido){
+  window.editandoPedidoIndex=index
+  window.itensPedidoAtual=[...(pedido.itens||[])]
+}
+
+function estaEditandoPedido(){
+  return window.editandoPedidoIndex!==null
+}
+
