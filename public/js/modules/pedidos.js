@@ -1072,3 +1072,17 @@ window.editarPedidoSalvo = function(index){
 
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
+
+
+document.addEventListener("click",function(e){
+
+    if(e.target.id==="btn-add-produto-edicao"){
+
+        const btnNormal = document.querySelector(".btn-add-produto");
+        if(btnNormal){
+            btnNormal.click();
+        }
+
+    }
+
+});
