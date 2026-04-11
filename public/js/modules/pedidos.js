@@ -627,6 +627,11 @@ window.editandoPedidoIndex = null;
             padding:10px;border-radius:8px;font-weight:700;
           ">Abrir</button>
 
+          <button onclick="window.editarPedidoDireto(${index})" style="
+            flex:1;border:none;background:#f59e0b;color:#fff;
+            padding:10px;border-radius:8px;font-weight:700;
+          ">Editar</button>
+
           <button onclick="window.cancelarPedidoSalvo(${index})" style="
             flex:1;border:none;background:#ef4444;color:#fff;
             padding:10px;border-radius:8px;font-weight:700;
@@ -1015,4 +1020,24 @@ window.editarPedidoDoModal=function(index){
    }catch(e){
       console.error(e);
    }
+};
+
+
+window.editarPedidoDireto=function(index){
+  try{
+    window.editandoPedidoIndex = index;
+
+    if(typeof abrirPedidoSalvo === 'function'){
+      abrirPedidoSalvo(index);
+    }
+
+    const btn = document.getElementById('btnSalvarPedidoFinal');
+    if(btn){
+      btn.innerText = 'Salvar Alterações';
+    }
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }catch(e){
+    console.error(e);
+  }
 };
