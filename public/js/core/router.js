@@ -434,6 +434,11 @@ function estoqueView() {
     <div class="dashboard-row fade-in">
       <div class="big-card">
         <h3>Estoque por Endereço</h3>
+        <input
+          id="filtroEstoqueEnderecos"
+          placeholder="Buscar por código, SKU, nome, categoria ou endereço..."
+          style="margin-bottom:14px;"
+        >
         <div class="table-scroll">
           <table class="table-wide">
             <thead>
@@ -542,7 +547,7 @@ window.filtrarSaldoEstoque = function () {
 };
 
 function renderTabelaEnderecos() {
-  const tabela = document.getElementById('tabelaEstoqueEnderecos');
+  const tabela = document.getElementById('enderecosTabela');
   if (!tabela) return;
 
   const filtroInput = document.getElementById('filtroEstoqueEnderecos');
@@ -569,9 +574,7 @@ function renderTabelaEnderecos() {
         item.categoria,
         item.produto,
         item.endereco
-      ]
-        .map(v => String(v || '').toLowerCase())
-        .join(' | ');
+      ].map(v => String(v || '').toLowerCase()).join(' | ');
 
       return alvo.includes(filtro);
     });
