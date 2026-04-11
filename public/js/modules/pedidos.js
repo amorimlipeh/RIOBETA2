@@ -1010,7 +1010,10 @@ window.editarPedidoDoModal=function(index){
 };
 
 
-window.editarPedidoDireto=function(index){
+
+
+
+window.editarPedidoDireto = function(index){
   try{
     window.editandoPedidoIndex = index;
 
@@ -1020,17 +1023,23 @@ window.editarPedidoDireto=function(index){
 
     const btn =
       document.getElementById('btnSalvarPedidoFinal') ||
-      document.getElementById('btnSalvarPedido');
+      document.getElementById('btnSalvarPedido') ||
+      document.querySelector('#pedidoFooterAcoes button') ||
+      document.querySelector('button[onclick*="salvarPedido"]');
 
     if(btn){
       btn.innerText = 'Salvar Alterações';
     }
 
-    const modal = document.getElementById('modalPedidoVisualizacao');
-    if(modal) modal.remove();
-
     window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    if(typeof renderPedidosSalvos === 'function'){
+      renderPedidosSalvos();
+    }
+
   }catch(e){
-    console.error(e);
+    console.error('ERRO AO EDITAR PEDIDO:', e);
   }
 };
+
+window.editarPedido = window.editarPedidoDireto;
