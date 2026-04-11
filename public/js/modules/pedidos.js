@@ -627,6 +627,13 @@ window.editandoPedidoIndex = null;
             padding:10px;border-radius:8px;font-weight:700;
           ">Abrir</button>
 
+          
+
+          <button onclick="window.editarPedidoSalvo(${index})" style="
+            flex:1;border:none;background:#f59e0b;color:#fff;
+            padding:10px;border-radius:8px;font-weight:700;
+          ">Editar</button>
+
           <button onclick="window.cancelarPedidoSalvo(${index})" style="
             flex:1;border:none;background:#ef4444;color:#fff;
             padding:10px;border-radius:8px;font-weight:700;
