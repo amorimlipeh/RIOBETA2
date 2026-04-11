@@ -697,6 +697,7 @@ window.editandoPedidoIndex = null;
   }
 
 
+
 function abrirPedidoSalvo(index) {
   const pedido = pedidosSalvosMemoria[index];
   if (!pedido) return;
@@ -708,41 +709,42 @@ function abrirPedidoSalvo(index) {
   document.getElementById('pedidoNumero').value = pedido.numero || '';
   document.getElementById('pedidoData').value = pedido.data || '';
 
-  const listaItens = document.getElementById('pedidoItensLista');
-  if(listaItens){
-    listaItens.innerHTML = '';
+  const lista = garantirListaItensPedido();
+  if (!lista) return;
 
-    (pedido.itens || []).forEach(item=>{
-      const div = document.createElement('div');
-      div.className = 'pedido-item-card';
-      div.style.marginBottom = '10px';
-      div.style.padding = '12px';
-      div.style.background = '#162742';
-      div.style.borderRadius = '10px';
+  lista.innerHTML = '';
 
-      div.innerHTML = `
-        <div style="font-weight:700;color:#fff;">${item.codigo || ''}</div>
-        <div style="color:#cbd5e1;">${item.nome || ''}</div>
-        <div style="color:#93c5fd;">${item.caixas || 0} CX | ${item.unidades || 0} UND</div>
-      `;
+  (pedido.itens || []).forEach(item => {
+    lista.appendChild(
+      criarCardItemPedido({
+        codigo: item.codigo || '',
+        nome: item.nome || '',
+        totalUnd: item.totalUnd || 0,
+        caixas: item.caixas || 0,
+        avulsas: item.avulsas || 0,
+        fator: item.fator || 1,
+        imagem: item.imagem || ''
+      })
+    );
+  });
 
-      listaItens.appendChild(div);
-    });
-  }
+  const footer = garantirFooterPedido();
+  if (footer) footer.style.display = 'block';
 
   const btn =
     document.getElementById('btnSalvarPedidoFinal') ||
     document.getElementById('btnSalvarPedido');
 
-  if(btn){
+  if (btn) {
     btn.innerText = 'Salvar Alterações';
   }
 
   window.scrollTo({
-    top:0,
-    behavior:'smooth'
+    top: 0,
+    behavior: 'smooth'
   });
 }
+
 )();
 
 
