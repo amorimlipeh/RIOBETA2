@@ -21,3 +21,14 @@ function renderMovimentacoes(movs) {
   });
 }
 
+
+setTimeout(() => {
+  fetch('/api/estoque')
+    .then(r => r.json())
+    .then(data => {
+      if (window.renderMovimentacoesFix) {
+        window.renderMovimentacoesFix(data);
+      }
+    });
+}, 1000);
+
