@@ -703,3 +703,22 @@
   window.renderPedidos = renderPedidos;
   window.destroyPedidosUI = destroyPedidosUI;
 })();
+
+
+// =========================
+// STATUS VISUAL GLOBAL
+// =========================
+function getPedidoStatusVisual(status) {
+  const s = String(status || '').trim();
+
+  if (s === 'Concluído') return { cor:'#22c55e', icone:'🟢' };
+  if (s === 'Em Separação') return { cor:'#facc15', icone:'🟡' };
+  if (s === 'Bloqueado') return { cor:'#ef4444', icone:'🔴' };
+
+  return { cor:'#94a3b8', icone:'⚪' };
+}
+
+function isPedidoHistorico(status){
+  const s = String(status || '').trim();
+  return s === 'Concluído' || s === 'Bloqueado';
+}
