@@ -25,11 +25,11 @@ function getVisualStatus(status){
     return { cor:'#facc15', icone:'🟡', fundo:'#3a2f0b' };
   }
 
-  if(s === 'Bloqueado'){
-    return { cor:'#ef4444', icone:'🔴', fundo:'#3b1212' };
+  if(s === 'Aguardando Separação'){
+    return { cor:'#facc15', icone:'🟡', fundo:'#162742' };
   }
 
-  return { cor:'#facc15', icone:'🟡', fundo:'#162742' };
+  return { cor:'#cbd5e1', icone:'⚪', fundo:'#162742' };
 }
 
 function renderSeparacao(){
@@ -42,16 +42,12 @@ function renderSeparacao(){
   const pendentes = pedidos.filter(p => p.status === 'Aguardando Separação');
   const andamento = pedidos.filter(p => p.status === 'Em Separação');
   const concluidos = pedidos.filter(p => p.status === 'Concluído');
-  const bloqueados = pedidos.filter(p => p.status === 'Bloqueado');
 
   root.innerHTML = `
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:16px;">
-
       ${renderColuna('Pendentes', pendentes, 'pendente')}
       ${renderColuna('Em Separação', andamento, 'andamento')}
       ${renderColuna('Concluídos', concluidos, 'concluido')}
-      ${renderColuna('Bloqueados', bloqueados, 'bloqueado')}
-
     </div>
   `;
 }
@@ -91,7 +87,6 @@ function renderCard(pedido, modo){
         ? `
           <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;">
             <button onclick="window.iniciarSeparacao('${pedido.id}')" style="flex:1;padding:10px;border:none;border-radius:8px;background:#f59e0b;color:#fff;font-weight:700;">Iniciar</button>
-            <button onclick="window.bloquearPedidoSeparacao('${pedido.id}')" style="flex:1;padding:10px;border:none;border-radius:8px;background:#ef4444;color:#fff;font-weight:700;">Bloquear</button>
           </div>
         `
         : ''
@@ -102,17 +97,6 @@ function renderCard(pedido, modo){
         ? `
           <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;">
             <button onclick="window.concluirSeparacao('${pedido.id}')" style="flex:1;padding:10px;border:none;border-radius:8px;background:#22c55e;color:#fff;font-weight:700;">Concluir</button>
-            <button onclick="window.bloquearPedidoSeparacao('${pedido.id}')" style="flex:1;padding:10px;border:none;border-radius:8px;background:#ef4444;color:#fff;font-weight:700;">Bloquear</button>
-          </div>
-        `
-        : ''
-      }
-
-      ${
-        modo === 'bloqueado'
-        ? `
-          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;">
-            <button onclick="window.liberarPedidoSeparacao('${pedido.id}')" style="flex:1;padding:10px;border:none;border-radius:8px;background:#2563eb;color:#fff;font-weight:700;">Liberar Pedido</button>
           </div>
         `
         : ''
@@ -140,32 +124,6 @@ window.concluirSeparacao = function(id){
   pedidos.forEach(p => {
     if(p.id === id){
       p.status = 'Concluído';
-    }
-  });
-
-  salvarPedidos(pedidos);
-  renderSeparacao();
-};
-
-window.bloquearPedidoSeparacao = function(id){
-  const pedidos = getPedidos();
-
-  pedidos.forEach(p => {
-    if(p.id === id){
-      p.status = 'Bloqueado';
-    }
-  });
-
-  salvarPedidos(pedidos);
-  renderSeparacao();
-};
-
-window.liberarPedidoSeparacao = function(id){
-  const pedidos = getPedidos();
-
-  pedidos.forEach(p => {
-    if(p.id === id){
-      p.status = 'Aguardando Separação';
     }
   });
 

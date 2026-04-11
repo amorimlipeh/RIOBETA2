@@ -158,6 +158,50 @@
     return `<div style="width:56px;height:56px;border-radius:12px;background:#2f6df6;display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:800;">IMG</div>`;
   }
 
+  function getStatusVisual(status) {
+    const s = text(status);
+
+    if (s === 'Concluído') {
+      return { cor: '#22c55e', icone: '🟢', fundo: '#123524', borda: '#22c55e' };
+    }
+
+    if (s === 'Em Separação') {
+      return { cor: '#facc15', icone: '🟡', fundo: '#3a2f0b', borda: '#facc15' };
+    }
+
+    if (s === 'Bloqueado') {
+      return { cor: '#ef4444', icone: '🔴', fundo: '#3b1212', borda: '#ef4444' };
+    }
+
+    if (s === 'Aguardando Separação') {
+      return { cor: '#facc15', icone: '🟡', fundo: '#162742', borda: '#334155' };
+    }
+
+    if (s === 'Aguardando Liberação') {
+      return { cor: '#cbd5e1', icone: '⚪', fundo: '#162742', borda: '#64748b' };
+    }
+
+    return { cor: '#cbd5e1', icone: '⚪', fundo: '#162742', borda: '#334155' };
+  }
+
+  function isHistorico(status) {
+    return text(status) === 'Concluído';
+  }
+
+  function canEdit(status) {
+    return text(status) !== 'Concluído';
+  }
+
+  function canLiberar(status) {
+    const s = text(status);
+    return s === 'Aguardando Liberação' || s === 'Bloqueado';
+  }
+
+  function canBloquear(status) {
+    const s = text(status);
+    return s === 'Aguardando Liberação' || s === 'Aguardando Separação' || s === 'Em Separação';
+  }
+
   function renderShell() {
     const el = root();
     if (!el) return;
@@ -195,6 +239,11 @@
           <div id="painelPedidosSalvos" style="background:#223754;padding:18px;border-radius:18px;">
             <h3 style="margin:0 0 15px 0;color:#fff;">📋 Pedidos Salvos</h3>
             <div id="listaPedidosSalvos" style="display:flex;flex-direction:column;gap:12px;"></div>
+
+            <div style="margin-top:18px;">
+              <h3 style="margin:0 0 12px 0;color:#fff;">📚 Histórico de Pedidos</h3>
+              <div id="listaHistoricoPedidos" style="display:flex;flex-direction:column;gap:12px;"></div>
+            </div>
           </div>
         </div>
 
@@ -216,51 +265,111 @@
     ensureModals();
   }
 
-  function renderSavedOrders() {
-    const list = document.getElementById('listaPedidosSalvos');
-    if (!list) return;
-    list.innerHTML = '';
+  function cardButtons(index, pedido, historico = false) {
+    const status = text(pedido.status);
 
-    if (!state.pedidos.length) {
-      list.innerHTML = '<p style="color:#cbd5e1;">Nenhum pedido salvo ainda.</p>';
-      return;
-    }
-
-    state.pedidos.forEach((pedido, index) => {
-      const editing = state.editandoPedidoIndex === index;
-      const card = document.createElement('div');
-      card.style.background = editing ? '#2d4669' : '#162742';
-      card.style.padding = '14px';
-      card.style.borderRadius = '12px';
-      card.style.border = editing ? '2px solid #f59e0b' : '1px solid transparent';
-      card.innerHTML = `
-        <div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start;flex-wrap:wrap;">
-          <div>
-            <div style="color:#fff;font-weight:700;">${escapeHtml(pedido.id)}</div>
-            <div style="color:#dbe7ff;font-size:13px;margin-top:4px;">${escapeHtml(pedido.cliente || 'Sem cliente')}${pedido.numero ? ' • Nº ' + escapeHtml(pedido.numero) : ''}</div>
-            <div style="color:#facc15;font-size:13px;margin-top:4px;">🟡 ${escapeHtml(pedido.status || 'Aguardando Separação')}</div>
-          </div>
-
-          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:flex-end;">
-            ${editing ? `
-              <div style="background:#f59e0b;color:#fff;padding:4px 8px;border-radius:999px;font-size:11px;font-weight:800;">✏️ Em edição</div>
-              <button
-                data-action="adicionar-produto-edicao"
-                data-index="${index}"
-                style="border:none;background:#22c55e;color:#fff;padding:10px 14px;border-radius:8px;font-weight:700;cursor:pointer;">
-                ＋ Adicionar Produto
-              </button>
-            ` : ''}
-          </div>
-        </div>
-
+    if (historico) {
+      return `
         <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;">
-          <button data-action="abrir" data-index="${index}" style="flex:1;border:none;background:#2f6df6;color:#fff;padding:10px;border-radius:8px;font-weight:700;">Abrir</button>
-          <button data-action="editar" data-index="${index}" style="flex:1;border:none;background:#f59e0b;color:#fff;padding:10px;border-radius:8px;font-weight:700;">Editar</button>
-          <button data-action="cancelar" data-index="${index}" style="flex:1;border:none;background:#ef4444;color:#fff;padding:10px;border-radius:8px;font-weight:700;">Cancelar</button>
+          <button data-action="abrir" data-index="${index}" style="flex:1;border:none;background:#334155;color:#fff;padding:10px;border-radius:8px;font-weight:700;">Abrir</button>
         </div>
       `;
+    }
+
+    let html = `
+      <button data-action="abrir" data-index="${index}" style="flex:1;border:none;background:#2f6df6;color:#fff;padding:10px;border-radius:8px;font-weight:700;">Abrir</button>
+    `;
+
+    if (canEdit(status)) {
+      html += `
+        <button data-action="editar" data-index="${index}" style="flex:1;border:none;background:#f59e0b;color:#fff;padding:10px;border-radius:8px;font-weight:700;">Editar</button>
+      `;
+    }
+
+    if (canLiberar(status)) {
+      html += `
+        <button data-action="liberar" data-index="${index}" style="flex:1;border:none;background:#2563eb;color:#fff;padding:10px;border-radius:8px;font-weight:700;">Liberar Pedido</button>
+      `;
+    }
+
+    if (canBloquear(status)) {
+      html += `
+        <button data-action="bloquear" data-index="${index}" style="flex:1;border:none;background:#dc2626;color:#fff;padding:10px;border-radius:8px;font-weight:700;">Bloquear</button>
+      `;
+    }
+
+    html += `
+      <button data-action="cancelar" data-index="${index}" style="flex:1;border:none;background:#ef4444;color:#fff;padding:10px;border-radius:8px;font-weight:700;">Cancelar</button>
+    `;
+
+    return `<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;">${html}</div>`;
+  }
+
+  function renderSavedOrders() {
+    const list = document.getElementById('listaPedidosSalvos');
+    const history = document.getElementById('listaHistoricoPedidos');
+    if (!list || !history) return;
+
+    list.innerHTML = '';
+    history.innerHTML = '';
+
+    const ativos = state.pedidos.filter(p => !isHistorico(p.status));
+    const historicos = state.pedidos.filter(p => isHistorico(p.status));
+
+    if (!ativos.length) {
+      list.innerHTML = '<p style="color:#cbd5e1;">Nenhum pedido salvo ativo.</p>';
+    }
+
+    ativos.forEach((pedido, index) => {
+      const realIndex = state.pedidos.indexOf(pedido);
+      const visual = getStatusVisual(pedido.status);
+
+      const card = document.createElement('div');
+      card.style.background = '#162742';
+      card.style.padding = '14px';
+      card.style.borderRadius = '12px';
+      card.style.border = `1px solid ${visual.borda}`;
+
+      card.innerHTML = `
+        <div style="color:#fff;font-weight:700;">${escapeHtml(pedido.id)}</div>
+        <div style="color:#dbe7ff;font-size:13px;margin-top:4px;">
+          ${escapeHtml(pedido.cliente || 'Sem cliente')}${pedido.numero ? ' • Nº ' + escapeHtml(pedido.numero) : ''}
+        </div>
+        <div style="color:${visual.cor};font-size:13px;margin-top:4px;">
+          ${visual.icone} ${escapeHtml(pedido.status || 'Aguardando Liberação')}
+        </div>
+        ${cardButtons(realIndex, pedido, false)}
+      `;
+
       list.appendChild(card);
+    });
+
+    if (!historicos.length) {
+      history.innerHTML = '<p style="color:#94a3b8;">Nenhum pedido no histórico.</p>';
+    }
+
+    historicos.forEach((pedido) => {
+      const realIndex = state.pedidos.indexOf(pedido);
+      const visual = getStatusVisual(pedido.status);
+
+      const card = document.createElement('div');
+      card.style.background = visual.fundo;
+      card.style.padding = '14px';
+      card.style.borderRadius = '12px';
+      card.style.border = `1px solid ${visual.borda}`;
+
+      card.innerHTML = `
+        <div style="color:#fff;font-weight:700;">${escapeHtml(pedido.id)}</div>
+        <div style="color:#dbe7ff;font-size:13px;margin-top:4px;">
+          ${escapeHtml(pedido.cliente || 'Sem cliente')}${pedido.numero ? ' • Nº ' + escapeHtml(pedido.numero) : ''}
+        </div>
+        <div style="color:${visual.cor};font-size:13px;margin-top:4px;">
+          ${visual.icone} ${escapeHtml(pedido.status || 'Concluído')}
+        </div>
+        ${cardButtons(realIndex, pedido, true)}
+      `;
+
+      history.appendChild(card);
     });
   }
 
@@ -279,7 +388,6 @@
 
     state.itensPedidoAtual.forEach((item, index) => {
       const card = document.createElement('div');
-      card.className = 'pedido-item-card-real';
       card.style.display = 'grid';
       card.style.gridTemplateColumns = '56px 1fr auto';
       card.style.gap = '10px';
@@ -506,6 +614,7 @@
     modal.innerHTML = `
       <div style="background:#13233d;padding:25px;border-radius:15px;width:90%;max-width:540px;max-height:85vh;overflow:auto;box-sizing:border-box;margin:auto;">
         <div style="color:#fff;font-size:22px;font-weight:800;margin-bottom:18px;">Pedido ${escapeHtml(pedido.id || '')}</div>
+        <div style="color:#9ec5ff;font-size:13px;margin-bottom:14px;">Status: ${escapeHtml(pedido.status || '-')}</div>
         <div style="display:flex;flex-direction:column;gap:12px;">
           ${(pedido.itens || []).map((item) => `
             <div style="background:#0f2038;border-radius:12px;padding:14px;color:#fff;">
@@ -532,6 +641,7 @@
   function openEdit(index) {
     const pedido = state.pedidos[index];
     if (!pedido) return;
+    if (text(pedido.status) === 'Concluído') return;
     state.editandoPedidoIndex = index;
     state.itensPedidoAtual = (pedido.itens || []).map((item) => ({ ...item }));
     setFormValues(pedido);
@@ -596,20 +706,36 @@
   }
 
   function removeItem(index) {
-    state.itensPedidoAtual.pedidosSalvosMemoria[index].status = 'Bloqueado';
+    state.itensPedidoAtual.splice(index, 1);
     renderCurrentItems();
   }
 
-  function cancelOrder(index) {
+  function cancelarPedido(index) {
     const pedido = state.pedidos[index];
     if (!pedido) return;
     if (!confirm(`Cancelar pedido ${pedido.id}?`)) return;
-    state.pedidos.pedidosSalvosMemoria[index].status = 'Bloqueado';
+    state.pedidos.splice(index, 1);
     if (state.editandoPedidoIndex === index) {
       resetOrderForm();
     } else if (state.editandoPedidoIndex !== null && state.editandoPedidoIndex > index) {
       state.editandoPedidoIndex -= 1;
     }
+    persist();
+    renderSavedOrders();
+  }
+
+  function bloquearPedido(index) {
+    const pedido = state.pedidos[index];
+    if (!pedido) return;
+    pedido.status = 'Bloqueado';
+    persist();
+    renderSavedOrders();
+  }
+
+  function liberarPedido(index) {
+    const pedido = state.pedidos[index];
+    if (!pedido) return;
+    pedido.status = 'Aguardando Separação';
     persist();
     renderSavedOrders();
   }
@@ -634,7 +760,7 @@
       representante: values.representante,
       numero: values.numero,
       data: values.data,
-      status: 'Aguardando Separação',
+      status: current?.status || 'Aguardando Liberação',
       itens: state.itensPedidoAtual.map((item) => ({ ...item })),
     };
 
@@ -667,16 +793,16 @@
 
       if (action === 'abrir') openViewModal(index);
       if (action === 'editar') openEdit(index);
-      if (action === 'cancelar') cancelOrder(index);
+      if (action === 'cancelar') cancelarPedido(index);
+      if (action === 'bloquear') bloquearPedido(index);
+      if (action === 'liberar') liberarPedido(index);
+    });
 
-      if (action === 'adicionar-produto-edicao') {
-        if (state.editandoPedidoIndex !== index) {
-          openEdit(index);
-          setTimeout(() => openProductModal(), 150);
-          return;
-        }
-        openProductModal();
-      }
+    document.getElementById('listaHistoricoPedidos')?.addEventListener('click', (e) => {
+      const btn = e.target.closest('button[data-action]');
+      if (!btn) return;
+      const index = Number(btn.dataset.index);
+      if (btn.dataset.action === 'abrir') openViewModal(index);
     });
 
     document.getElementById('listaItensPedido')?.addEventListener('click', (e) => {
@@ -703,28 +829,3 @@
   window.renderPedidos = renderPedidos;
   window.destroyPedidosUI = destroyPedidosUI;
 })();
-
-
-// =========================
-// STATUS VISUAL GLOBAL
-// =========================
-function getPedidoStatusVisual(status) {
-  const s = String(status || '').trim();
-
-  if (s === 'Concluído') return { cor:'#22c55e', icone:'🟢' };
-  if (s === 'Em Separação') return { cor:'#facc15', icone:'🟡' };
-  if (s === 'Bloqueado') return { cor:'#ef4444', icone:'🔴' };
-
-  return { cor:'#94a3b8', icone:'⚪' };
-}
-
-function isPedidoHistorico(status){
-  const s = String(status || '').trim();
-  return s === 'Concluído' || s === 'Bloqueado';
-}
-
-
-function isPedidoAtivo(status){
-  const s = String(status || '').trim();
-  return s === 'Aguardando Separação' || s === 'Em Separação';
-}
