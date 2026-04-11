@@ -1,5 +1,13 @@
 window.editandoPedidoIndex = null;
 
+    const btn =
+      document.getElementById('btnSalvarPedidoFinal') ||
+      document.getElementById('btnSalvarPedido');
+
+    if(btn){
+      btn.innerText = 'Salvar Pedido';
+    }
+
 (function () {
   const PEDIDOS_STORAGE_KEY = 'pedidosSalvosMemoria';
 
@@ -667,6 +675,14 @@ window.editandoPedidoIndex = null;
     if (window.editandoPedidoIndex !== null && pedidosSalvosMemoria[window.editandoPedidoIndex]) {
       pedidosSalvosMemoria[window.editandoPedidoIndex] = pedido;
       window.editandoPedidoIndex = null;
+
+    const btn =
+      document.getElementById('btnSalvarPedidoFinal') ||
+      document.getElementById('btnSalvarPedido');
+
+    if(btn){
+      btn.innerText = 'Salvar Pedido';
+    }
     } else {
       pedidosSalvosMemoria.unshift(pedido);
     }
@@ -948,21 +964,6 @@ font-weight:700;
 Fechar
 </button>
 
-<button onclick="
-window.editarPedidoDoModal(${index});
-"
-style="
-flex:1;
-padding:12px;
-border:none;
-border-radius:10px;
-background:#2f6df6;
-color:#fff;
-font-weight:700;
-">
-Editar Pedido
-</button>
-
 </div>
 
 </div>
@@ -999,27 +1000,13 @@ ${item.resumo||''}
 
 
 window.editarPedidoDoModal=function(index){
-   try{
-
-      window.editandoPedidoIndex = index;
-
-      const lista=document.getElementById("listaItensPedidoReal");
-      if(lista) lista.innerHTML="";
-
-      if(typeof window.abrirPedidoSalvo==='function'){
-         window.abrirPedidoSalvo(index);
-      }
-
-      if(typeof window.abrirModalProdutoPedido==='function'){
-         window.abrirModalProdutoPedido();
-      }
-
-      const modal=document.getElementById('modalPedidoVisualizacao');
-      if(modal) modal.remove();
-
-   }catch(e){
-      console.error(e);
-   }
+  try{
+    if(typeof window.editarPedidoDireto==='function'){
+      window.editarPedidoDireto(index);
+    }
+  }catch(e){
+    console.error(e);
+  }
 };
 
 
@@ -1031,10 +1018,16 @@ window.editarPedidoDireto=function(index){
       abrirPedidoSalvo(index);
     }
 
-    const btn = document.getElementById('btnSalvarPedidoFinal');
+    const btn =
+      document.getElementById('btnSalvarPedidoFinal') ||
+      document.getElementById('btnSalvarPedido');
+
     if(btn){
       btn.innerText = 'Salvar Alterações';
     }
+
+    const modal = document.getElementById('modalPedidoVisualizacao');
+    if(modal) modal.remove();
 
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }catch(e){
