@@ -1479,3 +1479,21 @@ function filtroAvancadoEstoque(item, termo){
     contem(item.enderecoFormatado)
   )
 }
+
+
+// ===== BOTÕES PADRÃO ENDEREÇO =====
+function gerarBotoesEndereco(produtoId, endereco){
+  return `
+    <div class="acoes-endereco-inline">
+      <button class="btn-action btn-edit btn-endereco-acao"
+        onclick="abrirAjusteEndereco('${produtoId}','${endereco}')">
+        Ajuste
+      </button>
+
+      <button class="btn-action btn-endereco-acao btn-transferir-endereco"
+        onclick="abrirTransferenciaEndereco('${produtoId}','${endereco}')">
+        Transferir
+      </button>
+    </div>
+  `;
+}
