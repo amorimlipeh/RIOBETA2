@@ -887,111 +887,72 @@ window.destroyPedidosUI = function () {
 
 
 window.visualizarPedidoModal=function(index){
+  const pedido = JSON.parse(localStorage.getItem('pedidosSalvosMemoria') || '[]')[index];
+  if(!pedido) return;
 
-const pedido=JSON.parse(localStorage.getItem('pedidosSalvosMemoria')||'[]')[index];
-if(!pedido)return;
+  let modal = document.getElementById("modalPedidoVisualizacao");
 
-let modal=document.getElementById("modalPedidoVisualizacao");
+  if(!modal){
+    modal = document.createElement("div");
+    modal.id = "modalPedidoVisualizacao";
+    modal.style.cssText = `
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,.75);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      z-index:999999;
+      padding:20px;
+    `;
+    document.body.appendChild(modal);
+  }
 
-if(!modal){
-modal=document.createElement("div");
-modal.id="modalPedidoVisualizacao";
+  modal.innerHTML = `
+    <div style="
+      background:#13233d;
+      padding:25px;
+      border-radius:15px;
+      width:90%;
+      max-width:540px;
+      max-height:85vh;
+      overflow:auto;
+      box-sizing:border-box;
+    ">
+      <div style="color:#fff;font-size:22px;font-weight:800;margin-bottom:18px;">
+        Pedido ${pedido.id || ""}
+      </div>
 
-modal.style.cssText=`
-position:fixed;
-inset:0;
-background:rgba(0,0,0,.75);
-display:flex;
-align-items:center;
-justify-content:center;
-z-index:999999;
-padding:20px;
-`;
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        ${(pedido.itens || []).map(item => `
+          <div style="
+            background:#0f2038;
+            border-radius:12px;
+            padding:14px;
+            color:#fff;
+          ">
+            <div style="font-weight:800;">${item.codigo || ""}</div>
+            <div>${item.nome || ""}</div>
+            <div style="color:#9ec5ff;font-size:13px;">
+              ${item.resumo || ((item.caixas || 0) + ' CX | ' + (item.totalUnd || item.unidades || 0) + ' UND')}
+            </div>
+          </div>
+        `).join("")}
+      </div>
 
-document.body.appendChild(modal);
-}
-
-modal.innerHTML=`
-<div style="
-background:#13233d;
-padding:25px;
-border-radius:15px;
-width:90%;
-max-width:650px;
-max-height:80vh;
-overflow:auto;
-box-shadow:0 0 30px rgba(0,0,0,.45);
-">
-
-<h2 style="color:#fff;margin-bottom:20px;">
-Pedido ${pedido.id}
-</h2>
-
-<div id="modalItensPedido"></div>
-
-<div style="
-display:flex;
-gap:10px;
-margin-top:20px;
-">
-
-<button onclick="
-document.getElementById('modalPedidoVisualizacao').remove()
-"
-style="
-flex:1;
-padding:12px;
-border:none;
-border-radius:10px;
-background:#475569;
-color:#fff;
-font-weight:700;
-">
-Fechar
-</button>
-
-<button onclick="
-window.editarPedidoDoModal(${index});
-"
-style="
-flex:1;
-padding:12px;
-border:none;
-border-radius:10px;
-background:#2f6df6;
-color:#fff;
-font-weight:700;
-">
-Editar Pedido
-</button>
-
-</div>
-
-</div>
-`;
-
-const container=document.getElementById("modalItensPedido");
-
-pedido.itens.forEach(item=>{
-
-container.innerHTML+=`
-<div style="
-background:#0d1a2f;
-padding:12px;
-margin-bottom:10px;
-border-radius:10px;
-color:#fff;
-">
-<div><b>${item.codigo}</b></div>
-<div>${item.nome}</div>
-<div style="font-size:12px;color:#7fb0ff;">
-${item.resumo||''}
-</div>
-</div>
-`;
-
-});
-
+      <div style="display:flex;justify-content:flex-end;margin-top:18px;">
+        <button onclick="document.getElementById('modalPedidoVisualizacao')?.remove()" style="
+          min-width:180px;
+          padding:12px;
+          border:none;
+          border-radius:10px;
+          background:#64748b;
+          color:#fff;
+          font-weight:700;
+        ">Fechar</button>
+      </div>
+    </div>
+  `;
 }
 
 
@@ -1060,38 +1021,50 @@ window.editarPedidoSalvo = function(index){
   if (!pedido) return;
 
   window.editandoPedidoIndex = index;
+  if (typeof iniciarModoEdicaoPedido === 'function') {
+    iniciarModoEdicaoPedido(index, pedido);
+  }
 
-  document.getElementById("pedidoCliente").value = pedido.cliente || "";
-  document.getElementById("pedidoRepresentante").value = pedido.representante || "";
-  document.getElementById("pedidoNumero").value = pedido.numero || "";
-  document.getElementById("pedidoData").value = pedido.data || "";
+  const cliente = document.getElementById('pedidoCliente');
+  const representante = document.getElementById('pedidoRepresentante');
+  const numero = document.getElementById('pedidoNumero');
+  const data = document.getElementById('pedidoData');
 
-  const container = document.getElementById("itensPedidoLista");
-  if(container){
-    container.innerHTML = "";
+  if (cliente) cliente.value = pedido.cliente || '';
+  if (representante) representante.value = pedido.representante || '';
+  if (numero) numero.value = pedido.numero || '';
+  if (data) data.value = pedido.data || '';
 
-    (pedido.itens || []).forEach(item=>{
-      const div = document.createElement("div");
-      div.className = "item-pedido";
-      div.dataset.codigo = item.codigo || "";
-      div.innerHTML = `
-        <strong>${item.codigo || ""}</strong><br>
-        ${item.nome || ""}<br>
-        ${item.caixas || 0} CX | ${item.unidades || 0} UND
-      `;
-      container.appendChild(div);
+  const targetLista = document.getElementById('listaItensPedidoReal') || (typeof garantirListaItensPedido === 'function' ? garantirListaItensPedido() : null);
+
+  if (targetLista) {
+    targetLista.innerHTML = '';
+    (pedido.itens || []).forEach(item => {
+      if (typeof criarCardItemPedido === 'function') {
+        targetLista.appendChild(criarCardItemPedido({
+          codigo: item.codigo || '',
+          nome: item.nome || '',
+          totalUnd: item.totalUnd || item.unidades || 0,
+          caixas: item.caixas || 0,
+          avulsas: item.avulsas || 0,
+          fator: item.fator || 1,
+          imagem: item.imagem || ''
+        }));
+      }
     });
   }
 
-  const btnAdd = document.querySelector("button[onclick*='abrirModalProdutoPedido'], #btnAdicionarProdutoPedido");
+  const footer = typeof garantirFooterPedido === 'function' ? garantirFooterPedido() : document.getElementById('pedidoFooterAcoes');
+  if (footer) footer.style.display = 'block';
 
-  if(btnAdd){
-    btnAdd.innerText = "Salvar Alterações";
-    btnAdd.style.background = "#f59e0b";
+  const btnSalvar =
+    document.getElementById('btnSalvarPedidoFinal') ||
+    document.querySelector('#pedidoFooterAcoes button');
+
+  if (btnSalvar) {
+    btnSalvar.innerText = 'Salvar Alterações';
+    btnSalvar.style.background = '#f59e0b';
   }
 
-  window.scrollTo({
-    top:0,
-    behavior:"smooth"
-  });
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
