@@ -42,8 +42,14 @@ function gerarSKU() {
   return 'SKU-' + Math.floor(Math.random() * 999999);
 }
 
-function getEnderecoStatus(qtd) {
+function getEnderecoStatus(qtd, endereco = '') {
   const n = Number(qtd || 0);
+  const e = String(endereco || '').trim().toUpperCase();
+
+  if (e === 'SEM_ENDERECO') {
+    return { classe: 'status-baixo', texto: 'Sem endereçamento' };
+  }
+
   if (n <= 0) return { classe: 'status-zero', texto: 'Zerado' };
   if (n <= 10) return { classe: 'status-baixo', texto: 'Baixo' };
   return { classe: 'status-ok', texto: 'Normal' };
@@ -546,7 +552,7 @@ function renderTabelaEnderecos() {
       String(p.nome || '').toLowerCase() === String(item.produto || '').toLowerCase()
     );
 
-    const status = getEnderecoStatus(item.quantidade);
+    const status = getEnderecoStatus(item.quantidade, item.endereco);
 
     tabela.innerHTML += `
       <tr>
@@ -639,22 +645,57 @@ window.salvarProduto = async function () {
       return;
     }
 
+    let produtoSalvo = null;
+
     if (produtoEditandoId) {
-      await fetch('/api/produtos/' + produtoEditandoId, {
+      const response = await fetch('/api/produtos/' + produtoEditandoId, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       });
+
+      try {
+        produtoSalvo = await response.json();
+      } catch {
+        produtoSalvo = null;
+      }
+
       produtoEditandoId = null;
     } else {
-      await fetch('/api/produtos', {
+      const response = await fetch('/api/produtos', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       });
+
+      try {
+        produtoSalvo = await response.json();
+      } catch {
+        produtoSalvo = null;
+      }
+
+      const quantidadeInicial = Number(payload.quantidade || 0);
+
+      if (quantidadeInicial > 0) {
+        const produtoIdCriado = produtoSalvo?.id || produtoSalvo?._id || payload.id || null;
+
+        if (produtoIdCriado) {
+          await fetch('/api/estoque/movimentar', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              produtoId: produtoIdCriado,
+              tipo: 'entrada',
+              endereco: 'SEM_ENDERECO',
+              quantidade: quantidadeInicial
+            })
+          });
+        }
+      }
     }
 
     await carregarProdutos();
+    await carregarEstoque();
     await renderView('produtos', { skipLoad: true });
     showModal('Produto salvo com sucesso.', 'success');
   } finally {
