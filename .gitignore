@@ -13,3 +13,4 @@ temp
 *.backup
 *.orig
 *.rej
+node_modules/
