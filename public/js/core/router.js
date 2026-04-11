@@ -59,7 +59,7 @@ function getTipoBadge(tipo) {
   if (tipo === 'entrada') return { classe: 'tipo-entrada', texto: 'Entrada' };
   if (tipo === 'saida') return { classe: 'tipo-saida', texto: 'Saída' };
   if (tipo === 'transferencia') return { classe: 'tipo-transferencia', texto: 'Transferência' };
-  return { classe: 'tipo-ajuste', texto: 'Ajuste' };
+  return { classe: 'tipo-ajuste', texto: 'Ajustado' };
 }
 
 function formatarDataHora(iso) {
@@ -908,7 +908,7 @@ window.cancelarMovimentacao = async function (id) {
   const confirmar = await showConfirmModal('Tem certeza que deseja cancelar esta movimentação?');
   if (!confirmar) return;
 
-  await fetch('/api/movimentacoes/' + id + '/cancelar', {
+  await fetch('/api/estoque/movimentacoes/' + id + '/cancelar', {
     method: 'PUT'
   });
 
@@ -1342,6 +1342,7 @@ async function renderView(view, options = {}) {
     renderTabelaEstoque();
     renderTabelaEnderecos();
     renderTabelaMovimentacoes();
+    try { renderUltimasMovimentacoes(); } catch {}
     initAutocompleteEstoque();
   }
 
