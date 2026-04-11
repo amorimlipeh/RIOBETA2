@@ -441,7 +441,7 @@ function estoqueView() {
                 <th>Produto</th>
                 <th>Endereço</th>
                 <th>Qtd</th>
-                <th>Status</th>
+                <th>Status</th><th>Ação</th>
             <th>Ação</th>
               </tr>
             </thead>
@@ -461,7 +461,7 @@ function estoqueView() {
                 <th>Endereço</th>
                 <th>Qtd</th>
                 <th>Data/Hora</th>
-                <th>Status</th>
+                <th>Status</th><th>Ação</th>
             <th>Ação</th>
                 <th>Ação</th>
               </tr>
@@ -562,7 +562,11 @@ function renderTabelaEnderecos() {
         <td>${item.endereco || '-'}</td>
         <td>${item.quantidade || 0}</td>
         <td><span class="badge ${status.classe}">${status.texto}</span></td>
-      </tr>
+      
+          <td>
+            <button class="btn-action btn-edit" onclick="abrirAjusteEndereco('${String(item.produtoId || '')}','${String(item.endereco || '').replace(/'/g, "\'")}')">Ajuste</button>
+          </td>
+        </tr>
     `;
   });
 }
