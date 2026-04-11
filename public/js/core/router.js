@@ -442,6 +442,7 @@ function estoqueView() {
                 <th>Endereço</th>
                 <th>Qtd</th>
                 <th>Status</th>
+            <th>Ação</th>
               </tr>
             </thead>
             <tbody id="enderecosTabela"></tbody>
@@ -461,6 +462,7 @@ function estoqueView() {
                 <th>Qtd</th>
                 <th>Data/Hora</th>
                 <th>Status</th>
+            <th>Ação</th>
                 <th>Ação</th>
               </tr>
             </thead>
@@ -521,7 +523,6 @@ function renderTabelaEstoque(lista = produtos) {
         <td>${produto.nome || '-'}</td>
         <td>${produto.estoqueTotal || 0}</td>
         <td style="display:flex;gap:6px;flex-wrap:wrap;">
-          <button class="btn-action btn-edit" onclick="abrirAjusteSaldo('${produto.id}')">Ajuste</button>
           <button class="btn-action btn-delete" onclick="excluirProdutoComEstoque('${produto.id}')">Excluir</button>
         </td>
       </tr>
@@ -1038,6 +1039,27 @@ window.excluirProdutoComEstoque = async function (produtoId) {
   }
 };
 
+window.abrirAjusteEndereco = async function (produtoId, endereco) {
+  const produto = produtos.find(p => String(p.id) === String(produtoId));
+  if (!produto) return;
+
+  movimentacaoEditandoId = null;
+  await renderView('estoque', { skipLoad: true });
+
+  const item = (estoque || []).find(entry =>
+    String(entry.produtoId || '') === String(produtoId) &&
+    String(entry.endereco || '') === String(endereco || '')
+  );
+
+  preencherMovimentacao(produto, {
+    tipo: 'ajuste',
+    endereco: endereco || '',
+    quantidade: Number(item?.quantidade || 0)
+  });
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+};
+
 window.abrirAjusteSaldo = async function (produtoId) {
   const produto = produtos.find(p => String(p.id) === String(produtoId));
   if (!produto) return;
@@ -1273,3 +1295,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const ultima = ultimaSalva && ultimaSalva.trim() ? ultimaSalva : 'dashboard';
   await renderView(ultima);
 });
+
+
+// chamada de segurança
+try { renderUltimasMovimentacoes(); } catch (e) {}
