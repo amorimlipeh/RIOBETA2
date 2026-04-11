@@ -1,62 +1,87 @@
 const express = require("express");
 const fs = require("fs");
-const app = express();
+const path = require("path");
 
+const app = express();
 app.use(express.json());
 
 // =========================
-// MOVIMENTAÇÃO DE ESTOQUE
+// SERVIR FRONTEND
+// =========================
+app.use(express.static(path.join(__dirname, "public")));
+
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "index.html"));
+});
+
+// =========================
+// HELPERS
+// =========================
+const readJSON = (file) => JSON.parse(fs.readFileSync(file));
+const writeJSON = (file, data) => fs.writeFileSync(file, JSON.stringify(data, null, 2));
+
+// =========================
+// PRODUTOS
+// =========================
+app.get("/api/produtos", (req, res) => {
+  const produtos = readJSON("data/produtos.json");
+  res.json(produtos);
+});
+
+// =========================
+// ESTOQUE
+// =========================
+app.get("/api/estoque", (req, res) => {
+  const estoque = readJSON("data/estoque.json");
+  res.json(estoque);
+});
+
+// =========================
+// MOVIMENTAÇÃO
 // =========================
 app.post("/api/estoque/movimentar", (req, res) => {
   const { produtoId, tipo, quantidade, endereco, origem, destino } = req.body;
 
-  let estoque = JSON.parse(fs.readFileSync("data/estoque.json"));
-  let movimentacoes = JSON.parse(fs.readFileSync("data/movimentacoes.json"));
+  let estoque = readJSON("data/estoque.json");
+  let movimentacoes = readJSON("data/movimentacoes.json");
 
   const qtd = Number(quantidade);
 
   // ===== ENTRADA =====
   if (tipo === "entrada") {
-    const index = estoque.findIndex(e => e.produtoId == produtoId && e.endereco == endereco);
+    const i = estoque.findIndex(e => e.produtoId == produtoId && e.endereco == endereco);
 
-    if (index >= 0) {
-      estoque[index].quantidade += qtd;
-    } else {
-      estoque.push({ produtoId, endereco, quantidade: qtd });
-    }
+    if (i >= 0) estoque[i].quantidade += qtd;
+    else estoque.push({ produtoId, endereco, quantidade: qtd });
   }
 
   // ===== SAÍDA =====
   else if (tipo === "saida") {
-    const index = estoque.findIndex(e => e.produtoId == produtoId && e.endereco == endereco);
+    const i = estoque.findIndex(e => e.produtoId == produtoId && e.endereco == endereco);
 
-    if (index >= 0) {
-      estoque[index].quantidade -= qtd;
-
-      if (estoque[index].quantidade < 0) {
-        estoque[index].quantidade = 0;
-      }
+    if (i >= 0) {
+      estoque[i].quantidade -= qtd;
+      if (estoque[i].quantidade < 0) estoque[i].quantidade = 0;
     }
   }
 
   // ===== AJUSTE =====
   else if (tipo === "ajuste") {
-    const index = estoque.findIndex(e => e.produtoId == produtoId && e.endereco == endereco);
+    const i = estoque.findIndex(e => e.produtoId == produtoId && e.endereco == endereco);
 
-    if (index >= 0) {
-      estoque[index].quantidade = qtd;
-    } else {
-      estoque.push({ produtoId, endereco, quantidade: qtd });
-    }
+    if (i >= 0) estoque[i].quantidade = qtd;
+    else estoque.push({ produtoId, endereco, quantidade: qtd });
   }
 
-  // ===== TRANSFERÊNCIA =====
+  // ===== TRANSFERÊNCIA (CORRETA) =====
   else if (tipo === "transferencia") {
+
     const origemIndex = estoque.findIndex(e => e.produtoId == produtoId && e.endereco == origem);
     const destinoIndex = estoque.findIndex(e => e.produtoId == produtoId && e.endereco == destino);
 
     if (origemIndex >= 0) {
       estoque[origemIndex].quantidade -= qtd;
+      if (estoque[origemIndex].quantidade < 0) estoque[origemIndex].quantidade = 0;
     }
 
     if (destinoIndex >= 0) {
@@ -66,7 +91,7 @@ app.post("/api/estoque/movimentar", (req, res) => {
     }
   }
 
-  // ===== SALVAR MOVIMENTAÇÃO (SEM ALTERAR TIPO) =====
+  // ===== SALVAR MOVIMENTAÇÃO =====
   movimentacoes.push({
     id: Date.now(),
     produtoId,
@@ -78,12 +103,15 @@ app.post("/api/estoque/movimentar", (req, res) => {
     data: new Date()
   });
 
-  fs.writeFileSync("data/estoque.json", JSON.stringify(estoque, null, 2));
-  fs.writeFileSync("data/movimentacoes.json", JSON.stringify(movimentacoes, null, 2));
+  writeJSON("data/estoque.json", estoque);
+  writeJSON("data/movimentacoes.json", movimentacoes);
 
   res.json({ ok: true });
 });
 
+// =========================
+// PORTA RAILWAY
+// =========================
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
