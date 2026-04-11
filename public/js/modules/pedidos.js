@@ -630,6 +630,10 @@ window.editandoPedidoIndex = null;
           
 
           <button onclick="window.editarPedidoSalvo(${index})" style="
+            position:relative;
+            z-index:9999;
+            pointer-events:auto;
+
             flex:1;border:none;background:#f59e0b;color:#fff;
             padding:10px;border-radius:8px;font-weight:700;
           ">Editar</button>
