@@ -411,7 +411,7 @@ function estoqueView() {
         <input id="transfDestino" placeholder="Endereço de destino">
         <input id="transfQuantidade" type="number" placeholder="Quantidade">
 
-        <button id="btnTransferir" onclick="transferirEstoque()">Transferir</button>
+        <button id="btnTransferir" onclick="transferirEstoque()">Transferir</button></div>
       </div>
     </div>
 
@@ -564,8 +564,10 @@ function renderTabelaEnderecos() {
         <td><span class="badge ${status.classe}">${status.texto}</span></td>
       
           <td>
-            <button class="btn-action btn-edit" onclick="abrirAjusteEndereco('${String(item.produtoId || '')}','${String(item.endereco || '').replace(/'/g, "\'")}')">Ajuste</button>
-            <button class="btn-action btn-edit" onclick="abrirTransferenciaEndereco('${String(item.produtoId || '')}','${String(item.endereco || '').replace(/'/g, "\'")}')">Transferir</button>
+            <div class="acoes-endereco-inline">
+              <button class="btn-action btn-edit btn-endereco-acao" onclick="abrirAjusteEndereco('${String(item.produtoId || '')}','${String(item.endereco || '').replace(/'/g, "\'")}')">Ajuste</button>
+              <button class="btn-action btn-edit btn-endereco-acao" onclick="abrirTransferenciaEndereco('${String(item.produtoId || '')}','${String(item.endereco || '').replace(/'/g, "\'")}')">Transferir</button></div>
+            </div>
           </td>
         </tr>
     `;
@@ -1370,3 +1372,59 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 // chamada de segurança
 try { renderUltimasMovimentacoes(); } catch (e) {}
+
+
+
+function renderUltimasMovimentacoes() {
+  const tbody =
+    document.querySelector('#tabelaUltimasMovimentacoes tbody') ||
+    document.querySelector('#ultimasMovimentacoesTable tbody') ||
+    document.querySelector('[data-tabela="ultimas-movimentacoes"] tbody');
+
+  if (!tbody) return;
+
+  const lista = Array.isArray(movimentacoes) ? movimentacoes.slice(0, 20) : [];
+
+  if (!lista.length) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="5" class="muted">Nenhuma movimentação encontrada.</td>
+      </tr>
+    `;
+    return;
+  }
+
+  tbody.innerHTML = lista.map(item => {
+    const produto = (produtos || []).find(p => String(p.id) === String(item.produtoId || ''));
+    const nomeProduto = produto?.nome || item.produto || item.codigo || '-';
+    const tipo = String(item.tipo || '-').toLowerCase();
+
+    let badgeClass = 'badge status-ok';
+    let tipoTexto = 'Entrada';
+
+    if (tipo === 'saida') {
+      badgeClass = 'badge status-zero';
+      tipoTexto = 'Saída';
+    } else if (tipo === 'ajuste') {
+      badgeClass = 'badge status-baixo';
+      tipoTexto = 'Ajuste';
+    } else if (tipo === 'transferencia') {
+      badgeClass = 'badge status-info';
+      tipoTexto = 'Transferência';
+    }
+
+    const endereco = item.endereco || item.destino || item.origem || '-';
+    const dataFmt = item.data ? new Date(item.data).toLocaleString('pt-BR') : '-';
+
+    return `
+      <tr>
+        <td><span class="${badgeClass}">${tipoTexto}</span></td>
+        <td>${escapeHtml(String(nomeProduto))}</td>
+        <td>${escapeHtml(String(endereco))}</td>
+        <td>${Number(item.quantidade || 0)}</td>
+        <td>${escapeHtml(String(dataFmt))}</td>
+      </tr>
+    `;
+  }).join('');
+}
+
