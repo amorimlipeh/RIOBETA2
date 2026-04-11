@@ -1072,22 +1072,61 @@ window.abrirTransferenciaEndereco = async function (produtoId, endereco) {
   movimentacaoEditandoId = null;
   await renderView('estoque', { skipLoad: true });
 
-  const buscaTransferencia = document.getElementById('transferProdutoBusca');
-  const origemInput = document.getElementById('transferOrigem');
-  const destinoInput = document.getElementById('transferDestino');
-  const quantidadeInput = document.getElementById('transferQuantidade');
+  // tenta localizar os campos reais do formulário de transferência
+  const inputs = Array.from(document.querySelectorAll('input, select, textarea'));
+  const botoes = Array.from(document.querySelectorAll('button'));
+  const titulos = Array.from(document.querySelectorAll('h1,h2,h3,h4,h5,.card-title,.section-title,strong'));
 
-  if (buscaTransferencia) buscaTransferencia.value = produtoOptionLabel(produto);
-  if (origemInput) origemInput.value = endereco || '';
-  if (destinoInput) destinoInput.value = '';
-  if (quantidadeInput) quantidadeInput.value = '';
+  const tituloTransferencia = titulos.find(el =>
+    (el.textContent || '').toLowerCase().includes('transferência entre endereços') ||
+    (el.textContent || '').toLowerCase().includes('transferencia entre enderecos')
+  );
 
-  const blocoTransferencia = document.getElementById('cardTransferencia') || document.querySelector('[data-card="transferencia"]');
-  if (blocoTransferencia && blocoTransferencia.scrollIntoView) {
-    blocoTransferencia.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  } else {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+  let cardTransferencia = null;
+  if (tituloTransferencia) {
+    cardTransferencia = tituloTransferencia.closest('.card, .panel, section, div');
   }
+
+  const inputProduto = document.getElementById('transferProdutoBusca')
+    || inputs.find(el => (el.placeholder || '').toLowerCase().includes('digite código ou nome do produto') && el.closest('.card, .panel, section, div') === cardTransferencia)
+    || inputs.find(el => (el.placeholder || '').toLowerCase().includes('digite código ou nome do produto'));
+
+  const inputOrigem = document.getElementById('transferOrigem')
+    || inputs.find(el => (el.placeholder || '').toLowerCase().includes('endereço de origem') || (el.placeholder || '').toLowerCase().includes('endereco de origem'));
+
+  const inputDestino = document.getElementById('transferDestino')
+    || inputs.find(el => (el.placeholder || '').toLowerCase().includes('endereço de destino') || (el.placeholder || '').toLowerCase().includes('endereco de destino'));
+
+  const inputQuantidade = document.getElementById('transferQuantidade')
+    || inputs.find(el => (el.placeholder || '').toLowerCase() === 'quantidade');
+
+  if (inputProduto) inputProduto.value = produtoOptionLabel(produto);
+  if (inputOrigem) inputOrigem.value = endereco || '';
+  if (inputDestino) inputDestino.value = '';
+  if (inputQuantidade) inputQuantidade.value = '';
+
+  if (cardTransferencia && cardTransferencia.scrollIntoView) {
+    cardTransferencia.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  } else {
+    const btnTransferir = botoes.find(btn => (btn.textContent || '').toLowerCase().trim() === 'transferir');
+    if (btnTransferir) {
+      const bloco = btnTransferir.closest('.card, .panel, section, div');
+      if (bloco && bloco.scrollIntoView) {
+        bloco.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } else {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    } else {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }
+
+  // dispara eventos para frameworks/escutas de input
+  [inputProduto, inputOrigem, inputDestino, inputQuantidade].forEach(el => {
+    if (!el) return;
+    el.dispatchEvent(new Event('input', { bubbles: true }));
+    el.dispatchEvent(new Event('change', { bubbles: true }));
+  });
 };
 
 
