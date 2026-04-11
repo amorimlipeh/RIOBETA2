@@ -1460,3 +1460,22 @@ function renderUltimasMovimentacoes(){
 }
 
 
+
+
+// ===== FILTRO AVANÇADO ESTOQUE =====
+function filtroAvancadoEstoque(item, termo){
+  termo = String(termo || '').toLowerCase()
+
+  function contem(v){
+    return String(v || '').toLowerCase().includes(termo)
+  }
+
+  return (
+    contem(item.produto) ||
+    contem(item.nome) ||
+    contem(item.codigo) ||
+    contem(item.sku) ||
+    contem(item.endereco) ||
+    contem(item.enderecoFormatado)
+  )
+}
