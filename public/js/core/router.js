@@ -441,7 +441,7 @@ function estoqueView() {
                 <th>Produto</th>
                 <th>Endereço</th>
                 <th>Qtd</th>
-                <th>Status</th><th>Ação</th><th>Ação</th>
+                <th>Status</th><th>Ação</th>
             <th>Ação</th>
               </tr>
             </thead>
@@ -461,7 +461,7 @@ function estoqueView() {
                 <th>Endereço</th>
                 <th>Qtd</th>
                 <th>Data/Hora</th>
-                <th>Status</th><th>Ação</th><th>Ação</th>
+                <th>Status</th><th>Ação</th>
             <th>Ação</th>
                 <th>Ação</th>
               </tr>
@@ -565,6 +565,7 @@ function renderTabelaEnderecos() {
       
           <td>
             <button class="btn-action btn-edit" onclick="abrirAjusteEndereco('${String(item.produtoId || '')}','${String(item.endereco || '').replace(/'/g, "\'")}')">Ajuste</button>
+            <button class="btn-action btn-edit" onclick="abrirTransferenciaEndereco('${String(item.produtoId || '')}','${String(item.endereco || '').replace(/'/g, "\'")}')">Transferir</button>
           </td>
         </tr>
     `;
@@ -1063,6 +1064,33 @@ window.abrirAjusteEndereco = async function (produtoId, endereco) {
 
   window.scrollTo({ top: 0, behavior: 'smooth' });
 };
+
+window.abrirTransferenciaEndereco = async function (produtoId, endereco) {
+  const produto = (produtos || []).find(p => String(p.id) === String(produtoId));
+  if (!produto) return;
+
+  movimentacaoEditandoId = null;
+  await renderView('estoque', { skipLoad: true });
+
+  const buscaTransferencia = document.getElementById('transferProdutoBusca');
+  const origemInput = document.getElementById('transferOrigem');
+  const destinoInput = document.getElementById('transferDestino');
+  const quantidadeInput = document.getElementById('transferQuantidade');
+
+  if (buscaTransferencia) buscaTransferencia.value = produtoOptionLabel(produto);
+  if (origemInput) origemInput.value = endereco || '';
+  if (destinoInput) destinoInput.value = '';
+  if (quantidadeInput) quantidadeInput.value = '';
+
+  const blocoTransferencia = document.getElementById('cardTransferencia') || document.querySelector('[data-card="transferencia"]');
+  if (blocoTransferencia && blocoTransferencia.scrollIntoView) {
+    blocoTransferencia.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  } else {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+};
+
+
 
 window.abrirAjusteSaldo = async function (produtoId) {
   const produto = produtos.find(p => String(p.id) === String(produtoId));
