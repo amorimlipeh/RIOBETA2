@@ -546,70 +546,7 @@ window.filtrarSaldoEstoque = function () {
 };
 
 
-function renderTabelaEnderecos() {
-  const tabela = document.getElementById('enderecosTabela');
-  if (!tabela) return;
 
-  const filtro = String(document.getElementById('filtro-estoque-endereco')?.value || '')
-    .trim()
-    .toLowerCase();
-
-  tabela.innerHTML = '';
-
-  let lista = Array.isArray(estoque) ? [...estoque] : [];
-
-  lista = lista.map(item => {
-    const produto = produtos.find(p =>
-      String(p.id) === String(item.produtoId) ||
-      String(p.codigo || '').toLowerCase() === String(item.codigo || '').toLowerCase() ||
-      String(p.nome || '').toLowerCase() === String(item.produto || '').toLowerCase()
-    );
-
-    return {
-      ...item,
-      produtoNome: produto ? produto.nome : (item.produto || item.produtoId || '-'),
-      codigo: produto?.codigo || item.codigo || '',
-      sku: produto?.sku || '',
-      categoria: produto?.categoria || ''
-    };
-  });
-
-  if (filtro) {
-    lista = lista.filter(item => {
-      const alvo = [
-        item.produtoNome,
-        item.codigo,
-        item.sku,
-        item.categoria,
-        item.endereco
-      ].map(v => String(v || '').toLowerCase()).join(' | ');
-
-      return alvo.includes(filtro);
-    });
-  }
-
-  if (!lista.length) {
-    tabela.innerHTML = `
-      <tr>
-        <td colspan="4">Sem dados</td>
-      </tr>
-    `;
-    return;
-  }
-
-  lista.forEach(item => {
-    const status = getEnderecoStatus(item.quantidade);
-
-    tabela.innerHTML += `
-      <tr>
-        <td>${item.produtoNome}</td>
-        <td>${item.endereco || '-'}</td>
-        <td>${item.quantidade || 0}</td>
-        <td><span class="badge ${status.classe}">${status.texto}</span></td>
-      </tr>
-    `;
-  });
-}
 
 
 function renderTabelaMovimentacoes() {
@@ -1497,3 +1434,78 @@ function gerarBotoesEndereco(produtoId, endereco){
     </div>
   `;
 }
+
+
+
+
+// ===============================
+// 🚀 NOVO ESTOQUE PROFISSIONAL
+// ===============================
+
+function renderEstoqueEndereco(){
+
+  const container = document.getElementById('estoque-enderecos');
+  if(!container) return;
+
+  const filtroInput = document.querySelector('#filtro-estoque-endereco');
+  const termo = filtroInput ? filtroInput.value.toLowerCase() : '';
+
+  let lista = window.dadosEnderecos || [];
+
+  // FILTRO PROFISSIONAL
+  if(termo){
+    lista = lista.filter(item => {
+      return (
+        String(item.produtoNome || '').toLowerCase().includes(termo) ||
+        String(item.codigo || '').toLowerCase().includes(termo) ||
+        String(item.sku || '').toLowerCase().includes(termo) ||
+        String(item.endereco || '').toLowerCase().includes(termo)
+      );
+    });
+  }
+
+  if(!lista.length){
+    container.innerHTML = '<tr><td colspan="5">Sem dados</td></tr>';
+    return;
+  }
+
+  container.innerHTML = lista.map(item => {
+
+    let status = 'Normal';
+
+    return `
+      <tr>
+        <td>${item.produtoNome || '-'}</td>
+        <td>${item.endereco || '-'}</td>
+        <td>${item.quantidade || 0}</td>
+        <td><span class="badge status-ok">${status}</span></td>
+        <td>
+          <div class="acoes-endereco-inline">
+
+            <button class="btn-action btn-edit"
+              onclick="abrirAjusteEndereco('${item.produtoId}','${item.endereco}')">
+              Ajuste
+            </button>
+
+            <button class="btn-action btn-transferir-endereco"
+              onclick="abrirTransferenciaEndereco('${item.produtoId}','${item.endereco}')">
+              Transferir
+            </button>
+
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+
+// ===============================
+// 🔄 AUTO UPDATE DO FILTRO
+// ===============================
+document.addEventListener('input', function(e){
+  if(e.target && e.target.id === 'filtro-estoque-endereco'){
+    renderEstoqueEndereco();
+  }
+});
+
