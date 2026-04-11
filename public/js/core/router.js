@@ -435,7 +435,7 @@ function estoqueView() {
       <div class="big-card">
         <h3>Estoque por Endereço</h3>
         <input
-          id="filtroEstoqueEnderecos"
+          id="filtro-estoque-endereco"
           placeholder="Buscar por código, SKU, nome, categoria ou endereço..."
           style="margin-bottom:14px;"
         >
@@ -550,7 +550,7 @@ function renderTabelaEnderecos() {
   const tabela = document.getElementById('enderecosTabela');
   if (!tabela) return;
 
-  const filtro = String(document.getElementById('filtroEstoqueEnderecos')?.value || '')
+  const filtro = String(document.getElementById('filtro-estoque-endereco')?.value || '')
     .trim()
     .toLowerCase();
 
