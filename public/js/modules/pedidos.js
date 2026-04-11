@@ -1053,3 +1053,22 @@ function estaEditandoPedido(){
   return window.editandoPedidoIndex!==null
 }
 
+
+
+window.editarPedidoSalvo = function(index){
+  const pedido = pedidosSalvosMemoria[index];
+  if (!pedido) return;
+
+  window.editandoPedidoIndex = index;
+
+  abrirPedidoSalvo(index);
+
+  const footer = document.getElementById('pedidoFooterAcoes');
+  if (footer) footer.style.display = 'none';
+
+  const btnAdd = document.querySelector("button[onclick*='abrirModalProdutoPedido'], #btnAdicionarProdutoPedido");
+  if(btnAdd){
+    btnAdd.innerText = "Salvar Alterações";
+    btnAdd.style.background = "#f59e0b";
+  }
+}
