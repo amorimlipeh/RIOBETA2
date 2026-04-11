@@ -977,3 +977,28 @@ cursor:pointer;
   }
 }
 
+
+/* ===== BOTÕES ESTOQUE ===== */
+.acoes-endereco {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+
+.btn-acao {
+  flex: 1;
+  padding: 6px 10px;
+  font-size: 12px;
+  border-radius: 8px;
+  border: none;
+  color: white;
+}
+
+.btn-ajuste {
+  background: #3b82f6;
+}
+
+.btn-transferir {
+  background: #10b981;
+}
+
