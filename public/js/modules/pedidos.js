@@ -1,13 +1,5 @@
 window.editandoPedidoIndex = null;
 
-    const btn =
-      document.getElementById('btnSalvarPedidoFinal') ||
-      document.getElementById('btnSalvarPedido');
-
-    if(btn){
-      btn.innerText = 'Salvar Pedido';
-    }
-
 (function () {
   const PEDIDOS_STORAGE_KEY = 'pedidosSalvosMemoria';
 
@@ -635,11 +627,6 @@ window.editandoPedidoIndex = null;
             padding:10px;border-radius:8px;font-weight:700;
           ">Abrir</button>
 
-          <button onclick="window.editarPedidoDireto(${index})" style="
-            flex:1;border:none;background:#f59e0b;color:#fff;
-            padding:10px;border-radius:8px;font-weight:700;
-          ">Editar</button>
-
           <button onclick="window.cancelarPedidoSalvo(${index})" style="
             flex:1;border:none;background:#ef4444;color:#fff;
             padding:10px;border-radius:8px;font-weight:700;
@@ -675,14 +662,6 @@ window.editandoPedidoIndex = null;
     if (window.editandoPedidoIndex !== null && pedidosSalvosMemoria[window.editandoPedidoIndex]) {
       pedidosSalvosMemoria[window.editandoPedidoIndex] = pedido;
       window.editandoPedidoIndex = null;
-
-    const btn =
-      document.getElementById('btnSalvarPedidoFinal') ||
-      document.getElementById('btnSalvarPedido');
-
-    if(btn){
-      btn.innerText = 'Salvar Pedido';
-    }
     } else {
       pedidosSalvosMemoria.unshift(pedido);
     }
@@ -696,52 +675,344 @@ window.editandoPedidoIndex = null;
     }
   }
 
-
-
 function abrirPedidoSalvo(index) {
-  const pedido = pedidosSalvosMemoria[index];
-  if (!pedido) return;
+    const pedido = pedidosSalvosMemoria[index];
+    if (!pedido) return;
 
-  window.editandoPedidoIndex = index;
+    const cliente = document.getElementById('pedidoCliente');
+    const representante = document.getElementById('pedidoRepresentante');
+    const numero = document.getElementById('pedidoNumero');
+    const data = document.getElementById('pedidoData');
+    const lista = document.getElementById('listaItensPedidoReal');
+    const footer = document.getElementById('pedidoFooterAcoes');
 
-  document.getElementById('pedidoCliente').value = pedido.cliente || '';
-  document.getElementById('pedidoRepresentante').value = pedido.representante || '';
-  document.getElementById('pedidoNumero').value = pedido.numero || '';
-  document.getElementById('pedidoData').value = pedido.data || '';
+    if (cliente) cliente.value = pedido.cliente || '';
+    if (representante) representante.value = pedido.representante || '';
+    if (numero) numero.value = pedido.numero || '';
+    if (data) data.value = pedido.data || '';
 
-  const lista = garantirListaItensPedido();
-  if (!lista) return;
+    const targetLista = lista || garantirListaItensPedido();
+    if (targetLista) {
+      targetLista.innerHTML = '';
+      (pedido.itens || []).forEach(item => {
+        const card = document.createElement('div');
+        card.className = 'pedido-item-card-real';
+        card.style.display = 'grid';
+        card.style.gridTemplateColumns = '56px 1fr 40px';
+        card.style.gap = '10px';
+        card.style.alignItems = 'center';
+        card.style.background = '#162742';
+        card.style.padding = '10px';
+        card.style.borderRadius = '12px';
+        card.style.marginBottom = '10px';
 
-  lista.innerHTML = '';
+        card.innerHTML = `
+          <div style="width:56px;height:56px;border-radius:10px;background:#2f6df6;display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:800;">IMG</div>
+          <div style="display:flex;flex-direction:column;gap:4px;color:#fff;">
+            <div style="font-weight:800;">${item.codigo || ''}</div>
+            <div style="color:#dbe7ff;">${item.nome || ''}</div>
+            <div style="color:#7fb0ff;font-size:12px;">${item.resumo || ''}</div>
+            <div style="color:#7fb0ff;font-size:12px;">${item.detalhe || ''}</div>
+          </div>
+          <div></div>
+        `;
+        targetLista.appendChild(card);
+      });
+    }
 
-  (pedido.itens || []).forEach(item => {
-    lista.appendChild(
-      criarCardItemPedido({
-        codigo: item.codigo || '',
-        nome: item.nome || '',
-        totalUnd: item.totalUnd || 0,
-        caixas: item.caixas || 0,
-        avulsas: item.avulsas || 0,
-        fator: item.fator || 1,
-        imagem: item.imagem || ''
-      })
-    );
-  });
-
-  const footer = garantirFooterPedido();
-  if (footer) footer.style.display = 'block';
-
-  const btn =
-    document.getElementById('btnSalvarPedidoFinal') ||
-    document.getElementById('btnSalvarPedido');
-
-  if (btn) {
-    btn.innerText = 'Salvar Alterações';
+    if (footer) footer.style.display = 'block';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  window.scrollTo({
-    top: 0,
-    behavior: 'smooth'
-  });
+  function cancelarPedidoSalvo(index) {
+    pedidosSalvosMemoria.splice(index, 1);
+    persistirPedidosSalvos();
+    renderPedidosSalvos();
+  }
+
+  function limparFormularioPedido() {
+    ['pedidoCliente', 'pedidoRepresentante', 'pedidoNumero'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.value = '';
+    });
+
+    const data = document.getElementById('pedidoData');
+    if (data) {
+      const hoje = new Date();
+      const yyyy = hoje.getFullYear();
+      const mm = String(hoje.getMonth() + 1).padStart(2, '0');
+      const dd = String(hoje.getDate()).padStart(2, '0');
+      data.value = `${yyyy}-${mm}-${dd}`;
+    }
+
+    const lista = document.getElementById('listaItensPedidoReal');
+    if (lista) {
+      lista.innerHTML = '';
+      const vazio = document.createElement('p');
+      vazio.style.color = '#cbd5e1';
+      vazio.innerText = 'Nenhum item adicionado.';
+      lista.appendChild(vazio);
+    }
+
+    const footer = document.getElementById('pedidoFooterAcoes');
+    if (footer) footer.style.display = 'none';
+  }
+
+  function abrirModalFinalizacaoPedido() {
+    let modal = document.getElementById('modalFinalizarPedido');
+
+    if (!modal) {
+      modal = document.createElement('div');
+      modal.id = 'modalFinalizarPedido';
+      modal.style.position = 'fixed';
+      modal.style.inset = '0';
+      modal.style.background = 'rgba(0,0,0,.7)';
+      modal.style.display = 'flex';
+      modal.style.alignItems = 'center';
+      modal.style.justifyContent = 'center';
+      modal.style.zIndex = '999999';
+
+      modal.innerHTML = `
+        <div style="
+          width:90%;
+          max-width:420px;
+          background:#162742;
+          padding:25px;
+          border-radius:18px;
+          box-shadow:0 0 30px rgba(0,0,0,.45);
+        ">
+          <h3 style="margin:0;color:#fff;">✅ Pedido salvo com sucesso</h3>
+
+          <p style="
+            color:#cbd5e1;
+            margin-top:12px;
+            margin-bottom:20px;
+          ">
+            O que deseja fazer agora?
+          </p>
+
+          <div style="
+            display:flex;
+            gap:10px;
+            flex-wrap:wrap;
+          ">
+            <button id="btnContinuarPedido" style="
+              flex:1;
+              padding:12px;
+              border:none;
+              border-radius:10px;
+              background:#475569;
+              color:#fff;
+              font-weight:700;
+            ">
+              Continuar Editando
+            </button>
+
+            <button id="btnFinalizarPedidoReal" style="
+              flex:1;
+              padding:12px;
+              border:none;
+              border-radius:10px;
+              background:#22c55e;
+              color:#fff;
+              font-weight:700;
+            ">
+              Finalizar Pedido
+            </button>
+          </div>
+        </div>
+      `;
+
+      document.body.appendChild(modal);
+
+      document.getElementById('btnContinuarPedido').onclick = function () {
+        adicionarPedidoNaLista();
+        modal.remove();
+      };
+
+      document.getElementById('btnFinalizarPedidoReal').onclick = function () {
+        adicionarPedidoNaLista();
+        limparFormularioPedido();
+        modal.remove();
+      };
+    }
+  }
+
+  function bindBotaoAdicionarProduto() {
+    const btn = document.getElementById('btnAdicionarProdutoPedido');
+    if (!btn || btn.dataset.pedidoBindOk === '1') return;
+
+    btn.dataset.pedidoBindOk = '1';
+    btn.addEventListener('click', function (e) {
+      e.preventDefault();
+      abrirModalProdutoPedido();
+    });
+  }
+
+  async function renderPedidos() {
+    criarPedidosLayout();
+    carregarPedidosSalvos();
+    renderPedidosSalvos();
+    await carregarProdutosPedido();
+    criarModalAdicionarProduto();
+    bindBotaoAdicionarProduto();
+    garantirListaItensPedido();
+  }
+
+  window.renderPedidos = renderPedidos;
+  window.abrirPedidoSalvo = abrirPedidoSalvo;
+  window.cancelarPedidoSalvo = cancelarPedidoSalvo;
+  window.abrirModalProdutoPedido = abrirModalProdutoPedido;
+  window.abrirModalFinalizacaoPedido = abrirModalFinalizacaoPedido;
+})();
+
+
+window.destroyPedidosUI = function () {
+  try { document.getElementById('pedidosV2Base')?.remove(); } catch(e) {}
+  try { document.getElementById('modalProdutoPedido')?.remove(); } catch(e) {}
+  try { document.getElementById('modalFinalizarPedido')?.remove(); } catch(e) {}
+
+  try {
+    document.querySelectorAll('.pedido-item-card-real').forEach(el => el.remove());
+  } catch(e) {}
+};
+
+
+
+window.visualizarPedidoModal=function(index){
+
+const pedido=JSON.parse(localStorage.getItem('pedidosSalvosMemoria')||'[]')[index];
+if(!pedido)return;
+
+let modal=document.getElementById("modalPedidoVisualizacao");
+
+if(!modal){
+modal=document.createElement("div");
+modal.id="modalPedidoVisualizacao";
+
+modal.style.cssText=`
+position:fixed;
+inset:0;
+background:rgba(0,0,0,.75);
+display:flex;
+align-items:center;
+justify-content:center;
+z-index:999999;
+padding:20px;
+`;
+
+document.body.appendChild(modal);
 }
 
+modal.innerHTML=`
+<div style="
+background:#13233d;
+padding:25px;
+border-radius:15px;
+width:90%;
+max-width:650px;
+max-height:80vh;
+overflow:auto;
+box-shadow:0 0 30px rgba(0,0,0,.45);
+">
+
+<h2 style="color:#fff;margin-bottom:20px;">
+Pedido ${pedido.id}
+</h2>
+
+<div id="modalItensPedido"></div>
+
+<div style="
+display:flex;
+gap:10px;
+margin-top:20px;
+">
+
+<button onclick="
+document.getElementById('modalPedidoVisualizacao').remove()
+"
+style="
+flex:1;
+padding:12px;
+border:none;
+border-radius:10px;
+background:#475569;
+color:#fff;
+font-weight:700;
+">
+Fechar
+</button>
+
+<button onclick="
+window.editarPedidoDoModal(${index});
+"
+style="
+flex:1;
+padding:12px;
+border:none;
+border-radius:10px;
+background:#2f6df6;
+color:#fff;
+font-weight:700;
+">
+Editar Pedido
+</button>
+
+</div>
+
+</div>
+`;
+
+const container=document.getElementById("modalItensPedido");
+
+pedido.itens.forEach(item=>{
+
+container.innerHTML+=`
+<div style="
+background:#0d1a2f;
+padding:12px;
+margin-bottom:10px;
+border-radius:10px;
+color:#fff;
+">
+<div><b>${item.codigo}</b></div>
+<div>${item.nome}</div>
+<div style="font-size:12px;color:#7fb0ff;">
+${item.resumo||''}
+</div>
+</div>
+`;
+
+});
+
+}
+
+
+
+
+
+
+
+window.editarPedidoDoModal=function(index){
+   try{
+
+      window.editandoPedidoIndex = index;
+
+      const lista=document.getElementById("listaItensPedidoReal");
+      if(lista) lista.innerHTML="";
+
+      if(typeof window.abrirPedidoSalvo==='function'){
+         window.abrirPedidoSalvo(index);
+      }
+
+      if(typeof window.abrirModalProdutoPedido==='function'){
+         window.abrirModalProdutoPedido();
+      }
+
+      const modal=document.getElementById('modalPedidoVisualizacao');
+      if(modal) modal.remove();
+
+   }catch(e){
+      console.error(e);
+   }
+};
