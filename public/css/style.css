@@ -1002,3 +1002,40 @@ cursor:pointer;
   background: #10b981;
 }
 
+
+
+
+/* ===== ações do estoque por endereço ===== */
+.acoes-endereco-inline{
+  display:flex !important;
+  flex-direction:row !important;
+  align-items:center !important;
+  justify-content:center !important;
+  gap:8px !important;
+  flex-wrap:nowrap !important;
+}
+
+.btn-endereco-acao{
+  min-width:92px !important;
+  height:38px !important;
+  padding:0 10px !important;
+  border-radius:10px !important;
+  font-weight:700 !important;
+  white-space:nowrap !important;
+}
+
+.btn-transferir-endereco{
+  background:#10b981 !important;
+}
+
+@media (max-width:768px){
+  .acoes-endereco-inline{
+    gap:6px !important;
+  }
+
+  .btn-endereco-acao{
+    min-width:88px !important;
+    font-size:12px !important;
+  }
+}
+
