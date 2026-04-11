@@ -471,6 +471,7 @@ const views = {
   produtos: () => produtosView(),
   estoque: () => estoqueView(),
   pedidos: () => `<div id="pedidos-root"></div>`,
+  separacao: () => `<div id="separacao-root"></div>`,
   scanner: () => `<div class="hero-card"><h1>Módulo Scanner</h1></div>`,
   wms: () => `<div class="hero-card"><h1>Módulo WMS</h1></div>`
 };
@@ -1070,6 +1071,7 @@ async function renderView(view, options = {}) {
   }
 
   if (view === 'pedidos' && typeof window.renderPedidos === 'function') {
+if (view === 'separacao' && typeof window.renderSeparacao === 'function') {  setTimeout(() => window.renderSeparacao(), 50);}
     setTimeout(() => window.renderPedidos(), 50);
     setTimeout(() => window.renderPedidos(), 250);
   }
