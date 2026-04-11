@@ -542,36 +542,76 @@ window.filtrarSaldoEstoque = function () {
 };
 
 function renderTabelaEnderecos() {
-  const tabela = document.getElementById('enderecosTabela');
+  const tabela = document.getElementById('tabelaEstoqueEnderecos');
   if (!tabela) return;
+
+  const filtroInput = document.getElementById('filtroEstoqueEnderecos');
+  const filtro = String(filtroInput?.value || '').trim().toLowerCase();
+
+  let lista = Array.isArray(estoque) ? [...estoque] : [];
+
+  lista = lista.map(item => {
+    const produto = (produtos || []).find(p => String(p.id) === String(item.produtoId || ''));
+    return {
+      ...item,
+      codigo: produto?.codigo || '',
+      sku: produto?.sku || '',
+      categoria: produto?.categoria || '',
+      produto: produto?.nome || item.produto || '-'
+    };
+  });
+
+  if (filtro) {
+    lista = lista.filter(item => {
+      const alvo = [
+        item.codigo,
+        item.sku,
+        item.categoria,
+        item.produto,
+        item.endereco
+      ]
+        .map(v => String(v || '').toLowerCase())
+        .join(' | ');
+
+      return alvo.includes(filtro);
+    });
+  }
 
   tabela.innerHTML = '';
 
-  estoque.forEach(item => {
-    const produto = produtos.find(p =>
-      String(p.id) === String(item.produtoId) ||
-      String(p.codigo || '').toLowerCase() === String(item.codigo || '').toLowerCase() ||
-      String(p.nome || '').toLowerCase() === String(item.produto || '').toLowerCase()
-    );
+  if (!lista.length) {
+    tabela.innerHTML = `
+      <tr>
+        <td colspan="5" class="muted">Nenhum endereço encontrado.</td>
+      </tr>
+    `;
+    return;
+  }
 
+  lista.forEach(item => {
     const status = getEnderecoStatus(item.quantidade, item.endereco);
 
     tabela.innerHTML += `
       <tr>
-        <td>${produto ? produto.nome : (item.produto || item.produtoId || '-')}</td>
-        <td>${item.endereco || '-'}</td>
-        <td>${item.quantidade || 0}</td>
+        <td>${escapeHtml(String(item.produto || '-'))}</td>
+        <td>${escapeHtml(String(item.endereco || '-'))}</td>
+        <td>${Number(item.quantidade || 0)}</td>
         <td><span class="badge ${status.classe}">${status.texto}</span></td>
-      
-          <td>
-            <div class="acoes-endereco-inline">
-              <button class="btn-action btn-edit btn-endereco-acao" onclick="abrirAjusteEndereco('${String(item.produtoId || '')}','${String(item.endereco || '').replace(/'/g, "\'")}')">Ajuste</button>
-              <button class="btn-action btn-edit btn-endereco-acao btn-transferir-endereco" onclick="abrirTransferenciaEndereco('${String(item.produtoId || '')}','${String(item.endereco || '').replace(/'/g, "\'")}')">Transferir</button>
-            </div>
-          </td>
-        </tr>
+        <td>
+          <div class="acoes-endereco-inline">
+            <button class="btn-action btn-edit btn-endereco-acao" onclick="abrirAjusteEndereco('${String(item.produtoId || '')}','${String(item.endereco || '').replace(/'/g, "\'")}')">Ajuste</button>
+            <button class="btn-action btn-endereco-acao btn-transferir-endereco" onclick="abrirTransferenciaEndereco('${String(item.produtoId || '')}','${String(item.endereco || '').replace(/'/g, "\'")}')">Transferir</button>
+          </div>
+        </td>
+      </tr>
     `;
   });
+
+  const filtroEl = document.getElementById('filtroEstoqueEnderecos');
+  if (filtroEl && !filtroEl.dataset.bindFiltroEndereco) {
+    filtroEl.addEventListener('input', () => renderTabelaEnderecos());
+    filtroEl.dataset.bindFiltroEndereco = '1';
+  }
 }
 
 function renderTabelaMovimentacoes() {
