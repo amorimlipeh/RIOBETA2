@@ -739,7 +739,7 @@ function preencherMovimentacao(produto, dados = {}) {
   if (busca && produto) busca.value = produtoOptionLabel(produto);
   if (tipo) tipo.value = dados.tipo || 'ajuste';
   if (endereco) endereco.value = dados.endereco || '';
-  if (quantidade) quantidade.value = dados.quantidade || '';
+  if (quantidade) quantidade.value = (dados.quantidade ?? '');
 }
 
 function preencherTransferencia(produto, dados = {}) {
@@ -770,25 +770,77 @@ window.movimentarEstoque = async function () {
       return;
     }
 
-    if (!endereco || !quantidade) {
-      showModal('Endereço e quantidade são obrigatórios.', 'error');
+    if (!endereco && tipo !== 'ajuste') {
+      showModal('Endereço é obrigatório.', 'error');
       return;
     }
 
-    const response = await fetch('/api/estoque/movimentar', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ produtoId: produto.id, tipo, endereco, quantidade })
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      showModal(data.message || 'Erro ao movimentar estoque.', 'error');
+    if (quantidade < 0 || Number.isNaN(quantidade)) {
+      showModal('Quantidade inválida.', 'error');
       return;
     }
 
-    showModal('Movimentação realizada com sucesso.', 'success');
+    if (tipo === 'ajuste') {
+      const itemAtual = (estoque || []).find(item => {
+        const matchId = String(item.produtoId || '') === String(produto.id || '');
+        const matchNome = String(item.produto || '').toLowerCase() === String(produto.nome || '').toLowerCase();
+        const matchCodigo = String(item.codigo || '').toLowerCase() === String(produto.codigo || '').toLowerCase();
+        const matchEndereco = String(item.endereco || '') === String(endereco || '');
+        return (matchId || matchNome || matchCodigo) && matchEndereco;
+      });
+
+      const atual = Number(itemAtual?.quantidade || 0);
+      const desejado = Number(quantidade || 0);
+      const diferenca = desejado - atual;
+
+      if (diferenca === 0) {
+        showModal('Nenhuma alteração necessária. O saldo já está nesse valor.', 'success');
+        return;
+      }
+
+      const tipoReal = diferenca > 0 ? 'entrada' : 'saida';
+      const quantidadeReal = Math.abs(diferenca);
+
+      const response = await fetch('/api/estoque/movimentar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          produtoId: produto.id,
+          tipo: tipoReal,
+          endereco,
+          quantidade: quantidadeReal
+        })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        showModal(data.message || 'Erro ao ajustar estoque.', 'error');
+        return;
+      }
+
+      showModal('Ajuste realizado com sucesso.', 'success');
+    } else {
+      const response = await fetch('/api/estoque/movimentar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          produtoId: produto.id,
+          tipo,
+          endereco,
+          quantidade
+        })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        showModal(data.message || 'Erro ao movimentar estoque.', 'error');
+        return;
+      }
+
+      showModal('Movimentação realizada com sucesso.', 'success');
+    }
 
     await carregarProdutos();
     await carregarEstoque();
@@ -986,8 +1038,27 @@ window.excluirProdutoComEstoque = async function (produtoId) {
   }
 };
 
-window.abrirAjusteSaldo = function (produtoId) {
-  abrirModalEscolhaEdicao(produtoId, 'saldo');
+window.abrirAjusteSaldo = async function (produtoId) {
+  const produto = produtos.find(p => String(p.id) === String(produtoId));
+  if (!produto) return;
+
+  const itemEstoque = (estoque || []).find(item => {
+    const matchId = String(item.produtoId || '') === String(produtoId);
+    const matchNome = String(item.produto || '').toLowerCase() === String(produto.nome || '').toLowerCase();
+    const matchCodigo = String(item.codigo || '').toLowerCase() === String(produto.codigo || '').toLowerCase();
+    return Number(item.quantidade || 0) >= 0 && (matchId || matchNome || matchCodigo);
+  });
+
+  movimentacaoEditandoId = null;
+  await renderView('estoque', { skipLoad: true });
+
+  preencherMovimentacao(produto, {
+    tipo: 'ajuste',
+    endereco: itemEstoque?.endereco || encontrarEnderecoOrigemDoProduto(produto) || '',
+    quantidade: Number(itemEstoque?.quantidade || 0)
+  });
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 };
 
 window.salvarEdicaoMovimentacao = async function () {
