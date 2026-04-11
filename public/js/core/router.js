@@ -441,7 +441,7 @@ function estoqueView() {
                 <th>Produto</th>
                 <th>Endereço</th>
                 <th>Qtd</th>
-                <th>Status</th><th>Ação</th>
+                <th>Status</th><th>Ação</th><th>Ação</th>
             <th>Ação</th>
               </tr>
             </thead>
@@ -461,7 +461,7 @@ function estoqueView() {
                 <th>Endereço</th>
                 <th>Qtd</th>
                 <th>Data/Hora</th>
-                <th>Status</th><th>Ação</th>
+                <th>Status</th><th>Ação</th><th>Ação</th>
             <th>Ação</th>
                 <th>Ação</th>
               </tr>
