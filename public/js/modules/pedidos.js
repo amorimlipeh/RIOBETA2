@@ -596,7 +596,7 @@
   }
 
   function removeItem(index) {
-    state.itensPedidoAtual.splice(index, 1);
+    state.itensPedidoAtual.pedidosSalvosMemoria[index].status = 'Bloqueado';
     renderCurrentItems();
   }
 
@@ -604,7 +604,7 @@
     const pedido = state.pedidos[index];
     if (!pedido) return;
     if (!confirm(`Cancelar pedido ${pedido.id}?`)) return;
-    state.pedidos.splice(index, 1);
+    state.pedidos.pedidosSalvosMemoria[index].status = 'Bloqueado';
     if (state.editandoPedidoIndex === index) {
       resetOrderForm();
     } else if (state.editandoPedidoIndex !== null && state.editandoPedidoIndex > index) {
@@ -721,4 +721,10 @@ function getPedidoStatusVisual(status) {
 function isPedidoHistorico(status){
   const s = String(status || '').trim();
   return s === 'Concluído' || s === 'Bloqueado';
+}
+
+
+function isPedidoAtivo(status){
+  const s = String(status || '').trim();
+  return s === 'Aguardando Separação' || s === 'Em Separação';
 }
