@@ -559,7 +559,7 @@ function renderTabelaEnderecos() {
     const produto = (produtos || []).find(p => String(p.id) === String(item.produtoId || ''));
     return {
       ...item,
-      codigo: produto?.codigo || '',
+      codigo: produto?.codigo || item.codigo || '',
       sku: produto?.sku || '',
       categoria: produto?.categoria || '',
       produto: produto?.nome || item.produto || '-'
