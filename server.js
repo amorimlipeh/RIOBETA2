@@ -1,383 +1,87 @@
-const express = require('express');
-const fs = require('fs');
-const path = require('path');
-
+const express = require("express");
+const fs = require("fs");
 const app = express();
-const PORT = process.env.PORT || 3000;
-
-const DATA_DIR = path.join(__dirname, 'data');
-const PRODUTOS_FILE = path.join(DATA_DIR, 'produtos.json');
-const ESTOQUE_FILE = path.join(DATA_DIR, 'estoque_enderecos.json');
-const MOVS_FILE = path.join(DATA_DIR, 'movimentacoes.json');
-const PUBLIC_DIR = path.join(__dirname, 'public');
 
 app.use(express.json());
-app.use(express.static(PUBLIC_DIR));
 
-function ensure(file) {
-  if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
-  if (!fs.existsSync(file)) fs.writeFileSync(file, '[]');
-}
+// =========================
+// MOVIMENTAÇÃO DE ESTOQUE
+// =========================
+app.post("/api/estoque/movimentar", (req, res) => {
+  const { produtoId, tipo, quantidade, endereco, origem, destino } = req.body;
 
-ensure(PRODUTOS_FILE);
-ensure(ESTOQUE_FILE);
-ensure(MOVS_FILE);
+  let estoque = JSON.parse(fs.readFileSync("data/estoque.json"));
+  let movimentacoes = JSON.parse(fs.readFileSync("data/movimentacoes.json"));
 
-const readJson = (file) => JSON.parse(fs.readFileSync(file, 'utf8') || '[]');
-const saveJson = (file, data) => fs.writeFileSync(file, JSON.stringify(data, null, 2));
-
-function recalcularEstoque() {
-  const produtos = readJson(PRODUTOS_FILE);
-  const movs = readJson(MOVS_FILE);
-
-  const estoqueMap = {};
-  const totalMap = {};
-
-  movs
-    .filter(m => m.status !== 'cancelado')
-    .forEach(m => {
-      if (m.tipo === 'transferencia') {
-        const origemKey = `${m.produtoId}@@${m.origem}`;
-        const destinoKey = `${m.produtoId}@@${m.destino}`;
-
-        estoqueMap[origemKey] = (estoqueMap[origemKey] || 0) - Number(m.quantidade || 0);
-        estoqueMap[destinoKey] = (estoqueMap[destinoKey] || 0) + Number(m.quantidade || 0);
-      } else if (m.tipo === 'entrada') {
-        const key = `${m.produtoId}@@${m.endereco}`;
-        estoqueMap[key] = (estoqueMap[key] || 0) + Number(m.quantidade || 0);
-      } else if (m.tipo === 'saida') {
-        const key = `${m.produtoId}@@${m.endereco}`;
-        estoqueMap[key] = (estoqueMap[key] || 0) - Number(m.quantidade || 0);
-      } else if (m.tipo === 'ajuste') {
-        const key = `${m.produtoId}@@${m.endereco}`;
-        estoqueMap[key] = Number(m.quantidade || 0);
-      }
-    });
-
-  const estoque = Object.entries(estoqueMap)
-    .map(([key, quantidade]) => {
-      const [produtoId, endereco] = key.split('@@');
-      return { produtoId, endereco, quantidade };
-    })
-    .filter(item => Number(item.quantidade) !== 0);
-
-  estoque.forEach(item => {
-    totalMap[item.produtoId] = (totalMap[item.produtoId] || 0) + Number(item.quantidade || 0);
-  });
-
-  const produtosAtualizados = produtos.map(produto => ({
-    ...produto,
-    estoqueTotal: totalMap[produto.id] || 0
-  }));
-
-  saveJson(ESTOQUE_FILE, estoque);
-  saveJson(PRODUTOS_FILE, produtosAtualizados);
-
-  return { estoque, produtos: produtosAtualizados };
-}
-
-function getSaldoEndereco(produtoId, endereco) {
-  const estoque = readJson(ESTOQUE_FILE);
-  const item = estoque.find(
-    e => String(e.produtoId) === String(produtoId) && String(e.endereco) === String(endereco)
-  );
-  return Number(item?.quantidade || 0);
-}
-
-function saldoProjetadoSemMovimentacao(movId, produtoId, endereco) {
-  const movs = readJson(MOVS_FILE).filter(m => String(m.id) !== String(movId) && m.status !== 'cancelado');
-  let saldo = 0;
-
-  movs.forEach(m => {
-    if (m.tipo === 'transferencia') {
-      if (String(m.produtoId) === String(produtoId) && String(m.origem) === String(endereco)) {
-        saldo -= Number(m.quantidade || 0);
-      }
-      if (String(m.produtoId) === String(produtoId) && String(m.destino) === String(endereco)) {
-        saldo += Number(m.quantidade || 0);
-      }
-    } else {
-      if (String(m.produtoId) !== String(produtoId) || String(m.endereco) !== String(endereco)) return;
-
-      if (m.tipo === 'entrada') saldo += Number(m.quantidade || 0);
-      if (m.tipo === 'saida') saldo -= Number(m.quantidade || 0);
-      if (m.tipo === 'ajuste') saldo = Number(m.quantidade || 0);
-    }
-  });
-
-  return saldo;
-}
-
-/* PRODUTOS */
-app.get('/api/produtos', (req, res) => res.json(readJson(PRODUTOS_FILE)));
-
-app.post('/api/produtos', (req, res) => {
-  const produtos = readJson(PRODUTOS_FILE);
-
-  const novo = {
-    id: Date.now().toString(),
-    ...req.body,
-    estoqueTotal: 0
-  };
-
-  produtos.push(novo);
-  saveJson(PRODUTOS_FILE, produtos);
-
-  res.json(novo);
-});
-
-app.put('/api/produtos/:id', (req, res) => {
-  const produtos = readJson(PRODUTOS_FILE);
-  const i = produtos.findIndex(p => p.id == req.params.id);
-
-  if (i === -1) {
-    return res.status(404).json({ ok: false, message: 'Produto não encontrado' });
-  }
-
-  produtos[i] = { ...produtos[i], ...req.body };
-  saveJson(PRODUTOS_FILE, produtos);
-
-  res.json(produtos[i]);
-});
-
-app.delete('/api/produtos/:id', (req, res) => {
-  const produtoId = String(req.params.id);
-
-  let produtos = readJson(PRODUTOS_FILE);
-  produtos = produtos.filter(p => String(p.id) !== produtoId);
-  saveJson(PRODUTOS_FILE, produtos);
-
-  let movs = readJson(MOVS_FILE);
-  movs = movs.filter(m => String(m.produtoId) !== produtoId);
-  saveJson(MOVS_FILE, movs);
-
-  recalcularEstoque();
-  res.json({ ok: true });
-});
-
-/* ESTOQUE / MOVIMENTAÇÕES */
-app.get('/api/estoque', (req, res) => {
-  res.json(readJson(ESTOQUE_FILE));
-});
-
-app.get('/api/movimentacoes', (req, res) => {
-  res.json(readJson(MOVS_FILE));
-});
-
-app.post('/api/estoque/movimentar', (req, res) => {
-  const { produtoId, endereco, quantidade, tipo } = req.body;
   const qtd = Number(quantidade);
 
-  if (!produtoId || !endereco || !tipo || Number.isNaN(qtd)) {
-    return res.status(400).json({ ok: false, message: 'Dados obrigatórios não informados.' });
-  }
+  // ===== ENTRADA =====
+  if (tipo === "entrada") {
+    const index = estoque.findIndex(e => e.produtoId == produtoId && e.endereco == endereco);
 
-  if (tipo !== 'ajuste' && qtd <= 0) {
-    return res.status(400).json({ ok: false, message: 'Quantidade deve ser maior que zero.' });
-  }
-
-  if (tipo === 'ajuste' && qtd < 0) {
-    return res.status(400).json({ ok: false, message: 'Ajuste negativo não é permitido.' });
-  }
-
-  const movs = readJson(MOVS_FILE);
-
-  if (tipo === 'saida') {
-    const saldoAtual = getSaldoEndereco(produtoId, endereco);
-
-    if (saldoAtual <= 0) {
-      return res.status(400).json({ ok: false, message: 'Endereço sem saldo para saída.' });
-    }
-
-    if (qtd > saldoAtual) {
-      return res.status(400).json({
-        ok: false,
-        message: `Saldo insuficiente no endereço. Saldo atual: ${saldoAtual}.`
-      });
+    if (index >= 0) {
+      estoque[index].quantidade += qtd;
+    } else {
+      estoque.push({ produtoId, endereco, quantidade: qtd });
     }
   }
 
-  movs.unshift({
-    id: Date.now().toString(),
+  // ===== SAÍDA =====
+  else if (tipo === "saida") {
+    const index = estoque.findIndex(e => e.produtoId == produtoId && e.endereco == endereco);
+
+    if (index >= 0) {
+      estoque[index].quantidade -= qtd;
+
+      if (estoque[index].quantidade < 0) {
+        estoque[index].quantidade = 0;
+      }
+    }
+  }
+
+  // ===== AJUSTE =====
+  else if (tipo === "ajuste") {
+    const index = estoque.findIndex(e => e.produtoId == produtoId && e.endereco == endereco);
+
+    if (index >= 0) {
+      estoque[index].quantidade = qtd;
+    } else {
+      estoque.push({ produtoId, endereco, quantidade: qtd });
+    }
+  }
+
+  // ===== TRANSFERÊNCIA =====
+  else if (tipo === "transferencia") {
+    const origemIndex = estoque.findIndex(e => e.produtoId == produtoId && e.endereco == origem);
+    const destinoIndex = estoque.findIndex(e => e.produtoId == produtoId && e.endereco == destino);
+
+    if (origemIndex >= 0) {
+      estoque[origemIndex].quantidade -= qtd;
+    }
+
+    if (destinoIndex >= 0) {
+      estoque[destinoIndex].quantidade += qtd;
+    } else {
+      estoque.push({ produtoId, endereco: destino, quantidade: qtd });
+    }
+  }
+
+  // ===== SALVAR MOVIMENTAÇÃO (SEM ALTERAR TIPO) =====
+  movimentacoes.push({
+    id: Date.now(),
     produtoId,
-    endereco,
-    quantidade: qtd,
     tipo,
-    status: 'ativo',
-    data: new Date().toISOString()
-  });
-
-  saveJson(MOVS_FILE, movs);
-  recalcularEstoque();
-
-  res.json({ ok: true });
-});
-
-app.post('/api/estoque/transferir', (req, res) => {
-  const { produtoId, origem, destino, quantidade } = req.body;
-  const qtd = Number(quantidade || 0);
-
-  if (!produtoId || !origem || !destino || !qtd) {
-    return res.status(400).json({ ok: false, message: 'Dados obrigatórios não informados.' });
-  }
-
-  if (String(origem) === String(destino)) {
-    return res.status(400).json({ ok: false, message: 'Origem e destino não podem ser iguais.' });
-  }
-
-  const saldoOrigem = getSaldoEndereco(produtoId, origem);
-
-  if (saldoOrigem <= 0) {
-    return res.status(400).json({ ok: false, message: 'Endereço de origem sem saldo.' });
-  }
-
-  if (qtd > saldoOrigem) {
-    return res.status(400).json({
-      ok: false,
-      message: `Saldo insuficiente na origem. Saldo atual: ${saldoOrigem}.`
-    });
-  }
-
-  const movs = readJson(MOVS_FILE);
-
-  movs.unshift({
-    id: Date.now().toString(),
-    produtoId,
-    origem,
-    destino,
     quantidade: qtd,
-    tipo: 'transferencia',
-    status: 'ativo',
-    data: new Date().toISOString()
+    endereco: endereco || null,
+    origem: origem || null,
+    destino: destino || null,
+    data: new Date()
   });
 
-  saveJson(MOVS_FILE, movs);
-  recalcularEstoque();
+  fs.writeFileSync("data/estoque.json", JSON.stringify(estoque, null, 2));
+  fs.writeFileSync("data/movimentacoes.json", JSON.stringify(movimentacoes, null, 2));
 
   res.json({ ok: true });
 });
 
-/* NOVO: editar movimentação em cima dela, sem cancelar */
-app.put('/api/movimentacoes/:id', (req, res) => {
-  const movs = readJson(MOVS_FILE);
-  const i = movs.findIndex(m => String(m.id) === String(req.params.id));
-
-  if (i === -1) {
-    return res.status(404).json({ ok: false, message: 'Movimentação não encontrada.' });
-  }
-
-  const atual = movs[i];
-  if (atual.status === 'cancelado') {
-    return res.status(400).json({ ok: false, message: 'Não é possível editar uma movimentação cancelada.' });
-  }
-
-  const qtd = Number(req.body.quantidade || 0);
-  if (!qtd || qtd < 0) {
-    return res.status(400).json({ ok: false, message: 'Quantidade inválida.' });
-  }
-
-  if (atual.tipo === 'transferencia') {
-    const produtoId = req.body.produtoId || atual.produtoId;
-    const origem = (req.body.origem || atual.origem || '').trim();
-    const destino = (req.body.destino || atual.destino || '').trim();
-
-    if (!produtoId || !origem || !destino) {
-      return res.status(400).json({ ok: false, message: 'Produto, origem e destino são obrigatórios.' });
-    }
-
-    if (String(origem) === String(destino)) {
-      return res.status(400).json({ ok: false, message: 'Origem e destino não podem ser iguais.' });
-    }
-
-    const saldoOrigemSemAtual = saldoProjetadoSemMovimentacao(atual.id, produtoId, origem);
-
-    if (saldoOrigemSemAtual <= 0) {
-      return res.status(400).json({ ok: false, message: 'Endereço de origem sem saldo.' });
-    }
-
-    if (qtd > saldoOrigemSemAtual) {
-      return res.status(400).json({
-        ok: false,
-        message: `Saldo insuficiente na origem. Saldo atual: ${saldoOrigemSemAtual}.`
-      });
-    }
-
-    movs[i] = {
-      ...atual,
-      produtoId,
-      origem,
-      destino,
-      quantidade: qtd,
-      editadoEm: new Date().toISOString()
-    };
-  } else {
-    const produtoId = req.body.produtoId || atual.produtoId;
-    const tipo = req.body.tipo || atual.tipo;
-    const endereco = (req.body.endereco || atual.endereco || '').trim();
-
-    if (!produtoId || !tipo || !endereco) {
-      return res.status(400).json({ ok: false, message: 'Produto, tipo e endereço são obrigatórios.' });
-    }
-
-    if (tipo === 'saida') {
-      const saldoSemAtual = saldoProjetadoSemMovimentacao(atual.id, produtoId, endereco);
-
-      if (saldoSemAtual <= 0) {
-        return res.status(400).json({ ok: false, message: 'Endereço sem saldo para saída.' });
-      }
-
-      if (qtd > saldoSemAtual) {
-        return res.status(400).json({
-          ok: false,
-          message: `Saldo insuficiente no endereço. Saldo atual: ${saldoSemAtual}.`
-        });
-      }
-    }
-
-    if (tipo === 'ajuste' && qtd < 0) {
-      return res.status(400).json({ ok: false, message: 'Ajuste negativo não é permitido.' });
-    }
-
-    movs[i] = {
-      ...atual,
-      produtoId,
-      tipo,
-      endereco,
-      quantidade: qtd,
-      editadoEm: new Date().toISOString()
-    };
-  }
-
-  saveJson(MOVS_FILE, movs);
-  recalcularEstoque();
-
-  res.json({ ok: true, movimentacao: movs[i] });
-});
-
-app.put('/api/movimentacoes/:id/cancelar', (req, res) => {
-  const movs = readJson(MOVS_FILE);
-  const i = movs.findIndex(m => String(m.id) === String(req.params.id));
-
-  if (i === -1) {
-    return res.status(404).json({ ok: false, message: 'Movimentação não encontrada' });
-  }
-
-  movs[i] = {
-    ...movs[i],
-    status: 'cancelado',
-    canceladoEm: new Date().toISOString()
-  };
-
-  saveJson(MOVS_FILE, movs);
-  recalcularEstoque();
-
-  res.json({ ok: true, movimentacao: movs[i] });
-});
-
-app.get('*', (req, res) => {
-  res.sendFile(path.join(PUBLIC_DIR, 'index.html'));
-});
-
-app.listen(PORT, () => {
-  console.log('Servidor rodando porta', PORT);
-});
+app.listen(3000, () => console.log("Servidor rodando 🚀"));
